@@ -1,9 +1,38 @@
 import { adminDb } from "./firebaseAdmin.js";
 
 const SITE_URL = (process.env.SITE_URL || "https://shahdanstore.com").replace(
-  /\/$/,
+  /\/+$/,
   "",
 );
+
+// تنظيف النصوص من HTML والإيموجي والمسافات الزائدة
+function cleanText(value = "") {
+  return String(value)
+    .replace(/<[^>]*>/g, " ")
+    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// حماية النصوص داخل XML
+function escapeXml(value = "") {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+// حماية محتوى CDATA
+function escapeCdata(value = "") {
+  return String(value).replace(/]]>/g, "]]]]><![CDATA[>");
+}
+
+// تنظيف الروابط
+function cleanUrl(value = "") {
+  return String(value).trim();
+}
 
 export default async function handler(req, res) {
   try {
@@ -11,106 +40,116 @@ export default async function handler(req, res) {
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0"
-xmlns:g="http://base.google.com/ns/1.0">
-<channel>
-<title>شهدان ستور - منتجات شهدان</title>
-<link>${SITE_URL}</link>
-<description>منتجات شهدان ستور</description>
+  xmlns:g="http://base.google.com/ns/1.0">
+  <channel>
+    <title>شهدان ستور - منتجات شهدان</title>
+    <link>${escapeXml(SITE_URL)}</link>
+    <description>منتجات شهدان ستور</description>
 `;
 
     snapshot.forEach((doc) => {
       const product = doc.data();
 
-      const title = product.name || "";
-      const description = product.description || "";
-      const slug = product.slug || doc.id;
+      const id = String(doc.id);
 
-      const image = product.images?.[0] || "";
+      const title = cleanText(product.name || "");
 
-      const extraImages =
-        product.images
-          ?.slice(1)
-          .map(
-            (img) =>
-              `<g:additional_image_link>${img}</g:additional_image_link>`,
-          )
-          .join("\n") || "";
+      const description = cleanText(product.description || "");
 
-      const price = Number(product.price || 0).toFixed(2);
-      const oldPrice = Number(product.oldPrice || 0).toFixed(2);
+      const slug = String(product.slug || doc.id).trim();
 
-      const availability =
-        Number(product.stock || 0) > 0 ? "in stock" : "out of stock";
+      const productUrl = `${SITE_URL}/product/${encodeURIComponent(slug)}`;
+
+      const images = Array.isArray(product.images)
+        ? product.images.filter(Boolean).map(cleanUrl)
+        : [];
+
+      const image = images[0] || "";
+
+      // لا نرسل المنتج إذا لم توجد صورة رئيسية
+      if (!title || !image) {
+        return;
+      }
+
+      const extraImages = images
+        .slice(1)
+        .map(
+          (img) =>
+            `      <g:additional_image_link>${escapeXml(img)}</g:additional_image_link>\n`,
+        )
+        .join("");
+
+      const priceNumber = Number(product.price || 0);
+
+      const oldPriceNumber = Number(product.oldPrice || 0);
+
+      if (!Number.isFinite(priceNumber) || priceNumber <= 0) {
+        return;
+      }
+
+      const price = priceNumber.toFixed(2);
+
+      const hasSalePrice =
+        Number.isFinite(oldPriceNumber) && oldPriceNumber > priceNumber;
+
+      const oldPrice = oldPriceNumber.toFixed(2);
+
+      const stock = Number(product.stock || 0);
+
+      const availability = stock > 0 ? "in stock" : "out of stock";
+
+      const category = cleanText(product.category || "Health & Beauty");
 
       xml += `
-<item>
+    <item>
+      <g:id>${escapeXml(id)}</g:id>
 
-<g:id>${doc.id}</g:id>
+      <g:title><![CDATA[${escapeCdata(title)}]]></g:title>
 
-<g:title><![CDATA[${title}]]></g:title>
+      <g:description><![CDATA[${escapeCdata(description)}]]></g:description>
 
-<g:description><![CDATA[${description}]]></g:description>
+      <g:link>${escapeXml(productUrl)}</g:link>
 
-<g:link>${SITE_URL}/product/${slug}</g:link>
+      <g:image_link>${escapeXml(image)}</g:image_link>
 
-<g:image_link>${image}</g:image_link>
+${extraImages}      <g:availability>${availability}</g:availability>
 
-${extraImages}
-
-<g:availability>${availability}</g:availability>
-
-<g:condition>new</g:condition>
+      <g:condition>new</g:condition>
 
 ${
-  product.oldPrice && Number(product.oldPrice) > Number(product.price)
-    ? `
-<g:price>${oldPrice} SAR</g:price>
-<g:sale_price>${price} SAR</g:sale_price>
+  hasSalePrice
+    ? `      <g:price>${oldPrice} SAR</g:price>
+      <g:sale_price>${price} SAR</g:sale_price>
 `
-    : `
-<g:price>${price} SAR</g:price>
+    : `      <g:price>${price} SAR</g:price>
 `
 }
 
-<g:brand>شهدان</g:brand>
+      <g:brand>شهدان</g:brand>
 
-<g:identifier_exists>false</g:identifier_exists>
+      <g:identifier_exists>false</g:identifier_exists>
 
-<g:product_type><![CDATA[${
-        product.category || "Health & Beauty"
-      }]]></g:product_type>
+      <g:product_type><![CDATA[${escapeCdata(category)}]]></g:product_type>
 
-<g:google_product_category>
-Health &amp; Beauty &gt; Health Care
-</g:google_product_category>
+      <g:google_product_category>Health &amp; Beauty &gt; Health Care</g:google_product_category>
 
-<g:item_group_id>${doc.id}</g:item_group_id>
-
-<g:shipping>
-<g:country>SA</g:country>
-<g:service>Standard</g:service>
-<g:price>0.00 SAR</g:price>
-</g:shipping>
-
-<g:adult>no</g:adult>
-
-<g:age_group>adult</g:age_group>
-
-<g:gender>unisex</g:gender>
-
-</item>
+      <g:adult>no</g:adult>
+    </item>
 `;
     });
 
     xml += `
-</channel>
+  </channel>
 </rss>`;
 
     res.setHeader("Content-Type", "application/xml; charset=utf-8");
 
-    res.status(200).send(xml);
+    res.setHeader("Cache-Control", "public, max-age=300, s-maxage=300");
+
+    return res.status(200).send(xml);
   } catch (error) {
     console.error("Product feed error:", error);
+
     res.status(500).send("Feed Error");
   }
 }
