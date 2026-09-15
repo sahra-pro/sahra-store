@@ -460,7 +460,7 @@ export default function Products() {
                   >
                     {/* DISCOUNT */}
                     {discount > 0 && (
-                      <div className="absolute right-2 top-2 z-10 rounded-full bg-[#30291f] px-2.5 py-1 text-[10px] font-black text-[#f8e6b8] shadow-md md:right-3 md:top-3 md:px-3 md:text-xs">
+                      <div className="absolute right-2 top-2 z-10 rounded-full bg-[red] px-2.5 py-1 text-[10px] font-black text-[white] shadow-md md:right-3 md:top-3 md:px-3 md:text-xs">
                         خصم {discount}%
                       </div>
                     )}
@@ -518,7 +518,7 @@ export default function Products() {
 
                       {/* CATEGORY */}
                       {productCategories.length > 0 && (
-                        <p className="mb-1 line-clamp-1 text-[10px] font-medium text-[#9d7337] md:text-xs">
+                        <p className="mb-1 line-clamp-1 text-[10px] font-medium text-[#2f7559] md:text-xs">
                           {productCategories.join(" • ")}
                         </p>
                       )}
@@ -532,7 +532,7 @@ export default function Products() {
 
                       {/* PRICE */}
                       <div className="mt-2 flex flex-wrap items-center gap-2 md:mt-3">
-                        <p className="text-base font-black text-[#b88a44] md:text-2xl">
+                        <p className="text-base font-black text-[#1b7f52] md:text-2xl">
                           {product.price}{" "}
                           <span className="text-[10px] font-bold md:text-sm">
                             ر.س
@@ -540,7 +540,7 @@ export default function Products() {
                         </p>
 
                         {discount > 0 && (
-                          <span className="text-[10px] text-[#aaa093] line-through md:text-sm">
+                          <span className="text-[10px] text-[red] line-through md:text-sm">
                             {product.oldPrice} ر.س
                           </span>
                         )}
