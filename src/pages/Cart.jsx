@@ -1,4 +1,3 @@
-
 import { Link, useNavigate } from "react-router-dom";
 import {
   FaTrash,
@@ -17,13 +16,11 @@ import { useSettings } from "../hooks/useSettings";
 
 export default function Cart() {
   const { cartItems, cartTotal, updateQuantity, removeFromCart } = useCart();
-
   const { settings } = useSettings();
 
   const shippingFee = settings?.shipping?.shippingFee || 0;
 
-  const freeShippingThreshold =
-    settings?.shipping?.freeShippingThreshold || 0;
+  const freeShippingThreshold = settings?.shipping?.freeShippingThreshold || 0;
 
   const shippingCost =
     freeShippingThreshold > 0 && cartTotal >= freeShippingThreshold
@@ -39,7 +36,7 @@ export default function Cart() {
 
   const remainingForFreeShipping = Math.max(
     0,
-    freeShippingThreshold - cartTotal
+    freeShippingThreshold - cartTotal,
   );
 
   const navigate = useNavigate();
@@ -49,267 +46,273 @@ export default function Cart() {
   ============================================================ */
   if (cartItems.length === 0) {
     return (
-      <section className="min-h-[70vh] bg-gradient-to-b from-[#f8f3e8] via-white to-[#f8f3e8] py-20 md:py-28">
-        <div className="mx-auto max-w-2xl px-6 text-center">
-          <div className="mx-auto mb-7 flex h-24 w-24 items-center justify-center rounded-full border border-[#eadfca] bg-white text-[#b88a44] shadow-[0_15px_40px_rgba(92,67,35,0.10)]">
-            <FaShoppingBag className="text-4xl" />
+      <section className="min-h-[75vh] bg-[#FBF6F1] px-4 py-16 sm:px-6 md:py-24">
+        <div className="mx-auto flex min-h-[55vh] max-w-2xl items-center justify-center">
+          <div className="w-full rounded-[32px] border border-[#E8D9D6] bg-white px-6 py-12 text-center shadow-[0_20px_60px_rgba(100,31,43,0.06)] sm:px-10 md:px-14">
+            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-[#F7EEE9] text-[#641F2B]">
+              <FaShoppingBag className="text-3xl" />
+            </div>
+
+            <p className="mt-7 text-xs font-bold tracking-[0.18em] text-[#A83F55]">
+              سهرة ستور
+            </p>
+
+            <h1 className="mt-3 text-3xl font-black text-[#4A1821] sm:text-4xl">
+              سلة المشتريات فارغة
+            </h1>
+
+            <p className="mx-auto mt-4 max-w-md text-sm leading-8 text-[#806D70] sm:text-base">
+              لم تضف أي منتجات إلى سلتك حتى الآن. تصفح منتجات سهرة واختر ما
+              يناسبك.
+            </p>
+
+            <Link
+              to="/products"
+              className="mt-8 inline-flex h-13 items-center justify-center gap-3 rounded-2xl bg-[#641F2B] px-8 py-3.5 text-sm font-bold text-white shadow-[0_10px_25px_rgba(100,31,43,0.16)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#4A1821] hover:shadow-[0_14px_30px_rgba(100,31,43,0.2)]"
+            >
+              تصفح المنتجات
+              <FaArrowLeft className="text-xs" />
+            </Link>
           </div>
-
-          <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-[#b88a44]">
-            شهدان ستور
-          </p>
-
-          <h1 className="text-3xl font-black text-[#30291f] md:text-4xl">
-            سلتك فارغة
-          </h1>
-
-          <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-[#8a8175] md:text-base">
-            لم تقم بإضافة أي منتجات إلى السلة بعد. اكتشف تشكيلتنا واختر ما
-            يناسبك.
-          </p>
-
-          <Link
-            to="/products"
-            className="mt-8 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#b88a44] to-[#9d7337] px-8 py-3.5 font-bold text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:from-[#9d7337] hover:to-[#8a642f] hover:shadow-xl"
-          >
-            تصفح المنتجات
-            <FaArrowLeft className="text-xs" />
-          </Link>
         </div>
       </section>
     );
   }
 
   return (
-    <section className="min-h-screen bg-gradient-to-b from-[#f8f3e8] via-white to-[#f8f3e8] py-8 md:py-14">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
-
+    <section className="min-h-screen bg-[#FBF6F1] py-8 sm:py-10 md:py-14">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* ========================================================
-            HEADER
+            PAGE HEADER
         ========================================================= */}
-        <div className="mb-8 text-center md:mb-10">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-[#eadfca] bg-white text-[#b88a44] shadow-sm">
-            <FaShoppingBag className="text-xl" />
+        <div className="mb-8 md:mb-10">
+          <div className="flex flex-col gap-2">
+            <p className="text-xs font-bold tracking-[0.16em] text-[#A83F55]">
+              سهرة ستور
+            </p>
+
+            <h1 className="text-3xl font-black tracking-tight text-[#4A1821] sm:text-4xl">
+              سلة المشتريات
+            </h1>
+
+            <p className="text-sm text-[#806D70]">
+              راجع منتجاتك والكميات قبل إتمام الطلب.
+            </p>
           </div>
-
-          <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-[#b88a44]">
-            شهدان ستور
-          </p>
-
-          <h1 className="text-3xl font-black text-[#30291f] md:text-5xl">
-            سلة المشتريات
-            <span className="mr-2 text-[#b88a44]">🛒</span>
-          </h1>
-
-          <p className="mt-3 text-sm text-[#8a8175]">
-            راجع منتجاتك قبل إتمام الطلب
-          </p>
         </div>
 
         {/* ========================================================
-            FREE SHIPPING MESSAGE
+            FREE SHIPPING PROGRESS
         ========================================================= */}
         {freeShippingThreshold > 0 && (
-          <div className="mb-6 overflow-hidden rounded-[24px] border border-[#eadfca] bg-white shadow-[0_8px_30px_rgba(92,67,35,0.06)]">
-            <div className="p-4 md:p-5">
-              {shippingCost === 0 ? (
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-[#f8e6b8] text-[#8a642f]">
-                    <FaCheckCircle />
-                  </div>
-
-                  <div>
-                    <p className="font-bold text-[#30291f]">
-                      🎉 مبروك! حصلت على الشحن المجاني
-                    </p>
-
-                    <p className="mt-1 text-xs text-[#8a8175]">
-                      طلبك تجاوز الحد المطلوب للشحن المجاني.
-                    </p>
-                  </div>
+          <div className="mb-7 rounded-[24px] border border-[#E8D9D6] bg-white p-5 shadow-[0_8px_30px_rgba(100,31,43,0.04)] sm:p-6">
+            {shippingCost === 0 ? (
+              <div className="flex items-center gap-4">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#F2E4E1] text-[#641F2B]">
+                  <FaCheckCircle />
                 </div>
-              ) : (
-                <>
-                  <div className="mb-2 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
-                      <FaTruck className="text-[#b88a44]" />
 
-                      <span className="text-xs font-bold text-[#30291f] md:text-sm">
-                        اقتربت من الشحن المجاني
-                      </span>
-                    </div>
+                <div>
+                  <p className="text-sm font-bold text-[#4A1821]">
+                    حصلت على الشحن المجاني
+                  </p>
 
-                    <span className="text-xs font-bold text-[#8a642f]">
-                      {shippingProgress.toFixed(0)}%
+                  <p className="mt-1 text-xs text-[#806D70]">
+                    طلبك تجاوز الحد المطلوب للشحن المجاني.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="mb-3 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-2.5">
+                    <FaTruck className="text-[#A83F55]" />
+
+                    <span className="text-sm font-bold text-[#4A1821]">
+                      اقتربت من الشحن المجاني
                     </span>
                   </div>
 
-                  <div className="h-2 overflow-hidden rounded-full bg-[#eee5d5]">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-[#c7a15a] to-[#8a642f] transition-all duration-700"
-                      style={{
-                        width: `${shippingProgress}%`,
-                      }}
-                    />
-                  </div>
+                  <span className="text-xs font-bold text-[#A83F55]">
+                    {shippingProgress.toFixed(0)}%
+                  </span>
+                </div>
 
-                  <p className="mt-3 text-xs text-[#8a8175]">
-                    أضف{" "}
-                    <span className="font-bold text-[#8a642f]">
-                      {remainingForFreeShipping.toFixed(2)} ر.س
-                    </span>{" "}
-                    لتحصل على شحن مجاني 🎁
-                  </p>
-                </>
-              )}
-            </div>
+                <div className="h-2 overflow-hidden rounded-full bg-[#F2E4E1]">
+                  <div
+                    className="h-full rounded-full bg-[#641F2B] transition-all duration-700"
+                    style={{
+                      width: `${shippingProgress}%`,
+                    }}
+                  />
+                </div>
+
+                <p className="mt-3 text-xs text-[#806D70]">
+                  أضف{" "}
+                  <span className="font-bold text-[#641F2B]">
+                    {remainingForFreeShipping.toFixed(2)} ر.س
+                  </span>{" "}
+                  للحصول على شحن مجاني.
+                </p>
+              </>
+            )}
           </div>
         )}
 
         {/* ========================================================
-            MAIN GRID
+            MAIN CONTENT
         ========================================================= */}
-        <div className="grid gap-6 lg:grid-cols-3 lg:gap-8">
-
+        <div className="grid items-start gap-7 lg:grid-cols-[minmax(0,1fr)_380px] xl:gap-9">
           {/* ======================================================
-              CART ITEMS
+              CART
           ======================================================= */}
-          <div className="lg:col-span-2">
-            <div className="mb-3 flex items-center justify-between">
+          <div>
+            <div className="mb-4 flex items-end justify-between gap-4">
               <div>
-                <h2 className="text-lg font-bold text-[#30291f] md:text-xl">
-                  المنتجات في السلة
+                <h2 className="text-lg font-black text-[#4A1821] sm:text-xl">
+                  منتجاتك
                 </h2>
 
-                <p className="mt-1 text-xs text-[#8a8175]">
-                  {cartItems.length} منتج في طلبك
+                <p className="mt-1 text-xs text-[#806D70]">
+                  {cartItems.length}{" "}
+                  {cartItems.length === 1 ? "منتج" : "منتجات"} في السلة
                 </p>
               </div>
+
+              <Link
+                to="/products"
+                className="hidden items-center gap-2 text-xs font-bold text-[#A83F55] transition-colors hover:text-[#641F2B] sm:inline-flex"
+              >
+                متابعة التسوق
+                <FaArrowLeft className="text-[10px]" />
+              </Link>
             </div>
 
-            <div className="overflow-hidden rounded-[28px] border border-[#eadfca] bg-white shadow-[0_12px_40px_rgba(92,67,35,0.07)]">
-              {cartItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="border-b border-[#eee5d5] p-4 transition-colors duration-300 last:border-b-0 hover:bg-[#fdfbf7] md:p-5"
-                >
-                  <div className="flex gap-3 md:gap-5">
+            <div className="overflow-hidden rounded-[28px] border border-[#E8D9D6] bg-white shadow-[0_12px_40px_rgba(100,31,43,0.05)]">
+              {cartItems.map((item) => {
+                const itemTotal =
+                  Number(item.price || 0) * Number(item.quantity || 0);
 
-                    {/* PRODUCT IMAGE */}
-                    <Link
-                      to={`/product/${item.seoSlug || item.slug || item.id}`}
-                      className="group flex-shrink-0"
-                    >
-                      <div className="h-24 w-24 overflow-hidden rounded-2xl border border-[#eadfca] bg-[#f8f3e8] md:h-32 md:w-32">
-                        <img
-                          src={
-                            item.images?.[0] ||
-                            "https://via.placeholder.com/200"
-                          }
-                          alt={item.name || "منتج شهدان"}
-                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                      </div>
-                    </Link>
-
-                    {/* PRODUCT INFO */}
-                    <div className="min-w-0 flex-1">
+                return (
+                  <article
+                    key={item.id}
+                    className="border-b border-[#F0E6E3] p-4 last:border-b-0 sm:p-5 md:p-6"
+                  >
+                    <div className="flex gap-4 sm:gap-5">
+                      {/* PRODUCT IMAGE */}
                       <Link
                         to={`/product/${item.seoSlug || item.slug || item.id}`}
+                        className="group shrink-0"
                       >
-                        <h3 className="line-clamp-2 text-sm font-bold leading-6 text-[#30291f] transition-colors hover:text-[#8a642f] md:text-lg">
-                          {item.name}
-                        </h3>
+                        <div className="h-24 w-24 overflow-hidden rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] sm:h-28 sm:w-28 md:h-32 md:w-32">
+                          <img
+                            src={
+                              item.images?.[0] ||
+                              "https://via.placeholder.com/200"
+                            }
+                            alt={item.name || "منتج سهرة"}
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        </div>
                       </Link>
 
-                      {item.category && (
-                        <p className="mt-1 text-xs text-[#8a8175]">
-                          {item.category}
-                        </p>
-                      )}
+                      {/* PRODUCT CONTENT */}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="min-w-0">
+                            <Link
+                              to={`/product/${
+                                item.seoSlug || item.slug || item.id
+                              }`}
+                            >
+                              <h3 className="line-clamp-2 text-sm font-bold leading-7 text-[#4A1821] transition-colors hover:text-[#A83F55] sm:text-base md:text-lg">
+                                {item.name}
+                              </h3>
+                            </Link>
 
-                      <p className="mt-2 text-sm font-black text-[#b88a44] md:text-base">
-                        {Number(item.price || 0).toFixed(2)} ر.س
-                      </p>
+                            {item.category && (
+                              <p className="mt-1.5 text-xs text-[#806D70]">
+                                {item.category}
+                              </p>
+                            )}
+                          </div>
 
-                      {/* QUANTITY + REMOVE */}
-                      <div className="mt-4 flex flex-wrap items-center gap-3">
-
-                        <div className="flex items-center overflow-hidden rounded-xl border border-[#eadfca] bg-[#fdfbf7]">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              updateQuantity(item.id, item.quantity - 1)
-                            }
-                            disabled={item.quantity <= 1}
-                            className="flex h-9 w-9 items-center justify-center text-[#5f574c] transition hover:bg-[#f8f3e8] hover:text-[#8a642f] disabled:cursor-not-allowed disabled:opacity-30"
-                            aria-label="تقليل الكمية"
-                          >
-                            <FaMinus className="text-[10px]" />
-                          </button>
-
-                          <span className="flex h-9 w-9 items-center justify-center border-x border-[#eadfca] text-sm font-bold text-[#30291f]">
-                            {item.quantity}
-                          </span>
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              updateQuantity(item.id, item.quantity + 1)
-                            }
-                            className="flex h-9 w-9 items-center justify-center text-[#5f574c] transition hover:bg-[#f8f3e8] hover:text-[#8a642f]"
-                            aria-label="زيادة الكمية"
-                          >
-                            <FaPlus className="text-[10px]" />
-                          </button>
+                          {/* DESKTOP ITEM TOTAL */}
+                          <div className="hidden shrink-0 text-left sm:block">
+                            <p className="text-base font-black text-[#4A1821] md:text-lg">
+                              {itemTotal.toFixed(2)}{" "}
+                              <span className="text-xs font-bold">ر.س</span>
+                            </p>
+                          </div>
                         </div>
 
-                        <button
-                          type="button"
-                          onClick={() => removeFromCart(item.id)}
-                          className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium text-[#a34f46] transition hover:bg-[#fdf1ef]"
-                          aria-label="حذف المنتج"
-                        >
-                          <FaTrash className="text-[10px]" />
-                          حذف
-                        </button>
+                        <p className="mt-3 text-sm font-bold text-[#641F2B]">
+                          {Number(item.price || 0).toFixed(2)} ر.س
+                        </p>
+
+                        {/* ACTIONS */}
+                        <div className="mt-4 flex flex-wrap items-center gap-3">
+                          <div className="flex h-10 items-center overflow-hidden rounded-xl border border-[#E8D9D6] bg-[#FBF6F1]">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateQuantity(item.id, item.quantity - 1)
+                              }
+                              disabled={item.quantity <= 1}
+                              className="flex h-10 w-10 items-center justify-center text-[#806D70] transition-colors hover:bg-[#F2E4E1] hover:text-[#641F2B] disabled:cursor-not-allowed disabled:opacity-30"
+                              aria-label="تقليل الكمية"
+                            >
+                              <FaMinus className="text-[10px]" />
+                            </button>
+
+                            <span className="flex h-10 min-w-[42px] items-center justify-center border-x border-[#E8D9D6] bg-white text-sm font-bold text-[#4A1821]">
+                              {item.quantity}
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateQuantity(item.id, item.quantity + 1)
+                              }
+                              className="flex h-10 w-10 items-center justify-center text-[#806D70] transition-colors hover:bg-[#F2E4E1] hover:text-[#641F2B]"
+                              aria-label="زيادة الكمية"
+                            >
+                              <FaPlus className="text-[10px]" />
+                            </button>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => removeFromCart(item.id)}
+                            className="flex h-10 items-center gap-2 rounded-xl px-3 text-xs font-semibold text-[#9B6269] transition-colors hover:bg-[#FBF0F1] hover:text-[#641F2B]"
+                            aria-label="حذف المنتج"
+                          >
+                            <FaTrash className="text-[10px]" />
+                            حذف
+                          </button>
+                        </div>
                       </div>
                     </div>
 
-                    {/* ITEM TOTAL */}
-                    <div className="hidden flex-shrink-0 text-left sm:block">
-                      <p className="text-base font-black text-[#30291f] md:text-lg">
-                        {(
-                          Number(item.price || 0) *
-                          Number(item.quantity || 0)
-                        ).toFixed(2)}{" "}
-                        ر.س
-                      </p>
+                    {/* MOBILE TOTAL */}
+                    <div className="mt-4 flex items-center justify-between border-t border-[#F0E6E3] pt-4 sm:hidden">
+                      <span className="text-xs text-[#806D70]">
+                        إجمالي المنتج
+                      </span>
+
+                      <span className="text-sm font-black text-[#4A1821]">
+                        {itemTotal.toFixed(2)} ر.س
+                      </span>
                     </div>
-                  </div>
-
-                  {/* MOBILE ITEM TOTAL */}
-                  <div className="mt-3 flex items-center justify-between border-t border-[#eee5d5] pt-3 sm:hidden">
-                    <span className="text-xs text-[#8a8175]">
-                      إجمالي المنتج
-                    </span>
-
-                    <span className="text-sm font-black text-[#30291f]">
-                      {(
-                        Number(item.price || 0) *
-                        Number(item.quantity || 0)
-                      ).toFixed(2)}{" "}
-                      ر.س
-                    </span>
-                  </div>
-                </div>
-              ))}
+                  </article>
+                );
+              })}
             </div>
 
-            {/* CONTINUE SHOPPING */}
+            {/* MOBILE CONTINUE SHOPPING */}
             <Link
               to="/products"
-              className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#8a642f] transition hover:text-[#b88a44]"
+              className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-[#A83F55] transition-colors hover:text-[#641F2B] sm:hidden"
             >
               <FaArrowLeft className="text-xs" />
               متابعة التسوق
@@ -319,147 +322,139 @@ export default function Cart() {
           {/* ======================================================
               ORDER SUMMARY
           ======================================================= */}
-          <div className="h-fit lg:sticky lg:top-24">
-
-            <div className="overflow-hidden rounded-[28px] border border-[#eadfca] bg-white shadow-[0_15px_45px_rgba(92,67,35,0.10)]">
-
+          <aside className="lg:sticky lg:top-24">
+            <div className="overflow-hidden rounded-[28px] border border-[#E8D9D6] bg-white shadow-[0_16px_45px_rgba(100,31,43,0.08)]">
               {/* SUMMARY HEADER */}
-              <div className="border-b border-[#eee5d5] bg-gradient-to-br from-[#fdfbf7] to-[#f8f3e8] p-5">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#b88a44] to-[#8a642f] text-white shadow-md">
-                    <FaShoppingBag />
-                  </div>
-
+              <div className="border-b border-[#F0E6E3] px-5 py-5 sm:px-6">
+                <div className="flex items-center justify-between gap-4">
                   <div>
-                    <h2 className="font-black text-[#30291f]">
+                    <h2 className="text-lg font-black text-[#4A1821]">
                       ملخص الطلب
                     </h2>
 
-                    <p className="mt-1 text-xs text-[#8a8175]">
-                      طلبك جاهز للتأكيد
+                    <p className="mt-1 text-xs text-[#806D70]">
+                      تفاصيل إجمالي طلبك
                     </p>
+                  </div>
+
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F2E4E1] text-[#641F2B]">
+                    <FaShoppingBag />
                   </div>
                 </div>
               </div>
 
-              <div className="p-5">
-
-                {/* PAYMENT */}
-                <div className="mb-5 rounded-2xl border border-[#eadfca] bg-[#f8f3e8] p-4">
+              <div className="p-5 sm:p-6">
+                {/* PAYMENT METHOD */}
+                <div className="rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] p-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-white text-[#b88a44] shadow-sm">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[#641F2B] shadow-sm">
                       <FaMoneyBillWave />
                     </div>
 
                     <div>
-                      <p className="text-sm font-bold text-[#30291f]">
+                      <p className="text-sm font-bold text-[#4A1821]">
                         الدفع عند الاستلام
                       </p>
 
-                      <p className="mt-1 text-xs text-[#8a8175]">
-                        ادفع عند استلام طلبك بكل أمان.
+                      <p className="mt-1 text-xs leading-5 text-[#806D70]">
+                        ادفع عند استلام طلبك.
                       </p>
                     </div>
                   </div>
                 </div>
 
                 {/* TOTALS */}
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between text-[#5f574c]">
+                <div className="mt-6 space-y-4 text-sm">
+                  <div className="flex items-center justify-between gap-4 text-[#806D70]">
                     <span>الإجمالي الفرعي</span>
 
-                    <span className="font-semibold text-[#30291f]">
+                    <span className="font-bold text-[#4A1821]">
                       {Number(cartTotal || 0).toFixed(2)} ر.س
                     </span>
                   </div>
 
-                  <div className="flex justify-between text-[#5f574c]">
+                  <div className="flex items-center justify-between gap-4 text-[#806D70]">
                     <span>الشحن</span>
 
                     <span
                       className={
                         shippingCost === 0
-                          ? "font-bold text-[#8a642f]"
-                          : "font-semibold text-[#30291f]"
+                          ? "font-bold text-[#7A8B43]"
+                          : "font-bold text-[#4A1821]"
                       }
                     >
                       {shippingCost === 0
-                        ? "مجاني 🎉"
+                        ? "مجاني"
                         : `${Number(shippingCost).toFixed(2)} ر.س`}
                     </span>
                   </div>
                 </div>
 
                 {/* FINAL TOTAL */}
-                <div className="mt-5 flex items-center justify-between border-t border-[#eadfca] pt-5">
-                  <span className="font-bold text-[#30291f]">
-                    الإجمالي
-                  </span>
+                <div className="mt-6 flex items-end justify-between gap-4 border-t border-[#E8D9D6] pt-5">
+                  <div>
+                    <p className="text-sm font-bold text-[#4A1821]">الإجمالي</p>
+                    <p className="mt-1 text-xs text-[#806D70]">
+                      شامل تكلفة الشحن
+                    </p>
+                  </div>
 
-                  <span className="text-2xl font-black text-[#b88a44]">
-                    {Number(finalTotal || 0).toFixed(2)}{" "}
-                    <span className="text-sm">ر.س</span>
-                  </span>
+                  <p className="text-2xl font-black text-[#641F2B]">
+                    {Number(finalTotal || 0).toFixed(2)}
+                    <span className="mr-1 text-sm font-bold">ر.س</span>
+                  </p>
                 </div>
 
                 {/* CHECKOUT */}
                 <button
                   type="button"
                   onClick={() => navigate("/checkout")}
-                  className="group relative mt-6 flex h-14 w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-[#b88a44] via-[#a87938] to-[#8a642f] font-bold text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                  className="mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#641F2B] px-5 text-sm font-bold text-white shadow-[0_10px_25px_rgba(100,31,43,0.16)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#4A1821] hover:shadow-[0_14px_30px_rgba(100,31,43,0.22)] active:scale-[0.99]"
                 >
-                  <span className="absolute -left-20 top-0 h-full w-10 -skew-x-12 bg-white/30 blur-sm animate-[shine_3s_linear_infinite]" />
-
-                  <span className="relative">
-                    ⚡ متابعة إتمام الطلب
-                  </span>
+                  متابعة إتمام الطلب
+                  <FaArrowLeft className="text-xs" />
                 </button>
 
                 {/* TRUST FEATURES */}
-                <div className="mt-5 space-y-2 rounded-2xl border border-[#eadfca] bg-[#fdfbf7] p-4">
-                  <div className="flex items-center gap-3 text-xs text-[#5f574c]">
-                    <FaTruck className="text-[#b88a44]" />
-                    <span>شحن سريع لجميع مناطق المملكة</span>
-                  </div>
+                <div className="mt-5 border-t border-[#F0E6E3] pt-5">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 text-xs text-[#806D70]">
+                      <FaTruck className="shrink-0 text-[#A83F55]" />
+                      <span>شحن سريع وموثوق</span>
+                    </div>
 
-                  <div className="flex items-center gap-3 text-xs text-[#5f574c]">
-                    <FaMoneyBillWave className="text-[#b88a44]" />
-                    <span>الدفع عند الاستلام</span>
-                  </div>
+                    <div className="flex items-center gap-3 text-xs text-[#806D70]">
+                      <FaMoneyBillWave className="shrink-0 text-[#A83F55]" />
+                      <span>الدفع عند الاستلام</span>
+                    </div>
 
-                  <div className="flex items-center gap-3 text-xs text-[#5f574c]">
-                    <FaShieldAlt className="text-[#b88a44]" />
-                    <span>معلوماتك آمنة ومحمية</span>
+                    <div className="flex items-center gap-3 text-xs text-[#806D70]">
+                      <FaShieldAlt className="shrink-0 text-[#A83F55]" />
+                      <span>بياناتك محمية وآمنة</span>
+                    </div>
                   </div>
                 </div>
-
-                <Link
-                  to="/products"
-                  className="mt-4 block text-center text-xs font-semibold text-[#8a8175] transition hover:text-[#8a642f]"
-                >
-                  العودة للتسوق
-                </Link>
               </div>
             </div>
-          </div>
+          </aside>
         </div>
 
         {/* ========================================================
             BOTTOM TRUST BAR
         ========================================================= */}
-        <div className="mt-10 grid gap-3 border-t border-[#eee5d5] pt-6 sm:grid-cols-3">
-          <div className="flex items-center justify-center gap-2 text-xs text-[#8a8175]">
-            <FaShieldAlt className="text-[#b88a44]" />
+        <div className="mt-10 grid gap-3 border-t border-[#E8D9D6] pt-7 sm:grid-cols-3">
+          <div className="flex items-center justify-center gap-2 text-xs text-[#806D70]">
+            <FaShieldAlt className="text-[#A83F55]" />
             تسوق آمن
           </div>
 
-          <div className="flex items-center justify-center gap-2 text-xs text-[#8a8175]">
-            <FaTruck className="text-[#b88a44]" />
+          <div className="flex items-center justify-center gap-2 text-xs text-[#806D70]">
+            <FaTruck className="text-[#A83F55]" />
             توصيل موثوق
           </div>
 
-          <div className="flex items-center justify-center gap-2 text-xs text-[#8a8175]">
-            <FaCheckCircle className="text-[#b88a44]" />
+          <div className="flex items-center justify-center gap-2 text-xs text-[#806D70]">
+            <FaCheckCircle className="text-[#A83F55]" />
             خدمة موثوقة
           </div>
         </div>
@@ -467,4 +462,3 @@ export default function Cart() {
     </section>
   );
 }
-

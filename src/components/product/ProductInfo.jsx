@@ -21,7 +21,7 @@ function ProductInfo({ product }) {
       {/* Discount Banner */}
       {discount > 0 && (
         <div className="mb-5">
-          <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-red-500 to-orange-500 px-5 py-2 text-sm font-bold text-white shadow-lg">
+          <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#8F3046] to-[#A83F55] px-5 py-2 text-sm font-bold text-white shadow-lg">
             🔥 عرض لفترة محدودة • وفر {savings} ر.س
           </div>
         </div>
@@ -30,50 +30,50 @@ function ProductInfo({ product }) {
       {/* Category */}
       <div className="mb-5 flex flex-wrap items-center gap-3">
         {product.category && (
-          <span className="rounded-full bg-green-100 px-4 py-2 text-sm font-semibold text-green-700">
+          <span className="rounded-full bg-[#F2E4E1] px-4 py-2 text-sm font-semibold text-[#641F2B]">
             ⚡ {product.category}
           </span>
         )}
 
         {discount > 0 && (
-          <span className="rounded-full bg-red-100 px-4 py-2 text-sm font-bold text-red-600">
+          <span className="rounded-full bg-[#FBE9ED] px-4 py-2 text-sm font-bold text-[#8F3046]">
             خصم {discount}%
           </span>
         )}
       </div>
 
       {/* Name */}
-      <h1 className="text-3xl font-bold leading-relaxed text-gray-800 lg:text-5xl">
+      <h1 className="text-3xl font-bold leading-relaxed text-[#4A1821] lg:text-5xl">
         {product.name}
       </h1>
 
       {/* Rating */}
       <div className="mt-5 flex items-center gap-3">
-        <div className="flex items-center gap-1 rounded-xl bg-yellow-50 px-4 py-2">
-          <FaStar className="text-yellow-400" />
+        <div className="flex items-center gap-1 rounded-xl bg-[#FFF7E8] px-4 py-2">
+          <FaStar className="text-[#D49B35]" />
 
-          <span className="font-bold">
+          <span className="font-bold text-[#4A1821]">
             {reviews.length > 0 ? averageRating : "منتج جديد"}
           </span>
         </div>
 
-        <span className="text-gray-500">({reviews.length} تقييم)</span>
+        <span className="text-[#806D70]">({reviews.length} تقييم)</span>
       </div>
 
       {/* Price */}
-      <div className="mt-8 rounded-3xl bg-green-50 p-6">
+      <div className="mt-8 rounded-3xl bg-[#F7EEE9] p-6">
         <div className="flex flex-wrap items-center gap-4">
-          <span className="text-4xl font-bold text-green-600">{price} ر.س</span>
+          <span className="text-4xl font-bold text-[#641F2B]">{price} ر.س</span>
 
           {oldPrice > price && (
-            <span className="text-2xl text-gray-400 line-through">
+            <span className="text-2xl text-[#A99A9C] line-through">
               {oldPrice} ر.س
             </span>
           )}
         </div>
 
         {discount > 0 && (
-          <div className="mt-4 inline-flex rounded-full bg-red-50 px-4 py-2 text-sm font-bold text-red-600">
+          <div className="mt-4 inline-flex rounded-full bg-[#FBE9ED] px-4 py-2 text-sm font-bold text-[#8F3046]">
             🔥 وفر {savings} ر.س عند الشراء الآن
           </div>
         )}
@@ -82,7 +82,7 @@ function ProductInfo({ product }) {
       {/* Stock */}
       <div className="mt-8">
         {stock > 0 ? (
-          <div className="inline-flex items-center gap-3 rounded-2xl bg-green-100 px-5 py-3 text-green-700">
+          <div className="inline-flex items-center gap-3 rounded-2xl bg-[#F2E4E1] px-5 py-3 text-[#641F2B]">
             <FaCheckCircle />
 
             <span className="font-bold">متوفر بالمخزون</span>
@@ -92,25 +92,11 @@ function ProductInfo({ product }) {
             </span>
           </div>
         ) : (
-          <div className="inline-flex items-center rounded-2xl bg-red-100 px-5 py-3 font-bold text-red-600">
+          <div className="inline-flex items-center rounded-2xl bg-[#FBE9ED] px-5 py-3 font-bold text-[#8F3046]">
             غير متوفر حالياً
           </div>
         )}
       </div>
-
-      {/* Description */}
-      {product.description && (
-        <div className="mt-10 border-t pt-8">
-          <h3 className="mb-4 text-xl font-bold text-gray-800">وصف المنتج</h3>
-
-          <div
-            className="product-description leading-9 text-gray-600"
-            dangerouslySetInnerHTML={{
-              __html: product.description,
-            }}
-          />
-        </div>
-      )}
     </div>
   );
 }

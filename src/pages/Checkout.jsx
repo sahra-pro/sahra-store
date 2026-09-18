@@ -10,6 +10,10 @@ import {
   Phone,
   ShoppingBag,
   User,
+  Truck,
+  ShieldCheck,
+  CreditCard,
+  PackageCheck,
 } from "lucide-react";
 
 import { useCart } from "../hooks/useCart";
@@ -199,12 +203,9 @@ function Checkout() {
       console.log("ORDER:", order);
 
       /*
-       * إرسال البريد الإلكتروني للمتجر.
-       *
-       * مهم:
-       * إنشاء الطلب في Firebase هو العملية الأساسية.
-       * إذا فشل البريد، لا نعتبر الطلب فاشلاً ولا نطلب من العميل
-       * إعادة الطلب حتى لا يتم إنشاء طلب مكرر.
+       * إنشاء الطلب هو العملية الأساسية.
+       * فشل البريد لا يعني فشل الطلب ولا يجب أن يؤدي إلى
+       * إعادة المحاولة حتى لا يتم إنشاء طلب مكرر.
        */
       try {
         const response = await fetch("/api/send-order-email", {
@@ -282,10 +283,10 @@ function Checkout() {
     return (
       <div
         dir="rtl"
-        className="flex min-h-[60vh] items-center justify-center bg-[#f8f3e8]"
+        className="flex min-h-[70vh] items-center justify-center bg-[#FBF6F1]"
       >
-        <div className="flex items-center gap-3 text-[#8a8175]">
-          <Loader2 className="h-5 w-5 animate-spin text-[#b88a44]" />
+        <div className="flex items-center gap-3 text-sm text-[#806D70]">
+          <Loader2 className="h-5 w-5 animate-spin text-[#641F2B]" />
           <span>جارٍ تحميل بيانات المتجر...</span>
         </div>
       </div>
@@ -299,95 +300,114 @@ function Checkout() {
   return (
     <div
       dir="rtl"
-      className="min-h-screen bg-gradient-to-b from-[#f8f3e8] via-white to-[#f8f3e8] py-8 md:py-12"
+      className="min-h-screen bg-[#FBF6F1] py-6 sm:py-8 md:py-12"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Breadcrumb */}
-        <div className="mb-8 flex flex-wrap items-center gap-2 text-sm text-[#8a8175]">
-          <Link
-            to="/"
-            className="transition-colors hover:text-[#8a642f]"
-          >
-            الرئيسية
-          </Link>
+        {/* ========================================================
+            CHECKOUT STEPS
+        ========================================================= */}
+        <div className="mb-8">
+          <div className="mx-auto flex max-w-xl items-center justify-center">
+            <div className="flex items-center">
+              <div className="flex flex-col items-center gap-2">
+                <Link
+                  to="/cart"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F2E4E1] text-[#641F2B] transition hover:bg-[#EBD6D4]"
+                >
+                  <ShoppingBag className="h-4 w-4" />
+                </Link>
 
-          <ChevronLeft className="h-4 w-4 text-[#c7a15a]" />
+                <span className="text-[10px] font-bold text-[#806D70] sm:text-xs">
+                  السلة
+                </span>
+              </div>
 
-          <Link
-            to="/cart"
-            className="transition-colors hover:text-[#8a642f]"
-          >
-            السلة
-          </Link>
+              <div className="mx-3 h-px w-12 bg-[#641F2B] sm:mx-5 sm:w-20" />
 
-          <ChevronLeft className="h-4 w-4 text-[#c7a15a]" />
+              <div className="flex flex-col items-center gap-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#641F2B] text-white shadow-[0_5px_15px_rgba(100,31,43,0.18)]">
+                  <User className="h-4 w-4" />
+                </div>
 
-          <span className="font-bold text-[#30291f]">
-            إتمام الطلب
-          </span>
+                <span className="text-[10px] font-bold text-[#641F2B] sm:text-xs">
+                  بيانات الطلب
+                </span>
+              </div>
+
+              <div className="mx-3 h-px w-12 bg-[#E8D9D6] sm:mx-5 sm:w-20" />
+
+              <div className="flex flex-col items-center gap-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full border border-[#E8D9D6] bg-white text-[#A99A9D]">
+                  <CheckCircle2 className="h-4 w-4" />
+                </div>
+
+                <span className="text-[10px] font-medium text-[#A99A9D] sm:text-xs">
+                  التأكيد
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Page title */}
-        <div className="mb-8 md:mb-10">
-          <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#eadfca] bg-white text-[#b88a44] shadow-[0_10px_30px_rgba(92,67,35,0.08)]">
-              <ShoppingBag className="h-6 w-6" />
-            </div>
+        {/* ========================================================
+            PAGE HEADER
+        ========================================================= */}
+        <div className="mb-8">
+          <div className="flex flex-col gap-2">
+            <p className="text-xs font-bold tracking-[0.16em] text-[#A83F55]">
+              سهرة ستور
+            </p>
 
-            <div>
-              <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.2em] text-[#b88a44]">
-                شهدان ستور
-              </p>
+            <h1 className="text-3xl font-black tracking-tight text-[#4A1821] sm:text-4xl">
+              إتمام الطلب
+            </h1>
 
-              <h1 className="text-2xl font-black text-[#30291f] md:text-3xl">
-                إتمام الطلب
-              </h1>
-
-              <p className="mt-1 text-sm text-[#8a8175]">
-                أدخل بياناتك لإتمام طلبك بسهولة وأمان
-              </p>
-            </div>
+            <p className="text-sm leading-7 text-[#806D70]">
+              أدخل بيانات التوصيل لإتمام طلبك بسهولة وأمان.
+            </p>
           </div>
         </div>
 
         <form
           onSubmit={handleSubmit}
-          className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8"
+          className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_390px] lg:gap-8"
         >
-          {/* Customer information */}
-          <div className="space-y-6 lg:col-span-2">
-            <div className="overflow-hidden rounded-[28px] border border-[#eadfca] bg-white shadow-[0_12px_40px_rgba(92,67,35,0.07)]">
-              <div className="border-b border-[#eee5d5] bg-gradient-to-br from-[#fdfbf7] to-[#f8f3e8] p-5 md:p-7">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#f8e6b8] text-[#8a642f]">
+          {/* ======================================================
+              CUSTOMER DETAILS
+          ======================================================= */}
+          <div className="space-y-6">
+            <section className="overflow-hidden rounded-[28px] border border-[#E8D9D6] bg-white shadow-[0_12px_40px_rgba(100,31,43,0.05)]">
+              <div className="border-b border-[#F0E6E3] px-5 py-5 sm:px-7 sm:py-6">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#F2E4E1] text-[#641F2B]">
                     <User className="h-5 w-5" />
                   </div>
 
                   <div>
-                    <h2 className="font-black text-[#30291f]">
-                      بيانات العميل
+                    <h2 className="text-base font-black text-[#4A1821] sm:text-lg">
+                      بيانات التوصيل
                     </h2>
 
-                    <p className="mt-1 text-sm text-[#8a8175]">
-                      أدخل بياناتك بشكل صحيح لاستلام الطلب
+                    <p className="mt-1 text-xs leading-5 text-[#806D70]">
+                      أدخل بياناتك كما تريد أن تظهر في طلبك.
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="p-5 md:p-7">
+              <div className="p-5 sm:p-7">
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                  {/* Name */}
+                  {/* NAME */}
                   <div>
                     <label
                       htmlFor="name"
-                      className="mb-2 block text-sm font-bold text-[#5f574c]"
+                      className="mb-2 block text-sm font-bold text-[#4A1821]"
                     >
                       الاسم الكامل
                     </label>
 
                     <div className="relative">
-                      <User className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#a79e91]" />
+                      <User className="pointer-events-none absolute right-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-[#A99A9D]" />
 
                       <input
                         id="name"
@@ -395,33 +415,34 @@ function Checkout() {
                         type="text"
                         value={customer.name}
                         onChange={handleChange}
-                        placeholder="أدخل اسمك الكامل"
-                        className={`w-full rounded-xl border bg-[#fdfbf7] py-3 pr-10 pl-4 text-sm text-[#30291f] placeholder:text-[#b1a99e] outline-none transition-all ${
+                        placeholder="أدخل الاسم الكامل"
+                        autoComplete="name"
+                        className={`h-14 w-full rounded-2xl border bg-[#FBF6F1] py-3 pr-11 pl-4 text-sm text-[#4A1821] placeholder:text-[#A99A9D] outline-none transition-all ${
                           errors.name
                             ? "border-red-400 bg-red-50/30 focus:border-red-500"
-                            : "border-[#eadfca] focus:border-[#b88a44] focus:bg-white focus:ring-4 focus:ring-[#b88a44]/10"
+                            : "border-[#E8D9D6] focus:border-[#A83F55] focus:bg-white focus:ring-4 focus:ring-[#F2E4E1]"
                         }`}
                       />
                     </div>
 
                     {errors.name && (
-                      <p className="mt-1.5 text-xs text-red-500">
+                      <p className="mt-1.5 text-xs font-medium text-red-500">
                         {errors.name}
                       </p>
                     )}
                   </div>
 
-                  {/* Phone */}
+                  {/* PHONE */}
                   <div>
                     <label
                       htmlFor="phone"
-                      className="mb-2 block text-sm font-bold text-[#5f574c]"
+                      className="mb-2 block text-sm font-bold text-[#4A1821]"
                     >
                       رقم الجوال
                     </label>
 
                     <div className="relative">
-                      <Phone className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#a79e91]" />
+                      <Phone className="pointer-events-none absolute right-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-[#A99A9D]" />
 
                       <input
                         id="phone"
@@ -431,25 +452,26 @@ function Checkout() {
                         value={customer.phone}
                         onChange={handleChange}
                         placeholder="05xxxxxxxx"
-                        className={`w-full rounded-xl border bg-[#fdfbf7] py-3 pr-10 pl-4 text-left text-sm text-[#30291f] placeholder:text-[#b1a99e] outline-none transition-all ${
+                        autoComplete="tel"
+                        dir="ltr"
+                        className={`h-14 w-full rounded-2xl border bg-[#FBF6F1] py-3 pr-11 pl-4 text-left text-sm text-[#4A1821] placeholder:text-[#A99A9D] outline-none transition-all ${
                           errors.phone
                             ? "border-red-400 bg-red-50/30 focus:border-red-500"
-                            : "border-[#eadfca] focus:border-[#b88a44] focus:bg-white focus:ring-4 focus:ring-[#b88a44]/10"
+                            : "border-[#E8D9D6] focus:border-[#A83F55] focus:bg-white focus:ring-4 focus:ring-[#F2E4E1]"
                         }`}
-                        dir="ltr"
                       />
                     </div>
 
                     {errors.phone && (
-                      <p className="mt-1.5 text-xs text-red-500">
+                      <p className="mt-1.5 text-xs font-medium text-red-500">
                         {errors.phone}
                       </p>
                     )}
                   </div>
 
-                  {/* City */}
+                  {/* CITY */}
                   <div>
-                    <label className="mb-2 block text-sm font-bold text-[#5f574c]">
+                    <label className="mb-2 block text-sm font-bold text-[#4A1821]">
                       المدينة
                     </label>
 
@@ -465,90 +487,109 @@ function Checkout() {
                       isSearchable
                       noOptionsMessage={() => "لا توجد نتائج"}
                       loadingMessage={() => "جارٍ التحميل..."}
-                      classNamePrefix="shahdan-select"
+                      classNamePrefix="sahra-select"
                       styles={{
                         control: (base, state) => ({
                           ...base,
-                          minHeight: "48px",
-                          borderRadius: "12px",
-                          backgroundColor: "#fdfbf7",
+                          minHeight: "56px",
+                          borderRadius: "16px",
+                          backgroundColor: "#FBF6F1",
                           borderColor: errors.city
                             ? "#f87171"
                             : state.isFocused
-                              ? "#b88a44"
-                              : "#eadfca",
+                              ? "#A83F55"
+                              : "#E8D9D6",
                           boxShadow: state.isFocused
-                            ? "0 0 0 4px rgba(184,138,68,0.10)"
+                            ? "0 0 0 4px rgba(168,63,85,0.10)"
                             : "none",
                           transition: "all 0.2s ease",
                           "&:hover": {
                             borderColor: errors.city
                               ? "#f87171"
-                              : "#b88a44",
+                              : "#A83F55",
                           },
+                        }),
+
+                        valueContainer: (base) => ({
+                          ...base,
+                          paddingRight: "16px",
+                          paddingLeft: "16px",
                         }),
 
                         singleValue: (base) => ({
                           ...base,
-                          color: "#30291f",
+                          color: "#4A1821",
                           fontSize: "14px",
                         }),
 
                         input: (base) => ({
                           ...base,
-                          color: "#30291f",
+                          color: "#4A1821",
                           fontSize: "14px",
                         }),
 
                         placeholder: (base) => ({
                           ...base,
-                          color: "#b1a99e",
+                          color: "#A99A9D",
                           fontSize: "14px",
+                        }),
+
+                        indicatorSeparator: () => ({
+                          display: "none",
                         }),
 
                         menu: (base) => ({
                           ...base,
                           zIndex: 50,
-                          borderRadius: "14px",
+                          borderRadius: "16px",
                           overflow: "hidden",
-                          border: "1px solid #eadfca",
+                          border: "1px solid #E8D9D6",
                           boxShadow:
-                            "0 15px 35px rgba(92,67,35,0.12)",
+                            "0 18px 45px rgba(100,31,43,0.12)",
+                        }),
+
+                        menuList: (base) => ({
+                          ...base,
+                          padding: "6px",
                         }),
 
                         option: (base, state) => ({
                           ...base,
+                          borderRadius: "10px",
+                          margin: "2px 0",
                           backgroundColor: state.isSelected
-                            ? "#b88a44"
+                            ? "#641F2B"
                             : state.isFocused
-                              ? "#f8f3e8"
-                              : "#ffffff",
+                              ? "#F7EEE9"
+                              : "#FFFFFF",
                           color: state.isSelected
-                            ? "#ffffff"
-                            : "#30291f",
+                            ? "#FFFFFF"
+                            : "#4A1821",
                           cursor: "pointer",
+                          fontSize: "14px",
+                          padding: "11px 12px",
                         }),
                       }}
                     />
 
                     {errors.city && (
-                      <p className="mt-1.5 text-xs text-red-500">
+                      <p className="mt-1.5 text-xs font-medium text-red-500">
                         {errors.city}
                       </p>
                     )}
                   </div>
 
-                  {/* Address */}
+                  {/* ADDRESS */}
                   <div>
                     <label
                       htmlFor="address"
-                      className="mb-2 block text-sm font-bold text-[#5f574c]"
+                      className="mb-2 block text-sm font-bold text-[#4A1821]"
                     >
                       العنوان
                     </label>
 
                     <div className="relative">
-                      <MapPin className="pointer-events-none absolute right-3 top-3.5 h-5 w-5 text-[#a79e91]" />
+                      <MapPin className="pointer-events-none absolute right-4 top-4 h-[18px] w-[18px] text-[#A99A9D]" />
 
                       <textarea
                         id="address"
@@ -557,29 +598,30 @@ function Checkout() {
                         value={customer.address}
                         onChange={handleChange}
                         placeholder="الحي، الشارع، رقم المنزل..."
-                        className={`w-full resize-none rounded-xl border bg-[#fdfbf7] py-3 pr-10 pl-4 text-sm text-[#30291f] placeholder:text-[#b1a99e] outline-none transition-all ${
+                        autoComplete="street-address"
+                        className={`min-h-[120px] w-full resize-none rounded-2xl border bg-[#FBF6F1] py-3 pr-11 pl-4 text-sm leading-7 text-[#4A1821] placeholder:text-[#A99A9D] outline-none transition-all ${
                           errors.address
                             ? "border-red-400 bg-red-50/30 focus:border-red-500"
-                            : "border-[#eadfca] focus:border-[#b88a44] focus:bg-white focus:ring-4 focus:ring-[#b88a44]/10"
+                            : "border-[#E8D9D6] focus:border-[#A83F55] focus:bg-white focus:ring-4 focus:ring-[#F2E4E1]"
                         }`}
                       />
                     </div>
 
                     {errors.address && (
-                      <p className="mt-1.5 text-xs text-red-500">
+                      <p className="mt-1.5 text-xs font-medium text-red-500">
                         {errors.address}
                       </p>
                     )}
                   </div>
 
-                  {/* Notes */}
+                  {/* NOTES */}
                   <div className="md:col-span-2">
                     <label
                       htmlFor="notes"
-                      className="mb-2 block text-sm font-bold text-[#5f574c]"
+                      className="mb-2 block text-sm font-bold text-[#4A1821]"
                     >
                       ملاحظات إضافية{" "}
-                      <span className="font-normal text-[#a79e91]">
+                      <span className="font-normal text-[#A99A9D]">
                         (اختياري)
                       </span>
                     </label>
@@ -591,82 +633,112 @@ function Checkout() {
                       value={customer.notes}
                       onChange={handleChange}
                       placeholder="أي ملاحظات ترغب بإضافتها للطلب..."
-                      className="w-full resize-none rounded-xl border border-[#eadfca] bg-[#fdfbf7] px-4 py-3 text-sm text-[#30291f] placeholder:text-[#b1a99e] outline-none transition-all focus:border-[#b88a44] focus:bg-white focus:ring-4 focus:ring-[#b88a44]/10"
+                      className="min-h-[110px] w-full resize-none rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] px-4 py-3 text-sm leading-7 text-[#4A1821] placeholder:text-[#A99A9D] outline-none transition-all focus:border-[#A83F55] focus:bg-white focus:ring-4 focus:ring-[#F2E4E1]"
                     />
                   </div>
                 </div>
               </div>
-            </div>
+            </section>
 
-            {/* Payment */}
-            <div className="overflow-hidden rounded-[28px] border border-[#eadfca] bg-white shadow-[0_12px_40px_rgba(92,67,35,0.07)]">
-              <div className="p-5 md:p-7">
-                <div className="mb-5 flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#f8e6b8] text-[#8a642f]">
-                    <CheckCircle2 className="h-5 w-5" />
+            {/* ====================================================
+                PAYMENT
+            ===================================================== */}
+            <section className="overflow-hidden rounded-[28px] border border-[#E8D9D6] bg-white shadow-[0_12px_40px_rgba(100,31,43,0.05)]">
+              <div className="border-b border-[#F0E6E3] px-5 py-5 sm:px-7 sm:py-6">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#F2E4E1] text-[#641F2B]">
+                    <CreditCard className="h-5 w-5" />
                   </div>
 
                   <div>
-                    <h2 className="font-black text-[#30291f]">
+                    <h2 className="text-base font-black text-[#4A1821] sm:text-lg">
                       طريقة الدفع
                     </h2>
 
-                    <p className="mt-1 text-sm text-[#8a8175]">
-                      اختر طريقة الدفع المناسبة لك
+                    <p className="mt-1 text-xs leading-5 text-[#806D70]">
+                      طريقة الدفع المتاحة حاليًا
                     </p>
                   </div>
                 </div>
+              </div>
 
-                <div className="rounded-2xl border-2 border-[#b88a44] bg-gradient-to-br from-[#fdfbf7] to-[#f8f3e8] p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#b88a44]">
-                      <div className="h-2.5 w-2.5 rounded-full bg-[#b88a44]" />
+              <div className="p-5 sm:p-7">
+                <div className="relative rounded-2xl border-2 border-[#641F2B] bg-[#FBF6F1] p-5">
+                  <div className="absolute left-4 top-4">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#641F2B] text-white">
+                      <CheckCircle2 className="h-4 w-4" />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 pl-8">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-[#641F2B] shadow-sm">
+                      <PackageCheck className="h-6 w-6" />
                     </div>
 
                     <div>
-                      <p className="font-bold text-[#30291f]">
+                      <p className="font-bold text-[#4A1821]">
                         الدفع عند الاستلام
                       </p>
 
-                      <p className="mt-1 text-xs text-[#8a8175]">
-                        ادفع قيمة الطلب عند استلامه
+                      <p className="mt-1 text-xs leading-6 text-[#806D70]">
+                        ادفع قيمة طلبك عند استلامه.
                       </p>
                     </div>
                   </div>
                 </div>
+              </div>
+            </section>
+
+            {/* SECURITY MESSAGE */}
+            <div className="flex items-start gap-3 rounded-2xl border border-[#E8D9D6] bg-white px-4 py-4 sm:px-5">
+              <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#7A8B43]" />
+
+              <div>
+                <p className="text-xs font-bold text-[#4A1821]">
+                  تسوق بأمان
+                </p>
+
+                <p className="mt-1 text-xs leading-5 text-[#806D70]">
+                  نستخدم بياناتك فقط لمعالجة طلبك وتوصيله إليك.
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Order summary */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-24 overflow-hidden rounded-[28px] border border-[#eadfca] bg-white shadow-[0_15px_45px_rgba(92,67,35,0.10)]">
-              <div className="border-b border-[#eee5d5] bg-gradient-to-br from-[#fdfbf7] to-[#f8f3e8] p-5 md:p-6">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#b88a44] to-[#8a642f] text-white shadow-md">
-                    <ShoppingBag className="h-5 w-5" />
-                  </div>
-
+          {/* ======================================================
+              ORDER SUMMARY
+          ======================================================= */}
+          <aside className="lg:sticky lg:top-24">
+            <section className="overflow-hidden rounded-[28px] border border-[#E8D9D6] bg-white shadow-[0_16px_50px_rgba(100,31,43,0.08)]">
+              {/* HEADER */}
+              <div className="border-b border-[#F0E6E3] px-5 py-5 sm:px-6">
+                <div className="flex items-center justify-between gap-4">
                   <div>
-                    <h2 className="font-black text-[#30291f]">
+                    <h2 className="text-lg font-black text-[#4A1821]">
                       ملخص الطلب
                     </h2>
 
-                    <p className="mt-1 text-xs text-[#8a8175]">
-                      راجع تفاصيل طلبك قبل التأكيد
+                    <p className="mt-1 text-xs text-[#806D70]">
+                      {cartItems.length}{" "}
+                      {cartItems.length === 1 ? "منتج" : "منتجات"}
                     </p>
+                  </div>
+
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F2E4E1] text-[#641F2B]">
+                    <ShoppingBag className="h-5 w-5" />
                   </div>
                 </div>
               </div>
 
-              <div className="p-5 md:p-6">
-                <div className="mb-5 max-h-80 space-y-4 overflow-y-auto pr-1">
+              <div className="p-5 sm:p-6">
+                {/* PRODUCTS */}
+                <div className="max-h-[310px] space-y-4 overflow-y-auto pl-1">
                   {cartItems.map((item) => (
                     <div
                       key={item.id}
-                      className="flex gap-3 border-b border-[#eee5d5] pb-4 last:border-0 last:pb-0"
+                      className="flex gap-3 border-b border-[#F0E6E3] pb-4 last:border-0 last:pb-0"
                     >
-                      <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-[#eadfca] bg-[#f8f3e8]">
+                      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-[#E8D9D6] bg-[#FBF6F1]">
                         {item.images?.[0] ? (
                           <img
                             src={item.images[0]}
@@ -674,23 +746,27 @@ function Checkout() {
                             className="h-full w-full object-contain"
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center text-[#c7bdaE]">
-                            <ShoppingBag className="h-6 w-6" />
+                          <div className="flex h-full w-full items-center justify-center text-[#A99A9D]">
+                            <ShoppingBag className="h-5 w-5" />
                           </div>
                         )}
+
+                        <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#641F2B] px-1 text-[9px] font-bold text-white">
+                          {item.quantity}
+                        </span>
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <h3 className="line-clamp-2 text-sm font-bold leading-5 text-[#30291f]">
+                        <h3 className="line-clamp-2 text-xs font-bold leading-5 text-[#4A1821] sm:text-sm">
                           {item.name}
                         </h3>
 
                         <div className="mt-1.5 flex items-center justify-between gap-2">
-                          <span className="text-xs text-[#8a8175]">
-                            الكمية: {item.quantity}
+                          <span className="text-[11px] text-[#806D70]">
+                            {Number(item.price || 0).toFixed(2)} ر.س
                           </span>
 
-                          <span className="text-sm font-black text-[#b88a44]">
+                          <span className="text-xs font-black text-[#641F2B]">
                             {(
                               Number(item.price || 0) *
                               Number(item.quantity || 0)
@@ -703,111 +779,123 @@ function Checkout() {
                   ))}
                 </div>
 
-                <div className="space-y-3 border-t border-[#eee5d5] pt-5 text-sm">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[#8a8175]">
-                      المجموع الفرعي
-                    </span>
+                {/* SHIPPING NOTICE */}
+                {freeShippingThreshold > 0 &&
+                  Number(cartTotal) < freeShippingThreshold && (
+                    <div className="mt-5 rounded-2xl bg-[#F7EEE9] px-4 py-3">
+                      <div className="flex items-start gap-2">
+                        <Truck className="mt-0.5 h-4 w-4 shrink-0 text-[#A83F55]" />
 
-                    <span className="font-bold text-[#30291f]">
+                        <p className="text-[11px] leading-5 text-[#806D70]">
+                          أضف{" "}
+                          <strong className="text-[#641F2B]">
+                            {Math.max(
+                              0,
+                              freeShippingThreshold - Number(cartTotal),
+                            ).toFixed(2)}{" "}
+                            ر.س
+                          </strong>{" "}
+                          للحصول على شحن مجاني.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                {/* TOTALS */}
+                <div className="mt-5 space-y-3 border-t border-[#F0E6E3] pt-5">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-[#806D70]">المجموع الفرعي</span>
+
+                    <span className="font-bold text-[#4A1821]">
                       {Number(cartTotal || 0).toFixed(2)} ر.س
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <span className="text-[#8a8175]">الشحن</span>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-[#806D70]">الشحن</span>
 
                     {shippingCost === 0 ? (
-                      <span className="font-bold text-[#8a642f]">
-                        مجاني 🎉
+                      <span className="font-bold text-[#7A8B43]">
+                        مجاني
                       </span>
                     ) : (
-                      <span className="font-bold text-[#30291f]">
+                      <span className="font-bold text-[#4A1821]">
                         {Number(shippingCost).toFixed(2)} ر.س
                       </span>
                     )}
                   </div>
-
-                  {freeShippingThreshold > 0 &&
-                    Number(cartTotal) < freeShippingThreshold && (
-                      <div className="rounded-2xl border border-[#eadfca] bg-[#f8f3e8] p-3 text-xs leading-5 text-[#6f6557]">
-                        أضف{" "}
-                        <strong className="text-[#8a642f]">
-                          {Math.max(
-                            0,
-                            freeShippingThreshold - Number(cartTotal),
-                          ).toFixed(2)}{" "}
-                          ر.س
-                        </strong>{" "}
-                        للحصول على شحن مجاني.
-                      </div>
-                    )}
-
-                  <div className="flex items-center justify-between border-t border-[#eadfca] pt-4">
-                    <span className="text-base font-black text-[#30291f]">
-                      الإجمالي
-                    </span>
-
-                    <span className="text-2xl font-black text-[#b88a44]">
-                      {Number(finalTotal).toFixed(2)}{" "}
-                      <span className="text-sm">ر.س</span>
-                    </span>
-                  </div>
                 </div>
 
+                {/* FINAL TOTAL */}
+                <div className="mt-5 flex items-end justify-between gap-4 border-t border-[#E8D9D6] pt-5">
+                  <div>
+                    <p className="text-sm font-black text-[#4A1821]">
+                      الإجمالي
+                    </p>
+
+                    <p className="mt-1 text-[11px] text-[#806D70]">
+                      شامل الشحن
+                    </p>
+                  </div>
+
+                  <p className="text-2xl font-black text-[#641F2B]">
+                    {Number(finalTotal).toFixed(2)}
+                    <span className="mr-1 text-sm">ر.س</span>
+                  </p>
+                </div>
+
+                {/* SUBMIT */}
                 <button
                   type="submit"
                   disabled={submitting || cartItems.length === 0}
-                  className="group relative mt-6 flex h-14 w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-[#b88a44] via-[#a87938] to-[#8a642f] px-5 font-bold text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+                  className="mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#641F2B] px-5 text-sm font-bold text-white shadow-[0_10px_28px_rgba(100,31,43,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#4A1821] hover:shadow-[0_14px_32px_rgba(100,31,43,0.24)] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
                 >
-                  <span className="absolute -left-20 top-0 h-full w-10 -skew-x-12 bg-white/30 blur-sm animate-[shine_3s_linear_infinite]" />
-
                   {submitting ? (
                     <>
-                      <Loader2 className="relative h-5 w-5 animate-spin" />
-                      <span className="relative">
-                        جارٍ تأكيد الطلب...
-                      </span>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      جارٍ تأكيد الطلب...
                     </>
                   ) : (
                     <>
-                      <span className="relative">تأكيد الطلب</span>
-                      <ChevronLeft className="relative h-5 w-5" />
+                      <span>تأكيد الطلب</span>
+                      <ChevronLeft className="h-5 w-5" />
                     </>
                   )}
                 </button>
 
-                <div className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-[#fdfbf7] px-3 py-3 text-center text-xs text-[#8a8175]">
-                  <CheckCircle2 className="h-4 w-4 text-[#b88a44]" />
-                  <span>بياناتك محفوظة وآمنة</span>
-                </div>
+                <p className="mt-3 text-center text-[10px] leading-5 text-[#A99A9D]">
+                  بالضغط على تأكيد الطلب، سيتم إرسال طلبك لمعالجته.
+                </p>
 
                 <Link
                   to="/cart"
-                  className="mt-4 block text-center text-sm font-semibold text-[#8a8175] transition-colors hover:text-[#8a642f]"
+                  className="mt-4 flex items-center justify-center gap-2 text-xs font-semibold text-[#806D70] transition-colors hover:text-[#641F2B]"
                 >
+                  <ChevronLeft className="h-3.5 w-3.5" />
                   العودة إلى السلة
                 </Link>
               </div>
-            </div>
-          </div>
+            </section>
+          </aside>
         </form>
 
-        {/* Trust indicators */}
-        <div className="mt-10 grid gap-3 border-t border-[#eee5d5] pt-6 sm:grid-cols-3">
-          <div className="flex items-center justify-center gap-2 text-xs text-[#8a8175]">
-            <CheckCircle2 className="text-[#b88a44]" />
-            بياناتك آمنة
+        {/* ========================================================
+            TRUST FEATURES
+        ========================================================= */}
+        <div className="mt-10 grid gap-3 border-t border-[#E8D9D6] pt-7 sm:grid-cols-3">
+          <div className="flex items-center justify-center gap-2.5 text-xs text-[#806D70]">
+            <ShieldCheck className="h-4 w-4 text-[#A83F55]" />
+            بياناتك محفوظة وآمنة
           </div>
 
-          <div className="flex items-center justify-center gap-2 text-xs text-[#8a8175]">
-            <ShoppingBag className="text-[#b88a44]" />
-            طلب سريع وسهل
+          <div className="flex items-center justify-center gap-2.5 text-xs text-[#806D70]">
+            <Truck className="h-4 w-4 text-[#A83F55]" />
+            توصيل موثوق
           </div>
 
-          <div className="flex items-center justify-center gap-2 text-xs text-[#8a8175]">
-            <MapPin className="text-[#b88a44]" />
-            توصيل لجميع المناطق
+          <div className="flex items-center justify-center gap-2.5 text-xs text-[#806D70]">
+            <PackageCheck className="h-4 w-4 text-[#A83F55]" />
+            الدفع عند الاستلام
           </div>
         </div>
       </div>

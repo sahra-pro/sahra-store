@@ -33,10 +33,11 @@ function Header() {
   const [cartPopup, setCartPopup] = useState(null);
   const [currentMessage, setCurrentMessage] = useState(0);
 
+  // رسائل افتراضية لمتجر سهرة
   const messages = settings?.announcementBar?.messages ?? [
-    "🚚 الشحن مجاني للطلبات فوق 199 ريال",
+    "🚚 شحن سريع وآمن لجميع الطلبات",
     "💳 الدفع عند الاستلام متوفر",
-    "✨ منتجات مختارة بعناية لجودة أفضل",
+    "✨ اكتشف اختيارات سهرة المميزة",
   ];
 
   const interval = settings?.announcementBar?.interval ?? 4000;
@@ -121,6 +122,14 @@ function Header() {
     closeMenu();
   };
 
+  const isActive = (path) => {
+    if (path === "/") {
+      return location.pathname === "/";
+    }
+
+    return location.pathname.startsWith(path);
+  };
+
   return (
     <>
       <header className="fixed left-0 right-0 top-0 z-[99990]">
@@ -132,7 +141,7 @@ function Header() {
             className="h-10 overflow-hidden"
             style={{
               backgroundColor:
-                settings?.announcementBar?.backgroundColor || "#171717",
+                settings?.announcementBar?.backgroundColor || "#641F2B",
               color: settings?.announcementBar?.textColor || "#ffffff",
             }}
           >
@@ -161,7 +170,7 @@ function Header() {
         {/* =========================================
             Main Header
             ========================================= */}
-        <div className="border-b border-[#e8e1d7] bg-[#faf8f3]/95 shadow-sm backdrop-blur-xl transition-all duration-300">
+        <div className="border-b border-[#E8D9D6] bg-[#FBF6F1]/95 shadow-sm backdrop-blur-xl transition-all duration-300">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
             {/* Mobile menu */}
             <button
@@ -170,7 +179,7 @@ function Header() {
                 setMenuOpen(true);
                 setDrawerVisible(false);
               }}
-              className="text-2xl text-[#242424] transition hover:text-[#b08d57] md:hidden"
+              className="text-2xl text-[#4A1821] transition hover:text-[#A83F55] md:hidden"
               aria-label="فتح القائمة"
             >
               <FaBars />
@@ -180,21 +189,21 @@ function Header() {
                 Logo
                 ========================================= */}
             <Link to="/" className="group flex items-center gap-3">
-              <div className="h-12 w-12 overflow-hidden rounded-full border border-[#d4b477]/40 bg-white shadow-sm transition-all duration-300 group-hover:scale-105 group-hover:shadow-md sm:h-14 sm:w-14">
+              <div className="h-12 w-12 overflow-hidden rounded-full border border-[#A83F55]/30 bg-white shadow-sm transition-all duration-300 group-hover:scale-105 group-hover:shadow-md sm:h-14 sm:w-14">
                 <img
                   src="/logo.png"
-                  alt="شهدان ستور"
+                  alt="سهرة"
                   className="h-full w-full object-cover"
                 />
               </div>
 
               <div className="flex flex-col leading-none">
-                <h1 className="text-2xl font-bold tracking-tight text-[#171717] sm:text-3xl">
-                  شهدان
+                <h1 className="text-2xl font-bold tracking-tight text-[#4A1821] sm:text-3xl">
+                  سهرة
                 </h1>
 
-                <span className="mt-1 text-[9px] font-semibold tracking-[0.28em] text-[#b08d57]">
-                  SHAHDAN STORE
+                <span className="mt-1 text-[9px] font-semibold tracking-[0.28em] text-[#A83F55]">
+                  SAHRA STORE
                 </span>
               </div>
             </Link>
@@ -205,28 +214,44 @@ function Header() {
             <nav className="hidden gap-8 font-medium md:flex">
               <Link
                 to="/"
-                className="relative py-2 text-[#242424] transition hover:text-[#b08d57]"
+                className={`relative py-2 transition ${
+                  isActive("/")
+                    ? "font-semibold text-[#8F3046]"
+                    : "text-[#4A1821] hover:text-[#8F3046]"
+                }`}
               >
                 الرئيسية
               </Link>
 
               <Link
                 to="/products"
-                className="relative py-2 text-[#242424] transition hover:text-[#b08d57]"
+                className={`relative py-2 transition ${
+                  isActive("/products")
+                    ? "font-semibold text-[#8F3046]"
+                    : "text-[#4A1821] hover:text-[#8F3046]"
+                }`}
               >
                 كل المنتجات
               </Link>
 
               <Link
                 to="/categories"
-                className="relative py-2 text-[#242424] transition hover:text-[#b08d57]"
+                className={`relative py-2 transition ${
+                  isActive("/categories")
+                    ? "font-semibold text-[#8F3046]"
+                    : "text-[#4A1821] hover:text-[#8F3046]"
+                }`}
               >
                 التصنيفات
               </Link>
 
               <Link
                 to="/about"
-                className="relative py-2 text-[#242424] transition hover:text-[#b08d57]"
+                className={`relative py-2 transition ${
+                  isActive("/about")
+                    ? "font-semibold text-[#8F3046]"
+                    : "text-[#4A1821] hover:text-[#8F3046]"
+                }`}
               >
                 تواصل معنا
               </Link>
@@ -237,19 +262,19 @@ function Header() {
                 ========================================= */}
             <form
               onSubmit={handleSearchSubmit}
-              className="hidden items-center overflow-hidden rounded-full border border-[#e8e1d7] bg-white lg:flex"
+              className="hidden items-center overflow-hidden rounded-full border border-[#E8D9D6] bg-white lg:flex"
             >
               <input
                 type="text"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="ابحث عن منتج..."
-                className="w-64 bg-transparent px-4 py-2 text-sm text-[#242424] outline-none placeholder:text-[#9a9a9a]"
+                className="w-64 bg-transparent px-4 py-2 text-sm text-[#4A1821] outline-none placeholder:text-[#A28D8F]"
               />
 
               <button
                 type="submit"
-                className="bg-[#171717] px-4 py-3 text-[#d4b477] transition hover:bg-[#b08d57] hover:text-white"
+                className="bg-[#641F2B] px-4 py-3 text-white transition hover:bg-[#8F3046]"
                 aria-label="بحث"
               >
                 <FaSearch />
@@ -265,7 +290,11 @@ function Header() {
                 to="/track-order"
                 title="متابعة الطلب"
                 aria-label="متابعة الطلب"
-                className="flex h-11 w-11 items-center justify-center rounded-full text-[#242424] transition-all duration-300 hover:bg-[#f3eadc] hover:text-[#b08d57] hover:shadow-md active:scale-90"
+                className={`flex h-11 w-11 items-center justify-center rounded-full transition-all duration-300 hover:bg-[#F2E4E1] hover:text-[#8F3046] hover:shadow-md active:scale-90 ${
+                  isActive("/track-order")
+                    ? "bg-[#F2E4E1] text-[#8F3046]"
+                    : "text-[#4A1821]"
+                }`}
               >
                 <FaUser />
               </Link>
@@ -275,12 +304,16 @@ function Header() {
                 to="/wishlist"
                 title="المفضلة"
                 aria-label="المفضلة"
-                className="relative flex h-11 w-11 items-center justify-center rounded-full text-[#242424] transition-all duration-300 hover:bg-[#f3eadc] hover:text-[#b08d57] hover:shadow-md active:scale-90"
+                className={`relative flex h-11 w-11 items-center justify-center rounded-full transition-all duration-300 hover:bg-[#F2E4E1] hover:text-[#8F3046] hover:shadow-md active:scale-90 ${
+                  isActive("/wishlist")
+                    ? "bg-[#F2E4E1] text-[#8F3046]"
+                    : "text-[#4A1821]"
+                }`}
               >
                 <FaHeart />
 
                 {wishlistCount > 0 && (
-                  <span className="absolute -right-1 -top-1 flex min-h-[20px] min-w-[20px] items-center justify-center rounded-full bg-[#b08d57] px-1 text-[11px] font-bold text-white shadow-md">
+                  <span className="absolute -right-1 -top-1 flex min-h-[20px] min-w-[20px] items-center justify-center rounded-full bg-[#A83F55] px-1 text-[11px] font-bold text-white shadow-md">
                     {wishlistCount}
                   </span>
                 )}
@@ -291,10 +324,14 @@ function Header() {
                 to="/cart"
                 title="السلة"
                 aria-label="السلة"
-                className="relative flex h-11 w-11 items-center justify-center rounded-full text-[#242424] transition-all duration-300 hover:bg-[#f3eadc] hover:text-[#b08d57] hover:shadow-md active:scale-90"
+                className={`relative flex h-11 w-11 items-center justify-center rounded-full transition-all duration-300 hover:bg-[#F2E4E1] hover:text-[#8F3046] hover:shadow-md active:scale-90 ${
+                  isActive("/cart")
+                    ? "bg-[#F2E4E1] text-[#8F3046]"
+                    : "text-[#4A1821]"
+                }`}
               >
                 {cartPopup && (
-                  <span className="pointer-events-none absolute -top-7 right-0 z-50 animate-[cartFly_1s_ease] rounded-full bg-[#b08d57] px-2 py-1 text-xs font-bold text-white">
+                  <span className="pointer-events-none absolute -top-7 right-0 z-50 animate-[cartFly_1s_ease] rounded-full bg-[#A83F55] px-2 py-1 text-xs font-bold text-white">
                     +{cartPopup}
                   </span>
                 )}
@@ -309,7 +346,7 @@ function Header() {
 
                 {cartCount > 0 && (
                   <span
-                    className={`absolute -right-1 -top-1 flex min-h-[20px] min-w-[20px] items-center justify-center rounded-full bg-[#b08d57] px-1 text-[11px] font-bold text-white shadow-md ${
+                    className={`absolute -right-1 -top-1 flex min-h-[20px] min-w-[20px] items-center justify-center rounded-full bg-[#A83F55] px-1 text-[11px] font-bold text-white shadow-md ${
                       cartAnimating ? "animate-[cartBadge_600ms_ease]" : ""
                     }`}
                   >
@@ -337,34 +374,34 @@ function Header() {
 
           {/* Drawer */}
           <div
-            className={`absolute right-0 top-0 z-[2147483647] flex h-full w-80 max-w-[85%] flex-col overflow-y-auto rounded-l-3xl bg-[#faf8f3] shadow-2xl transition-all duration-300 ease-out ${
+            className={`absolute right-0 top-0 z-[2147483647] flex h-full w-80 max-w-[85%] flex-col overflow-y-auto rounded-l-3xl bg-[#FBF6F1] shadow-2xl transition-all duration-300 ease-out ${
               drawerVisible
                 ? "translate-x-0 opacity-100"
                 : "translate-x-full opacity-0"
             }`}
           >
-            <div className="flex items-center justify-between border-b border-[#e8e1d7] bg-[#faf8f3] px-5 py-4">
+            <div className="flex items-center justify-between border-b border-[#E8D9D6] bg-[#FBF6F1] px-5 py-4">
               {/* الشعار */}
               <Link
                 to="/"
                 onClick={closeMenu}
                 className="group flex items-center gap-3"
               >
-                <div className="h-11 w-11 overflow-hidden rounded-full border border-[#d4b477]/40 bg-white shadow-sm transition-transform duration-300 group-hover:scale-105">
+                <div className="h-11 w-11 overflow-hidden rounded-full border border-[#A83F55]/30 bg-white shadow-sm transition-transform duration-300 group-hover:scale-105">
                   <img
                     src="/logo.png"
-                    alt="شهدان ستور"
+                    alt="سهرة"
                     className="h-full w-full object-cover"
                   />
                 </div>
 
                 <div className="flex flex-col leading-none">
-                  <span className="text-xl font-bold tracking-tight text-[#171717]">
-                    شهدان
+                  <span className="text-xl font-bold tracking-tight text-[#4A1821]">
+                    سهرة
                   </span>
 
-                  <span className="mt-1 text-[8px] font-semibold tracking-[0.25em] text-[#b08d57]">
-                    SHAHDAN STORE
+                  <span className="mt-1 text-[8px] font-semibold tracking-[0.25em] text-[#A83F55]">
+                    SAHRA STORE
                   </span>
                 </div>
               </Link>
@@ -373,7 +410,7 @@ function Header() {
               <button
                 type="button"
                 onClick={closeMenu}
-                className="flex h-10 w-10 items-center justify-center rounded-xl text-xl text-[#242424] transition hover:bg-[#f3eadc] hover:text-[#b08d57]"
+                className="flex h-10 w-10 items-center justify-center rounded-xl text-xl text-[#4A1821] transition hover:bg-[#F2E4E1] hover:text-[#8F3046]"
                 aria-label="إغلاق القائمة"
               >
                 <FaTimes />
@@ -383,19 +420,19 @@ function Header() {
             {/* Mobile Search */}
             <form
               onSubmit={handleSearchSubmit}
-              className="flex items-center gap-2 border-b border-[#e8e1d7] p-5"
+              className="flex items-center gap-2 border-b border-[#E8D9D6] p-5"
             >
               <input
                 type="text"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="ابحث عن منتج..."
-                className="flex-1 rounded-xl border border-[#e8e1d7] bg-white p-3 text-sm outline-none transition focus:border-[#b08d57]"
+                className="flex-1 rounded-xl border border-[#E8D9D6] bg-white p-3 text-sm text-[#4A1821] outline-none transition focus:border-[#A83F55]"
               />
 
               <button
                 type="submit"
-                className="rounded-xl bg-[#171717] p-3 text-[#d4b477] transition hover:bg-[#b08d57] hover:text-white"
+                className="rounded-xl bg-[#641F2B] p-3 text-white transition hover:bg-[#8F3046]"
                 aria-label="بحث"
               >
                 <FaSearch />
@@ -403,14 +440,14 @@ function Header() {
             </form>
 
             {/* Mobile Navigation */}
-            <nav className="flex flex-col border-b border-[#e8e1d7] p-3">
+            <nav className="flex flex-col border-b border-[#E8D9D6] p-3">
               <Link
                 to="/"
                 onClick={closeMenu}
                 className={`rounded-2xl px-4 py-3 transition-all duration-300 active:scale-95 ${
-                  location.pathname === "/"
-                    ? "bg-[#f3eadc] font-semibold text-[#b08d57] shadow-sm"
-                    : "text-[#242424] hover:bg-[#f3eadc] hover:text-[#b08d57]"
+                  isActive("/")
+                    ? "bg-[#F2E4E1] font-semibold text-[#8F3046] shadow-sm"
+                    : "text-[#4A1821] hover:bg-[#F2E4E1] hover:text-[#8F3046]"
                 }`}
               >
                 الرئيسية
@@ -420,9 +457,9 @@ function Header() {
                 to="/products"
                 onClick={closeMenu}
                 className={`rounded-2xl px-4 py-3 transition-all duration-300 active:scale-95 ${
-                  location.pathname === "/products"
-                    ? "bg-[#f3eadc] font-semibold text-[#b08d57] shadow-sm"
-                    : "text-[#242424] hover:bg-[#f3eadc] hover:text-[#b08d57]"
+                  isActive("/products")
+                    ? "bg-[#F2E4E1] font-semibold text-[#8F3046] shadow-sm"
+                    : "text-[#4A1821] hover:bg-[#F2E4E1] hover:text-[#8F3046]"
                 }`}
               >
                 كل المنتجات
@@ -432,9 +469,9 @@ function Header() {
                 to="/categories"
                 onClick={closeMenu}
                 className={`rounded-2xl px-4 py-3 transition-all duration-300 active:scale-95 ${
-                  location.pathname === "/categories"
-                    ? "bg-[#f3eadc] font-semibold text-[#b08d57] shadow-sm"
-                    : "text-[#242424] hover:bg-[#f3eadc] hover:text-[#b08d57]"
+                  isActive("/categories")
+                    ? "bg-[#F2E4E1] font-semibold text-[#8F3046] shadow-sm"
+                    : "text-[#4A1821] hover:bg-[#8F3046] hover:text-white"
                 }`}
               >
                 التصنيفات
@@ -444,9 +481,9 @@ function Header() {
                 to="/wishlist"
                 onClick={closeMenu}
                 className={`rounded-2xl px-4 py-3 transition-all duration-300 active:scale-95 ${
-                  location.pathname === "/wishlist"
-                    ? "bg-[#f3eadc] font-semibold text-[#b08d57] shadow-sm"
-                    : "text-[#242424] hover:bg-[#f3eadc] hover:text-[#b08d57]"
+                  isActive("/wishlist")
+                    ? "bg-[#F2E4E1] font-semibold text-[#8F3046] shadow-sm"
+                    : "text-[#4A1821] hover:bg-[#F2E4E1] hover:text-[#8F3046]"
                 }`}
               >
                 المفضلة
@@ -456,9 +493,9 @@ function Header() {
                 to="/track-order"
                 onClick={closeMenu}
                 className={`rounded-2xl px-4 py-3 transition-all duration-300 active:scale-95 ${
-                  location.pathname === "/track-order"
-                    ? "bg-[#f3eadc] font-semibold text-[#b08d57] shadow-sm"
-                    : "text-[#242424] hover:bg-[#f3eadc] hover:text-[#b08d57]"
+                  isActive("/track-order")
+                    ? "bg-[#F2E4E1] font-semibold text-[#8F3046] shadow-sm"
+                    : "text-[#4A1821] hover:bg-[#F2E4E1] hover:text-[#8F3046]"
                 }`}
               >
                 متابعة الطلب
@@ -468,9 +505,9 @@ function Header() {
                 to="/about"
                 onClick={closeMenu}
                 className={`rounded-2xl px-4 py-3 transition-all duration-300 active:scale-95 ${
-                  location.pathname === "/about"
-                    ? "bg-[#f3eadc] font-semibold text-[#b08d57] shadow-sm"
-                    : "text-[#242424] hover:bg-[#f3eadc] hover:text-[#b08d57]"
+                  isActive("/about")
+                    ? "bg-[#F2E4E1] font-semibold text-[#8F3046] shadow-sm"
+                    : "text-[#4A1821] hover:bg-[#F2E4E1] hover:text-[#8F3046]"
                 }`}
               >
                 تواصل معنا
@@ -480,7 +517,7 @@ function Header() {
             {/* Categories */}
             {categories.length > 0 && (
               <div className="p-3">
-                <p className="px-3 py-2 text-sm font-semibold text-[#b08d57]">
+                <p className="px-3 py-2 text-sm font-semibold text-[#8F3046]">
                   التصنيفات
                 </p>
 
@@ -489,10 +526,10 @@ function Header() {
                     key={cat.id}
                     type="button"
                     onClick={() => handleCategoryClick(cat.name)}
-                    className="group flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-right text-[#242424] transition-all duration-300 hover:bg-[#f3eadc] hover:text-[#b08d57]"
+                    className="group flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-right text-[#4A1821] transition-all duration-300 hover:bg-[#F2E4E1] hover:text-[#8F3046]"
                   >
                     {/* صورة التصنيف */}
-                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-[#e8e1d7] bg-white shadow-sm">
+                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-[#E8D9D6] bg-white shadow-sm">
                       {cat.image ? (
                         <img
                           src={cat.image}
@@ -501,7 +538,7 @@ function Header() {
                           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-xs text-[#b08d57]">
+                        <div className="flex h-full w-full items-center justify-center text-xs text-[#A83F55]">
                           صورة
                         </div>
                       )}
@@ -512,7 +549,7 @@ function Header() {
                       {cat.name}
                     </span>
 
-                    <FaChevronLeft className="text-xs text-[#b08d57] transition-transform duration-300 group-hover:-translate-x-1" />
+                    <FaChevronLeft className="text-xs text-[#A83F55] transition-transform duration-300 group-hover:-translate-x-1" />
                   </button>
                 ))}
               </div>

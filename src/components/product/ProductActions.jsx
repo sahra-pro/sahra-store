@@ -6,10 +6,7 @@ import {
   FaMinus,
   FaPlus,
   FaHeart,
-  FaTruck,
-  FaShieldAlt,
-  FaMoneyBillWave,
-  FaHeadset,
+  FaRegHeart,
 } from "react-icons/fa";
 
 import { useCart } from "../../hooks/useCart";
@@ -30,6 +27,8 @@ function ProductActions({ product }) {
   const outOfStock = stock <= 0;
   const inWishlist = isInWishlist(product.id);
 
+  const totalPrice = price * quantity;
+
   const decrease = () => {
     setQuantity((currentQuantity) => Math.max(1, currentQuantity - 1));
   };
@@ -45,7 +44,7 @@ function ProductActions({ product }) {
       content_name: product.name,
       content_ids: [product.id],
       content_type: "product",
-      value: price * quantity,
+      value: totalPrice,
       currency: "SAR",
     });
   };
@@ -81,52 +80,58 @@ function ProductActions({ product }) {
   };
 
   return (
-    <div className="mt-10">
-      {/* Purchase Panel */}
-      <div className="overflow-hidden rounded-[30px] border border-[#e8dfd0] bg-white shadow-[0_16px_50px_rgba(48,41,31,0.08)]">
-        {/* Header */}
-        <div className="border-b border-[#eee5d5] px-5 py-5 sm:px-7">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-[10px] font-extrabold tracking-[0.25em] text-[#b88a44]">
-                SHAHDAN STORE
-              </p>
+    <div className="mt-8">
+      <div className="rounded-3xl border border-[#E8D9D6] bg-white p-5 shadow-[0_10px_35px_rgba(100,31,43,0.06)] sm:p-6">
+        {/* Quantity + Wishlist */}
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-bold text-[#4A1821]">الكمية</p>
 
-              <h3 className="mt-1 text-lg font-extrabold text-[#30291f]">
-                أضف المنتج إلى طلبك
-              </h3>
-            </div>
-
-            {stock > 0 && stock <= 5 && (
-              <span className="rounded-full bg-[#fff8e9] px-3 py-1.5 text-[11px] font-bold text-[#9d7337]">
-                كمية محدودة
-              </span>
-            )}
+            <p className="mt-1 text-xs text-[#806D70]">اختر الكمية المطلوبة</p>
           </div>
-        </div>
 
-        <div className="p-5 sm:p-7">
-          {/* Quantity */}
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-sm font-bold text-[#30291f]">الكمية</p>
+          <div className="flex items-center gap-2">
+            {/* Wishlist */}
+            <button
+              type="button"
+              onClick={() => toggleWishlist(product.id)}
+              className={`
+                flex
+                h-12
+                w-12
+                items-center
+                justify-center
+                rounded-xl
+                border
+                transition-all
+                duration-200
+                active:scale-95
+                ${
+                  inWishlist
+                    ? "border-[#641F2B] bg-[#641F2B] text-white"
+                    : "border-[#E8D9D6] bg-[#FBF6F1] text-[#806D70] hover:border-[#A83F55] hover:text-[#A83F55]"
+                }
+              `}
+              aria-label={inWishlist ? "إزالة من المفضلة" : "إضافة إلى المفضلة"}
+            >
+              {inWishlist ? <FaHeart /> : <FaRegHeart />}
+            </button>
 
-              <p className="mt-1 text-xs text-[#8a8175]">
-                اختر الكمية المطلوبة
-              </p>
-            </div>
-
-            <div className="flex h-12 items-center rounded-xl border border-[#ded3c2] bg-[#fcfaf6]">
+            {/* Quantity */}
+            <div className="flex h-12 items-center overflow-hidden rounded-xl border border-[#E8D9D6] bg-[#FBF6F1]">
               <button
                 type="button"
                 onClick={decrease}
                 disabled={outOfStock || quantity <= 1}
                 className="
-                  flex h-12 w-11 items-center justify-center
-                  text-[#5f574c]
+                  flex
+                  h-12
+                  w-10
+                  items-center
+                  justify-center
+                  text-[#641F2B]
                   transition
-                  hover:bg-[#f5ead5]
-                  hover:text-[#8a642f]
+                  hover:bg-[#F2E4E1]
                   disabled:cursor-not-allowed
                   disabled:opacity-30
                 "
@@ -135,7 +140,7 @@ function ProductActions({ product }) {
                 <FaMinus className="text-xs" />
               </button>
 
-              <span className="flex h-12 min-w-[48px] items-center justify-center border-x border-[#e8dfd0] text-base font-extrabold text-[#30291f]">
+              <span className="flex h-12 min-w-[42px] items-center justify-center border-x border-[#E8D9D6] text-sm font-bold text-[#4A1821]">
                 {quantity}
               </span>
 
@@ -144,11 +149,14 @@ function ProductActions({ product }) {
                 onClick={increase}
                 disabled={outOfStock || quantity >= stock}
                 className="
-                  flex h-12 w-11 items-center justify-center
-                  text-[#5f574c]
+                  flex
+                  h-12
+                  w-10
+                  items-center
+                  justify-center
+                  text-[#641F2B]
                   transition
-                  hover:bg-[#f5ead5]
-                  hover:text-[#8a642f]
+                  hover:bg-[#F2E4E1]
                   disabled:cursor-not-allowed
                   disabled:opacity-30
                 "
@@ -158,264 +166,102 @@ function ProductActions({ product }) {
               </button>
             </div>
           </div>
+        </div>
 
-          {/* Main Button */}
+        {/* Total */}
+        <div className="mt-6 flex items-end justify-between border-t border-[#F0E6E3] pt-5">
+          <span className="text-sm text-[#806D70]">الإجمالي</span>
+
+          <div className="text-right">
+            <span className="text-2xl font-black text-[#641F2B]">
+              {totalPrice} ر.س
+            </span>
+          </div>
+        </div>
+
+        {/* Main Actions */}
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
           <button
             type="button"
             onClick={handleBuyNow}
             disabled={outOfStock}
             className="
-              group
-              relative
-              mt-6
               flex
-              h-[62px]
-              w-full
+              h-14
               items-center
               justify-center
-              gap-3
-              overflow-hidden
+              gap-2
               rounded-2xl
-              bg-[#30291f]
-              text-base
-              font-extrabold
+              bg-[#641F2B]
+              text-sm
+              font-bold
               text-white
-              shadow-[0_10px_25px_rgba(48,41,31,0.18)]
+              shadow-[0_8px_20px_rgba(100,31,43,0.16)]
               transition-all
-              duration-300
+              duration-200
               hover:-translate-y-0.5
-              hover:bg-[#3d3428]
-              hover:shadow-[0_15px_30px_rgba(48,41,31,0.22)]
-              active:scale-[0.985]
+              hover:bg-[#4A1821]
+              active:scale-[0.98]
               disabled:cursor-not-allowed
               disabled:opacity-50
             "
           >
-            <span
-              className="
-                pointer-events-none
-                absolute
-                inset-y-0
-                -left-20
-                w-12
-                rotate-[20deg]
-                bg-white/10
-                blur-sm
-                transition-all
-                duration-700
-                group-hover:left-[110%]
-              "
-            />
-
-            <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[#b88a44] text-lg">
-              🚀
-            </span>
-
-            <span className="relative">اشترِ الآن</span>
+            اشترِ الآن
           </button>
 
-          {/* Secondary Actions */}
-          <div className="mt-3 flex gap-3">
-            <button
-              type="button"
-              onClick={handleAddToCart}
-              disabled={outOfStock}
-              className={`
-                group
-                flex
-                h-14
-                flex-1
-                items-center
-                justify-center
-                gap-2
-                rounded-2xl
-                border
-                text-sm
-                font-bold
-                transition-all
-                duration-300
-                active:scale-[0.98]
-                disabled:cursor-not-allowed
-                disabled:opacity-50
+          <button
+            type="button"
+            onClick={handleAddToCart}
+            disabled={outOfStock}
+            className={`
+              flex
+              h-14
+              items-center
+              justify-center
+              gap-2
+              rounded-2xl
+              border
+              text-sm
+              font-bold
+              transition-all
+              duration-200
+              active:scale-[0.98]
+              disabled:cursor-not-allowed
+              disabled:opacity-50
 
-                ${
-                  added
-                    ? "border-[#8a642f] bg-[#8a642f] text-white shadow-md"
-                    : "border-[#d8c7aa] bg-[#fffdf9] text-[#8a642f] hover:border-[#b88a44] hover:bg-[#fdf8ee]"
-                }
-              `}
-            >
-              {added ? (
-                <>
-                  <FaCheck className="text-base" />
-                  تمت الإضافة
-                </>
-              ) : (
-                <>
-                  <FaShoppingCart className="text-base transition-transform group-hover:-translate-x-1" />
-                  أضف للسلة
-                </>
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => toggleWishlist(product.id)}
-              className={`
-                flex
-                h-14
-                w-14
-                shrink-0
-                items-center
-                justify-center
-                rounded-2xl
-                border
-                transition-all
-                duration-300
-                active:scale-95
-
-                ${
-                  inWishlist
-                    ? "border-[#b88a44] bg-[#b88a44] text-white shadow-md"
-                    : "border-[#e5dccd] bg-white text-[#8a8175] hover:border-[#b88a44] hover:bg-[#fdf8ee] hover:text-[#b88a44]"
-                }
-              `}
-              aria-label={inWishlist ? "إزالة من المفضلة" : "إضافة إلى المفضلة"}
-            >
-              <FaHeart
-                className={`transition-transform ${
-                  inWishlist ? "scale-110" : ""
-                }`}
-              />
-            </button>
-          </div>
-
-          {/* Benefits */}
-          <div className="mt-7 grid grid-cols-2 border-y border-[#eee5d5] py-5">
-            <div className="flex items-center gap-3 border-l border-[#eee5d5] pl-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f8f3e8] text-[#b88a44]">
-                <FaTruck className="text-sm" />
-              </div>
-
-              <div>
-                <p className="text-xs font-bold text-[#30291f]">شحن سريع</p>
-                <p className="mt-1 text-[10px] text-[#8a8175]">داخل المملكة</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 pr-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f8f3e8] text-[#b88a44]">
-                <FaMoneyBillWave className="text-sm" />
-              </div>
-
-              <div>
-                <p className="text-xs font-bold text-[#30291f]">
-                  الدفع عند الاستلام
-                </p>
-                <p className="mt-1 text-[10px] text-[#8a8175]">
-                  عند وصول الطلب
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-5 flex items-center gap-3 border-l border-[#eee5d5] pl-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f8f3e8] text-[#b88a44]">
-                <FaShieldAlt className="text-sm" />
-              </div>
-
-              <div>
-                <p className="text-xs font-bold text-[#30291f]">شراء آمن</p>
-                <p className="mt-1 text-[10px] text-[#8a8175]">
-                  حماية معلوماتك
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-5 flex items-center gap-3 pr-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f8f3e8] text-[#b88a44]">
-                <FaHeadset className="text-sm" />
-              </div>
-
-              <div>
-                <p className="text-xs font-bold text-[#30291f]">خدمة العملاء</p>
-                <p className="mt-1 text-[10px] text-[#8a8175]">
-                  دعم عند الحاجة
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Order Journey */}
-          <div className="mt-6">
-            <div className="mb-5 flex items-center justify-between">
-              <h3 className="text-sm font-extrabold text-[#30291f]">
-                رحلة طلبك
-              </h3>
-
-              <span className="text-[10px] font-bold text-[#b88a44]">
-                4 خطوات بسيطة
-              </span>
-            </div>
-
-            <div className="grid grid-cols-4 gap-1">
-              <div className="text-center">
-                <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-[#30291f] text-xs font-bold text-white">
-                  01
-                </div>
-
-                <p className="mt-2 text-[10px] font-bold text-[#5f574c]">
-                  الطلب
-                </p>
-              </div>
-
-              <div className="text-center">
-                <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-[#30291f] text-xs font-bold text-white">
-                  02
-                </div>
-
-                <p className="mt-2 text-[10px] font-bold text-[#5f574c]">
-                  التجهيز
-                </p>
-              </div>
-
-              <div className="text-center">
-                <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-[#30291f] text-xs font-bold text-white">
-                  03
-                </div>
-
-                <p className="mt-2 text-[10px] font-bold text-[#5f574c]">
-                  الشحن
-                </p>
-              </div>
-
-              <div className="text-center">
-                <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-[#b88a44] text-xs font-bold text-white">
-                  04
-                </div>
-
-                <p className="mt-2 text-[10px] font-bold text-[#5f574c]">
-                  الاستلام
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Stock */}
-          {stock > 0 && stock <= 5 && (
-            <div className="mt-6 flex items-center justify-center gap-2 rounded-xl border border-[#ead7b5] bg-[#fffaf0] px-4 py-3 text-xs font-bold text-[#8a642f]">
-              <span className="text-base">🔥</span>
-              <span>
-                متبقي فقط {stock} {stock === 1 ? "قطعة" : "قطع"}
-              </span>
-            </div>
-          )}
-
-          {outOfStock && (
-            <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-600">
-              المنتج غير متوفر حالياً
-            </div>
-          )}
+              ${
+                added
+                  ? "border-[#641F2B] bg-[#641F2B] text-white"
+                  : "border-[#E8D9D6] bg-[#FBF6F1] text-[#641F2B] hover:border-[#A83F55] hover:bg-[#F2E4E1]"
+              }
+            `}
+          >
+            {added ? (
+              <>
+                <FaCheck />
+                تمت الإضافة
+              </>
+            ) : (
+              <>
+                <FaShoppingCart />
+                أضف للسلة
+              </>
+            )}
+          </button>
         </div>
+
+        {/* Stock */}
+        {!outOfStock && stock <= 5 && (
+          <div className="mt-4 text-center text-xs font-semibold text-[#8F3046]">
+            متبقي فقط {stock} {stock === 1 ? "قطعة" : "قطع"}
+          </div>
+        )}
+
+        {outOfStock && (
+          <div className="mt-4 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-600">
+            المنتج غير متوفر حالياً
+          </div>
+        )}
       </div>
     </div>
   );

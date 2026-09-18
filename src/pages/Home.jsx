@@ -13,12 +13,16 @@ export default function Home() {
   const { settings } = useSettings();
 
   useEffect(() => {
-    document.title = settings.seo?.title || settings.storeName;
+    document.title = settings.seo?.title || settings.storeName || "سهرة ستور";
 
     const meta = document.querySelector('meta[name="description"]');
 
     if (meta) {
-      meta.setAttribute("content", settings.seo?.description || "");
+      meta.setAttribute(
+        "content",
+        settings.seo?.description ||
+          "سهرة ستور - متجر يوفر لك منتجات مختارة بعناية وتجربة تسوق مميزة.",
+      );
     }
   }, [settings]);
 
@@ -26,17 +30,22 @@ export default function Home() {
     <main
       className={`min-h-screen ${
         settings.theme?.darkMode
-          ? "bg-[#211d18] text-white"
-          : "bg-[#f8f3e8] text-[#30291f]"
+          ? "bg-[#4A1821] text-white"
+          : "bg-[#FBF6F1] text-[#4A1821]"
       }`}
       style={{
-        "--primary": settings.theme?.primaryColor || "#b88a44",
-        "--shahdan-gold": "#b88a44",
-        "--shahdan-dark-gold": "#8a642f",
-        "--shahdan-beige": "#f8f3e8",
-        "--shahdan-dark": "#30291f",
-        "--shahdan-text": "#5f574c",
-        "--shahdan-border": "#eadfca",
+        "--primary": settings.theme?.primaryColor || "#641F2B",
+
+        "--sahra-burgundy": "#641F2B",
+        "--sahra-burgundy-dark": "#4A1821",
+        "--sahra-rose": "#A83F55",
+        "--sahra-rose-dark": "#8F3046",
+        "--sahra-rose-pale": "#F2E4E1",
+        "--sahra-ivory": "#FBF6F1",
+        "--sahra-cream": "#F7EEE9",
+        "--sahra-text": "#4A1821",
+        "--sahra-text-soft": "#806D70",
+        "--sahra-border": "#E8D9D6",
       }}
     >
       {/* =========================================================
@@ -53,19 +62,17 @@ export default function Home() {
       ========================================================== */}
       <div
         className={`relative overflow-hidden ${
-          settings.theme?.darkMode
-            ? "bg-[#211d18]"
-            : "bg-gradient-to-b from-[#f8f3e8] via-white to-[#f8f3e8]"
+          settings.theme?.darkMode ? "bg-[#4A1821]" : "bg-[#FBF6F1]"
         }`}
       >
         {/* Decorative background elements */}
         {!settings.theme?.darkMode && (
           <>
-            <div className="pointer-events-none absolute right-[-120px] top-[180px] h-72 w-72 rounded-full bg-[#b88a44]/5 blur-3xl" />
+            <div className="pointer-events-none absolute right-[-120px] top-[180px] h-72 w-72 rounded-full bg-[#A83F55]/5 blur-3xl" />
 
-            <div className="pointer-events-none absolute left-[-140px] top-[700px] h-80 w-80 rounded-full bg-[#c7a15a]/5 blur-3xl" />
+            <div className="pointer-events-none absolute left-[-140px] top-[700px] h-80 w-80 rounded-full bg-[#641F2B]/5 blur-3xl" />
 
-            <div className="pointer-events-none absolute right-[-100px] top-[1500px] h-72 w-72 rounded-full bg-[#b88a44]/5 blur-3xl" />
+            <div className="pointer-events-none absolute right-[-100px] top-[1500px] h-72 w-72 rounded-full bg-[#A83F55]/5 blur-3xl" />
           </>
         )}
 
@@ -80,7 +87,7 @@ export default function Home() {
           )}
 
           {/* =====================================================
-              FLASH SALE
+              OFFERS
           ====================================================== */}
           {settings.discounts?.flashSaleEnabled && (
             <section id="offers">
@@ -89,7 +96,7 @@ export default function Home() {
           )}
 
           {/* =====================================================
-              BEST SELLERS
+              FEATURED PRODUCTS
           ====================================================== */}
           {settings.home?.showBestSellers && (
             <section id="featured-products">
@@ -98,9 +105,9 @@ export default function Home() {
           )}
 
           {/* =====================================================
-              WHY SHAHDAN
+              WHY SAHRA
           ====================================================== */}
-          <section id="why-shahdan">
+          <section id="why-sahra">
             <WhyUs />
           </section>
 

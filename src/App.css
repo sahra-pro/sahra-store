@@ -1,23 +1,26 @@
 /* =========================================
-   SHAHDAN STORE
+   SAHRA STORE
+
    Global App Styles
    ========================================= */
 
 :root {
-  --shahdan-black: #171717;
-  --shahdan-black-soft: #242424;
+  --sahra-burgundy: #641f2b;
+  --sahra-burgundy-dark: #4a1821;
 
-  --shahdan-gold: #b08d57;
-  --shahdan-gold-light: #d4b477;
-  --shahdan-gold-pale: #f3eadc;
+  --sahra-rose: #a83f55;
+  --sahra-rose-dark: #8f3046;
+  --sahra-rose-pale: #f2e4e1;
 
-  --shahdan-ivory: #faf8f3;
-  --shahdan-white: #ffffff;
+  --sahra-ivory: #fbf6f1;
+  --sahra-cream: #f7eee9;
 
-  --shahdan-text: #242424;
-  --shahdan-text-soft: #737373;
+  --sahra-white: #ffffff;
 
-  --shahdan-border: #e8e1d7;
+  --sahra-text: #4a1821;
+  --sahra-text-soft: #806d70;
+
+  --sahra-border: #e8d9d6;
 }
 
 /* =========================================
@@ -32,20 +35,28 @@
    COMMON
    ========================================= */
 
-.shahdan-gold {
-  color: var(--shahdan-gold);
+.sahra-burgundy {
+  color: var(--sahra-burgundy);
 }
 
-.shahdan-gold-bg {
-  background-color: var(--shahdan-gold);
+.sahra-burgundy-bg {
+  background-color: var(--sahra-burgundy);
 }
 
-.shahdan-black {
-  color: var(--shahdan-black);
+.sahra-rose {
+  color: var(--sahra-rose);
 }
 
-.shahdan-black-bg {
-  background-color: var(--shahdan-black);
+.sahra-rose-bg {
+  background-color: var(--sahra-rose);
+}
+
+.sahra-text {
+  color: var(--sahra-text);
+}
+
+.sahra-ivory-bg {
+  background-color: var(--sahra-ivory);
 }
 
 /* =========================================
@@ -57,7 +68,7 @@ a:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
-  outline: 2px solid var(--shahdan-gold);
+  outline: 2px solid var(--sahra-rose);
   outline-offset: 2px;
 }
 

@@ -7,31 +7,39 @@ html {
 
 :root {
   /* ================================
-     SHAHDAN BRAND COLORS
+     SAHRA BRAND COLORS
      ================================ */
 
-  --shahdan-black: #171717;
-  --shahdan-black-soft: #242424;
+  /* Burgundy - اللون الأساسي */
+  --sahra-burgundy: #641f2b;
+  --sahra-burgundy-dark: #4a1821;
 
-  --shahdan-gold: #b08d57;
-  --shahdan-gold-light: #d4b477;
-  --shahdan-gold-pale: #f3eadc;
+  /* Rose - اللون المساعد */
+  --sahra-rose: #a83f55;
+  --sahra-rose-dark: #8f3046;
+  --sahra-rose-pale: #f2e4e1;
 
-  --shahdan-ivory: #faf8f3;
-  --shahdan-white: #ffffff;
+  /* Ivory / Cream - الخلفيات */
+  --sahra-ivory: #fbf6f1;
+  --sahra-cream: #f7eee9;
 
-  --shahdan-text: #242424;
-  --shahdan-text-soft: #737373;
+  /* Basic */
+  --sahra-white: #ffffff;
 
-  --shahdan-border: #e8e1d7;
+  /* Text */
+  --sahra-text: #4a1821;
+  --sahra-text-soft: #806d70;
+
+  /* Borders */
+  --sahra-border: #e8d9d6;
 }
 
 body {
   margin: 0;
   min-width: 320px;
 
-  background-color: var(--shahdan-ivory);
-  color: var(--shahdan-text);
+  background-color: var(--sahra-ivory);
+  color: var(--sahra-text);
 
   font-family: Arial, sans-serif;
 
@@ -62,8 +70,8 @@ img {
 }
 
 ::selection {
-  background: var(--shahdan-gold);
-  color: var(--shahdan-white);
+  background: var(--sahra-burgundy);
+  color: var(--sahra-white);
 }
 
 /* ================================
@@ -75,16 +83,16 @@ img {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--shahdan-ivory);
+  background: var(--sahra-ivory);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--shahdan-gold);
+  background: var(--sahra-burgundy);
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--shahdan-black-soft);
+  background: var(--sahra-rose-dark);
 }
 
 /* ================================
