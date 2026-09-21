@@ -2,10 +2,22 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const SITE_URL = (process.env.SITE_URL || "https://shahdanstore.com").replace(
+const SITE_URL = (process.env.SITE_URL || "https://example.com").replace(
   /\/$/,
   "",
 );
+
+const STORE_NAME = "سهرة";
+const STORE_EMAIL = "sahra0sales@gmail.com";
+
+function escapeHtml(value = "") {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -25,125 +37,357 @@ export default async function handler(req, res) {
       });
     }
 
+    const customer = order.customer || {};
+    const items = Array.isArray(order.items) ? order.items : [];
+
     const productsHtml =
-      order.items
-        ?.map(
+      items
+        .map(
           (item) => `
             <tr>
-              <td style="padding:8px;border:1px solid #eee;">
-                ${item.name || ""}
+              <td style="padding:10px;border:1px solid #eadcda;">
+                ${escapeHtml(item.name || "")}
               </td>
 
-              <td style="padding:8px;border:1px solid #eee;text-align:center;">
-                ${item.quantity || 0}
+              <td
+                style="
+                  padding:10px;
+                  border:1px solid #eadcda;
+                  text-align:center;
+                "
+              >
+                ${Number(item.quantity || 0)}
               </td>
 
-              <td style="padding:8px;border:1px solid #eee;text-align:center;">
-                ${item.price || 0} ر.س
+              <td
+                style="
+                  padding:10px;
+                  border:1px solid #eadcda;
+                  text-align:center;
+                "
+              >
+                ${Number(item.price || 0).toFixed(2)} ر.س
               </td>
             </tr>
           `,
         )
         .join("") || "";
 
+    const orderNumber = escapeHtml(order.orderNumber || "");
+    const customerName = escapeHtml(customer.name || "");
+    const customerPhone = escapeHtml(customer.phone || "");
+    const customerCity = escapeHtml(customer.city || "");
+    const customerAddress = escapeHtml(customer.address || "");
+    const customerNotes = escapeHtml(customer.notes || "لا يوجد");
+
+    const subtotal = Number(order.subtotal || 0).toFixed(2);
+    const shipping = Number(order.shipping || 0).toFixed(2);
+    const total = Number(order.total || 0).toFixed(2);
+
     const result = await resend.emails.send({
-      from: "شهدان ستور <onboarding@resend.dev>",
-      to: ["shahdan.store@gmail.com"],
+      from: `${STORE_NAME} <onboarding@resend.dev>`,
+      to: [STORE_EMAIL],
+
       subject: `🛒 طلب جديد ${order.orderNumber || ""} - ${
-        order.customer?.name || ""
+        customer.name || ""
       }`,
+
       html: `
         <div
           style="
-            font-family:Arial,sans-serif;
             direction:rtl;
-            max-width:700px;
-            margin:auto;
-            padding:20px;
+            font-family:Arial,sans-serif;
+            background:#fbf6f1;
+            padding:30px 15px;
+            color:#4a1821;
           "
         >
-          <h2 style="color:#16a34a;">
-            🛒 طلب جديد في متجر شهدان
-          </h2>
-
-          <p>
-            <strong>رقم الطلب:</strong>
-            ${order.orderNumber || ""}
-          </p>
-
-          <p>
-            <strong>اسم العميل:</strong>
-            ${order.customer?.name || ""}
-          </p>
-
-          <p>
-            <strong>رقم الجوال:</strong>
-            ${order.customer?.phone || ""}
-          </p>
-
-          <p>
-            <strong>المدينة:</strong>
-            ${order.customer?.city || ""}
-          </p>
-
-          <p>
-            <strong>العنوان:</strong>
-            ${order.customer?.address || ""}
-          </p>
-
-          <p>
-            <strong>الملاحظات:</strong>
-            ${order.customer?.notes || "لا يوجد"}
-          </p>
-
-          <h3>المنتجات</h3>
-
-          <table
+          <div
             style="
-              width:100%;
-              border-collapse:collapse;
-              margin-top:10px;
+              max-width:720px;
+              margin:0 auto;
+              background:#ffffff;
+              border:1px solid #e8d9d6;
+              border-radius:18px;
+              overflow:hidden;
             "
           >
-            <thead>
-              <tr style="background:#f3f4f6;">
-                <th style="padding:10px;border:1px solid #eee;">
-                  المنتج
-                </th>
+            <div
+              style="
+                background:#641f2b;
+                color:#ffffff;
+                padding:24px;
+              "
+            >
+              <h1
+                style="
+                  margin:0;
+                  font-size:24px;
+                "
+              >
+                طلب جديد في ${STORE_NAME}
+              </h1>
 
-                <th style="padding:10px;border:1px solid #eee;">
-                  الكمية
-                </th>
+              <p
+                style="
+                  margin:8px 0 0;
+                  font-size:14px;
+                  opacity:.9;
+                "
+              >
+                رقم الطلب: ${orderNumber}
+              </p>
+            </div>
 
-                <th style="padding:10px;border:1px solid #eee;">
-                  السعر
-                </th>
-              </tr>
-            </thead>
+            <div style="padding:24px;">
+              <h2
+                style="
+                  margin:0 0 18px;
+                  font-size:18px;
+                  color:#641f2b;
+                "
+              >
+                بيانات العميل
+              </h2>
 
-            <tbody>
-              ${productsHtml}
-            </tbody>
-          </table>
+              <table
+                style="
+                  width:100%;
+                  border-collapse:collapse;
+                  margin-bottom:24px;
+                "
+              >
+                <tbody>
+                  <tr>
+                    <td
+                      style="
+                        padding:9px 0;
+                        font-weight:bold;
+                        width:120px;
+                      "
+                    >
+                      الاسم
+                    </td>
 
-          <h3 style="margin-top:20px;color:#16a34a;">
-            الإجمالي: ${order.total || 0} ر.س
-          </h3>
+                    <td style="padding:9px 0;">
+                      ${customerName}
+                    </td>
+                  </tr>
 
-          <a
-            href="${SITE_URL}/admin/orders"
-            style="
-              background:#16a34a;
-              color:#fff;
-              padding:12px 20px;
-              text-decoration:none;
-              border-radius:8px;
-              display:inline-block;
-              margin-top:20px;
-            "
-          >
-            عرض الطلبات
-          </a>
+                  <tr>
+                    <td
+                      style="
+                        padding:9px 0;
+                        font-weight:bold;
+                      "
+                    >
+                      الجوال
+                    </td>
+
+                    <td style="padding:9px 0;">
+                      ${customerPhone}
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td
+                      style="
+                        padding:9px 0;
+                        font-weight:bold;
+                      "
+                    >
+                      المدينة
+                    </td>
+
+                    <td style="padding:9px 0;">
+                      ${customerCity}
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td
+                      style="
+                        padding:9px 0;
+                        font-weight:bold;
+                        vertical-align:top;
+                      "
+                    >
+                      العنوان
+                    </td>
+
+                    <td style="padding:9px 0;">
+                      ${customerAddress}
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td
+                      style="
+                        padding:9px 0;
+                        font-weight:bold;
+                        vertical-align:top;
+                      "
+                    >
+                      الملاحظات
+                    </td>
+
+                    <td style="padding:9px 0;">
+                      ${customerNotes}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <h2
+                style="
+                  margin:0 0 14px;
+                  font-size:18px;
+                  color:#641f2b;
+                "
+              >
+                المنتجات
+              </h2>
+
+              <table
+                style="
+                  width:100%;
+                  border-collapse:collapse;
+                  margin-bottom:24px;
+                "
+              >
+                <thead>
+                  <tr style="background:#f7eee9;">
+                    <th
+                      style="
+                        padding:11px;
+                        border:1px solid #eadcda;
+                        text-align:right;
+                      "
+                    >
+                      المنتج
+                    </th>
+
+                    <th
+                      style="
+                        padding:11px;
+                        border:1px solid #eadcda;
+                        text-align:center;
+                      "
+                    >
+                      الكمية
+                    </th>
+
+                    <th
+                      style="
+                        padding:11px;
+                        border:1px solid #eadcda;
+                        text-align:center;
+                      "
+                    >
+                      السعر
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  ${productsHtml}
+                </tbody>
+              </table>
+
+              <div
+                style="
+                  background:#fbf6f1;
+                  border:1px solid #e8d9d6;
+                  border-radius:14px;
+                  padding:18px;
+                "
+              >
+                <div
+                  style="
+                    display:flex;
+                    justify-content:space-between;
+                    margin-bottom:10px;
+                  "
+                >
+                  <span>المجموع الفرعي</span>
+                  <strong>${subtotal} ر.س</strong>
+                </div>
+
+                <div
+                  style="
+                    display:flex;
+                    justify-content:space-between;
+                    margin-bottom:10px;
+                  "
+                >
+                  <span>الشحن</span>
+                  <strong>
+                    ${
+                      Number(order.shipping || 0) > 0
+                        ? `${shipping} ر.س`
+                        : "مجاني"
+                    }
+                  </strong>
+                </div>
+
+                <div
+                  style="
+                    border-top:1px solid #e8d9d6;
+                    margin-top:12px;
+                    padding-top:12px;
+                    display:flex;
+                    justify-content:space-between;
+                    font-size:18px;
+                    color:#641f2b;
+                  "
+                >
+                  <strong>الإجمالي</strong>
+                  <strong>${total} ر.س</strong>
+                </div>
+              </div>
+
+              <div
+                style="
+                  margin-top:24px;
+                  padding:14px 16px;
+                  border-radius:12px;
+                  background:#f2e4e1;
+                  color:#641f2b;
+                "
+              >
+                <strong>طريقة الدفع:</strong>
+                الدفع عند الاستلام
+              </div>
+
+              <a
+                href="${SITE_URL}/admin/orders"
+                style="
+                  display:inline-block;
+                  margin-top:24px;
+                  background:#641f2b;
+                  color:#ffffff;
+                  padding:13px 22px;
+                  text-decoration:none;
+                  border-radius:10px;
+                  font-weight:bold;
+                "
+              >
+                عرض الطلبات
+              </a>
+            </div>
+
+            <div
+              style="
+                border-top:1px solid #e8d9d6;
+                padding:18px 24px;
+                text-align:center;
+                color:#806d70;
+                font-size:12px;
+              "
+            >
+              شكرًا لاختيارك ${STORE_NAME}
+            </div>
+          </div>
         </div>
       `,
     });

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   FaBolt,
@@ -23,10 +23,11 @@ function Login() {
 
   const redirectTo = location.state?.from || "/admin/dashboard";
 
-  if (!authLoading && isAuthenticated) {
-    navigate(redirectTo, { replace: true });
-    return null;
-  }
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      navigate(redirectTo, { replace: true });
+    }
+  }, [authLoading, isAuthenticated, navigate, redirectTo]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -44,6 +45,10 @@ function Login() {
       setError(result.message);
     }
   };
+
+  if (!authLoading && isAuthenticated) {
+    return null;
+  }
 
   return (
     <main
@@ -98,6 +103,7 @@ function Login() {
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] py-3.5 pl-4 pr-11 text-sm text-[#4A1821] outline-none transition-all placeholder:text-[#B3A4A6] focus:border-[#A83F55] focus:bg-white focus:ring-4 focus:ring-[#F2E4E1]"
                   placeholder="البريد الإلكتروني"
+                  autoComplete="email"
                   autoFocus
                   required
                 />
@@ -119,6 +125,7 @@ function Login() {
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] py-3.5 pl-4 pr-11 text-sm text-[#4A1821] outline-none transition-all placeholder:text-[#B3A4A6] focus:border-[#A83F55] focus:bg-white focus:ring-4 focus:ring-[#F2E4E1]"
                   placeholder="كلمة المرور"
+                  autoComplete="current-password"
                   required
                 />
               </div>
