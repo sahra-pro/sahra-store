@@ -52,7 +52,7 @@ export function OrderProvider({ children }) {
 
   const [myOrderNumbers, setMyOrderNumbers] = useState(() => {
     try {
-      const saved = localStorage.getItem("shahdan_my_order_numbers");
+      const saved = localStorage.getItem("sahra_my_order_numbers");
 
       return saved ? JSON.parse(saved) : [];
     } catch {
@@ -113,7 +113,7 @@ export function OrderProvider({ children }) {
 
   useEffect(() => {
     localStorage.setItem(
-      "shahdan_my_order_numbers",
+      "sahra_my_order_numbers",
       JSON.stringify(myOrderNumbers),
     );
   }, [myOrderNumbers]);

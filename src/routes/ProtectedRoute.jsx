@@ -2,7 +2,7 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 import { useAuth } from "../hooks/useAuth";
 
-const ADMIN_EMAIL = "shahdan.store@gmail.com";
+const ADMIN_EMAIL = "sahra0sales@gmail.com";
 
 function ProtectedRoute() {
   const { user, isAuthenticated, authLoading } = useAuth();
@@ -29,7 +29,7 @@ function ProtectedRoute() {
     );
   }
 
-  // السماح لحساب مدير شهدان فقط
+  // السماح لحساب مدير سهرة فقط
   if (user?.email?.toLowerCase() !== ADMIN_EMAIL) {
     return <Navigate to="/" replace />;
   }

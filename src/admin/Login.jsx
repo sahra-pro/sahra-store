@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FaBolt, FaEnvelope, FaLock } from "react-icons/fa";
+import {
+  FaBolt,
+  FaEnvelope,
+  FaLock,
+  FaArrowLeft,
+  FaShieldAlt,
+} from "react-icons/fa";
 
 import { useAuth } from "../hooks/useAuth";
 
@@ -40,81 +46,113 @@ function Login() {
   };
 
   return (
-    <div
+    <main
       dir="rtl"
-      className="flex min-h-screen items-center justify-center bg-green-700 px-6"
+      className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#FBF6F1] px-4 py-10"
     >
-      <div className="w-full max-w-md rounded-2xl bg-white p-10 shadow-xl">
+      {/* Background decoration */}
+      <div className="pointer-events-none absolute -right-32 -top-32 h-80 w-80 rounded-full bg-[#F2E4E1]" />
+      <div className="pointer-events-none absolute -bottom-40 -left-32 h-96 w-96 rounded-full bg-[#E8D9D6]/60" />
+
+      <div className="relative z-10 w-full max-w-md">
+        {/* Brand */}
         <div className="mb-8 text-center">
-          <div className="mb-4 flex justify-center text-5xl text-green-600">
-            <FaBolt />
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#641F2B] text-[#F2E4E1] shadow-[0_15px_35px_rgba(100,31,43,0.20)]">
+            <FaBolt className="text-2xl" />
           </div>
 
-          <h1 className="text-2xl font-bold text-gray-800">
-            لوحة تحكم شهدان ستور
+          <p className="text-xs font-bold uppercase tracking-[0.4em] text-[#A83F55]">
+            SAHRA
+          </p>
+
+          <h1 className="mt-2 text-3xl font-black text-[#4A1821]">
+            لوحة تحكم سهرة
           </h1>
 
-          <p className="mt-2 text-sm text-gray-500">
-            سجّل دخولك للوصول إلى لوحة التحكم
+          <p className="mt-2 text-sm leading-7 text-[#806D70]">
+            سجّل دخولك للوصول إلى إدارة المتجر
           </p>
         </div>
 
-        {error && (
-          <div className="mb-6 rounded-xl bg-red-100 p-4 text-center text-red-700">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-          <div>
-            <label className="mb-2 block font-semibold text-gray-700">
-              البريد الإلكتروني
-            </label>
-
-            <div className="relative">
-              <FaEnvelope className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" />
-
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border py-3 pl-4 pr-11 outline-none focus:border-green-600"
-                placeholder="admin@shahdan.com"
-                autoFocus
-                required
-              />
+        {/* Login card */}
+        <div className="rounded-[30px] border border-[#E8D9D6] bg-white p-6 shadow-[0_20px_60px_rgba(100,31,43,0.10)] sm:p-8">
+          {error && (
+            <div className="mb-6 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-center text-sm font-semibold leading-6 text-red-600">
+              {error}
             </div>
-          </div>
+          )}
 
-          <div>
-            <label className="mb-2 block font-semibold text-gray-700">
-              كلمة المرور
-            </label>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Email */}
+            <div>
+              <label className="mb-2 block text-sm font-bold text-[#4A1821]">
+                البريد الإلكتروني
+              </label>
 
-            <div className="relative">
-              <FaLock className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" />
+              <div className="relative">
+                <FaEnvelope className="absolute right-4 top-1/2 -translate-y-1/2 text-[#A83F55]" />
 
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border py-3 pl-4 pr-11 outline-none focus:border-green-600"
-                placeholder="••••••••"
-                required
-              />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] py-3.5 pl-4 pr-11 text-sm text-[#4A1821] outline-none transition-all placeholder:text-[#B3A4A6] focus:border-[#A83F55] focus:bg-white focus:ring-4 focus:ring-[#F2E4E1]"
+                  placeholder="البريد الإلكتروني"
+                  autoFocus
+                  required
+                />
+              </div>
             </div>
-          </div>
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="mt-2 rounded-xl bg-green-600 py-3 font-semibold text-white transition hover:bg-green-700 disabled:opacity-60"
-          >
-            {submitting ? "جارِ التحقق..." : "تسجيل الدخول"}
-          </button>
-        </form>
+            {/* Password */}
+            <div>
+              <label className="mb-2 block text-sm font-bold text-[#4A1821]">
+                كلمة المرور
+              </label>
+
+              <div className="relative">
+                <FaLock className="absolute right-4 top-1/2 -translate-y-1/2 text-[#A83F55]" />
+
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] py-3.5 pl-4 pr-11 text-sm text-[#4A1821] outline-none transition-all placeholder:text-[#B3A4A6] focus:border-[#A83F55] focus:bg-white focus:ring-4 focus:ring-[#F2E4E1]"
+                  placeholder="كلمة المرور"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={submitting}
+              className="group mt-2 flex w-full items-center justify-center gap-3 rounded-2xl bg-[#641F2B] py-4 text-sm font-bold text-white shadow-[0_12px_30px_rgba(100,31,43,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#4A1821] hover:shadow-[0_18px_38px_rgba(100,31,43,0.24)] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {submitting ? (
+                "جارِ التحقق..."
+              ) : (
+                <>
+                  تسجيل الدخول
+                  <FaArrowLeft className="text-xs transition-transform duration-300 group-hover:-translate-x-1" />
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Security note */}
+          <div className="mt-6 flex items-center justify-center gap-2 border-t border-[#E8D9D6] pt-5 text-xs text-[#806D70]">
+            <FaShieldAlt className="text-[#7A8B43]" />
+            <span>دخول آمن ومخصص لإدارة متجر سهرة</span>
+          </div>
+        </div>
+
+        <p className="mt-6 text-center text-xs text-[#806D70]">
+          © 2026 سهرة — لوحة الإدارة
+        </p>
       </div>
-    </div>
+    </main>
   );
 }
 

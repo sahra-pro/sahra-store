@@ -1,9 +1,10 @@
+
 import { useEffect, useState } from "react";
 
 import { CartContext } from "./cart-context-instance";
 import { useStore } from "../hooks/useStore";
 
-const CART_KEY = "shahdan_cart";
+const CART_KEY = "sahra_cart";
 
 function loadCart() {
   try {
@@ -115,7 +116,8 @@ export function CartProvider({ children }) {
   );
 
   const cartTotal = cartItems.reduce(
-    (sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 0),
+    (sum, item) =>
+      sum + Number(item.price || 0) * Number(item.quantity || 0),
     0,
   );
 
@@ -131,3 +133,4 @@ export function CartProvider({ children }) {
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
+

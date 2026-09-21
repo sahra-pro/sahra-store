@@ -1,7 +1,12 @@
-const CLOUD_NAME = "shahdan-store";
-const UPLOAD_PRESET = "shahdan_products";
+
+const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
 export async function uploadToCloudinary(file) {
+  if (!CLOUD_NAME || !UPLOAD_PRESET) {
+    throw new Error("لم يتم إعداد بيانات Cloudinary الخاصة بسهرة بعد");
+  }
+
   const formData = new FormData();
 
   formData.append("file", file);
@@ -17,10 +22,11 @@ export async function uploadToCloudinary(file) {
 
   const data = await response.json();
 
-  if (!data.secure_url) {
+  if (!response.ok || !data.secure_url) {
     console.error("Cloudinary upload error:", data);
     throw new Error("فشل رفع الصورة");
   }
 
   return data.secure_url;
 }
+

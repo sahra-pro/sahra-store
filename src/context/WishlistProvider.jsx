@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { WishlistContext } from "./WishlistContext";
 
-const STORAGE_KEY = "shahdan_wishlist";
+const STORAGE_KEY = "sahra_wishlist";
 
 function WishlistProvider({ children }) {
   const [wishlistItems, setWishlistItems] = useState(() => {

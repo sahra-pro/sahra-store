@@ -1,10 +1,11 @@
+
 import { useEffect, useState } from "react";
 
 import { WishlistContext } from "./wishlist-context-instance";
 
 import { useStore } from "../hooks/useStore";
 
-const WISHLIST_KEY = "shahdan_wishlist";
+const WISHLIST_KEY = "sahra_wishlist";
 
 function loadWishlist() {
   try {
@@ -69,3 +70,4 @@ export function WishlistProvider({ children }) {
     </WishlistContext.Provider>
   );
 }
+

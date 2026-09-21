@@ -10,7 +10,7 @@ export default function WhatsAppButton({ order }) {
     const message = `
 السلام عليكم ${order.customer?.name || ""}
 
-شكراً لطلبك من متجر شهدان ستور ⚡
+شكرًا لطلبك من سهرة 🤍
 
 تم استلام طلبك بنجاح.
 
@@ -57,7 +57,7 @@ ${order.customer?.address || ""}
 
 سيتم التواصل معك عند تجهيز الطلب وخروجه للتوصيل.
 
-شكراً لاختيارك متجر شهدان ستور ⚡
+شكرًا لاختيارك سهرة 🤍
 `;
 
     if (!phone) {
@@ -74,14 +74,7 @@ ${order.customer?.address || ""}
     <button
       type="button"
       onClick={sendWhatsApp}
-      className="
-        rounded-lg
-        bg-green-500
-        px-4
-        py-2
-        text-white
-        hover:bg-green-600
-      "
+      className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1ebe5d] hover:shadow-md"
     >
       💬 واتساب العميل
     </button>

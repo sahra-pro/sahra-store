@@ -1,6 +1,7 @@
+
 export const DEFAULT_SETTINGS = {
   // بيانات المتجر
-  storeName: "شهدان",
+  storeName: "سهرة",
   storeDescription: "مكملات غذائية ومنتجات لتعزيز الحيوية والطاقة",
   email: "",
   phone: "",
@@ -24,11 +25,8 @@ export const DEFAULT_SETTINGS = {
   // الشريط الإعلاني
   announcementBar: {
     enabled: true,
-
     interval: 4500,
-
-    backgroundColor: "#15803d",
-
+    backgroundColor: "#641F2B",
     textColor: "#ffffff",
 
     messages: [
@@ -41,26 +39,19 @@ export const DEFAULT_SETTINGS = {
   // إعدادات السلايدر الرئيسي
   heroSlider: {
     enabled: true,
-
     autoplay: true,
-
     autoplayDelay: 5000,
-
     showArrows: true,
-
     showDots: true,
-
     desktopHeight: 420,
-
     mobileHeight: 220,
-
     overlay: 0.35,
   },
 
   // المظهر
   theme: {
-    primaryColor: "#16a34a",
-    secondaryColor: "#14532d",
+    primaryColor: "#641F2B",
+    secondaryColor: "#A83F55",
     darkMode: false,
     borderRadius: 16,
     fontFamily: "Cairo",
@@ -71,7 +62,7 @@ export const DEFAULT_SETTINGS = {
   // الصفحة الرئيسية
   home: {
     showHero: true,
-    heroTitle: "مرحباً بكم في متجر شهدان",
+    heroTitle: "مرحباً بكم في سهرة",
     heroSubtitle: "مكملات غذائية ومنتجات مختارة لتعزيز الحيوية والطاقة",
     heroImage: "",
 
@@ -192,3 +183,4 @@ export const DEFAULT_SETTINGS = {
     returnPolicy: "",
   },
 };
+

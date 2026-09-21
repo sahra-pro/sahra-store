@@ -30,7 +30,6 @@ export function downloadProductTemplate(categories = []) {
   const workbook = XLSX.utils.book_new();
 
   XLSX.utils.book_append_sheet(workbook, worksheet, "Products");
-
   XLSX.utils.book_append_sheet(workbook, categorySheet, "Categories");
 
   // جعل ورقة التصنيفات مخفية
@@ -51,5 +50,5 @@ export function downloadProductTemplate(categories = []) {
     },
   ];
 
-  XLSX.writeFile(workbook, "shahdan-products-template.xlsx");
+  XLSX.writeFile(workbook, "sahra-products-template.xlsx");
 }

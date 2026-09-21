@@ -1,6 +1,15 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaEdit, FaTrash, FaSearch } from "react-icons/fa";
+import {
+  FaEdit,
+  FaTrash,
+  FaSearch,
+  FaPlus,
+  FaFileExcel,
+  FaUpload,
+  FaBoxOpen,
+  FaTags
+} from "react-icons/fa";
 
 import AdminLayout from "../components/layout/AdminLayout";
 
@@ -74,214 +83,371 @@ function Products() {
 
   return (
     <AdminLayout>
-      <div className="mt-8 rounded-2xl bg-white shadow">
-        {/* Header */}
-        <div className="flex flex-col gap-4 border-b p-6 lg:flex-row lg:items-center lg:justify-between">
-          <h2 className="text-3xl font-bold">إدارة المنتجات</h2>
+      <main dir="rtl" className="min-h-full bg-[#FBF6F1] text-[#4A1821]">
+        {/* Page header */}
+        <section className="mb-6 overflow-hidden rounded-[30px] bg-[#641F2B] shadow-[0_18px_50px_rgba(100,31,43,0.14)]">
+          <div className="relative px-5 py-7 md:px-7 md:py-8">
+            <div className="pointer-events-none absolute -left-16 -top-20 h-52 w-52 rounded-full bg-white/5" />
+            <div className="pointer-events-none absolute -bottom-28 right-20 h-64 w-64 rounded-full bg-[#A83F55]/20" />
 
-          <div className="flex flex-col gap-3 md:flex-row md:flex-wrap">
-            {/* البحث */}
-            <div className="relative">
-              <FaSearch className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" />
+            <div className="relative z-10 flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
+              <div>
+                <div className="mb-2 flex items-center gap-2 text-xs font-bold tracking-[0.25em] text-[#F2E4E1]">
+                  <FaBoxOpen />
+                  SAHRA ADMIN
+                </div>
+
+                <h1 className="text-3xl font-black text-white md:text-4xl">
+                  إدارة المنتجات
+                </h1>
+
+                <p className="mt-2 max-w-xl text-sm leading-7 text-white/65">
+                  إدارة المنتجات والأسعار والمخزون والتصنيفات من مكان واحد.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 backdrop-blur-sm">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-[#F2E4E1]">
+                  <FaBoxOpen />
+                </div>
+
+                <div>
+                  <p className="text-xs text-white/55">إجمالي المنتجات</p>
+
+                  <p className="mt-0.5 text-xl font-black text-white">
+                    {products.length.toLocaleString("ar-SA")}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Controls */}
+        <section className="mb-6 rounded-[28px] border border-[#E8D9D6] bg-white p-4 shadow-[0_10px_35px_rgba(100,31,43,0.05)] md:p-5">
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+            {/* Search */}
+            <div className="relative w-full xl:max-w-md">
+              <FaSearch className="absolute right-4 top-1/2 -translate-y-1/2 text-[#A83F55]" />
 
               <input
                 type="text"
-                placeholder="ابحث عن منتج..."
+                placeholder="ابحث باسم المنتج أو التصنيف..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-72 rounded-xl border py-3 pr-11 pl-4 outline-none focus:border-green-500"
+                className="w-full rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] py-3.5 pl-4 pr-11 text-sm text-[#4A1821] outline-none transition-all placeholder:text-[#B3A4A6] focus:border-[#A83F55] focus:bg-white focus:ring-4 focus:ring-[#F2E4E1]"
               />
             </div>
 
-            {/* إضافة منتج */}
-            <button
-              type="button"
-              onClick={() => navigate("/admin/products/add")}
-              className="rounded-xl bg-green-600 px-6 py-3 text-white transition hover:bg-green-700"
-            >
-              + إضافة منتج
-            </button>
+            {/* Actions */}
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              {/* Add */}
+              <button
+                type="button"
+                onClick={() => navigate("/admin/products/add")}
+                className="flex items-center justify-center gap-2 rounded-2xl bg-[#641F2B] px-5 py-3.5 text-sm font-bold text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#4A1821] hover:shadow-md"
+              >
+                <FaPlus className="text-xs" />
+                إضافة منتج
+              </button>
 
-            {/* تحميل قالب Excel */}
-            <button
-              type="button"
-              onClick={() => downloadProductTemplate(categories)}
-              className="rounded-xl bg-blue-600 px-6 py-3 text-white transition hover:bg-blue-700"
-            >
-              📥 تحميل قالب Excel
-            </button>
+              {/* Download Excel */}
+              <button
+                type="button"
+                onClick={() => downloadProductTemplate(categories)}
+                className="flex items-center justify-center gap-2 rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] px-5 py-3.5 text-sm font-bold text-[#641F2B] transition-all duration-300 hover:border-[#D8B8B9] hover:bg-[#F7EEE9]"
+              >
+                <FaFileExcel className="text-[#7A8B43]" />
+                قالب Excel
+              </button>
 
-            {/* رفع Excel */}
-            <label
-              className={`cursor-pointer rounded-xl px-6 py-3 text-white transition ${
-                uploading
-                  ? "cursor-not-allowed bg-gray-400"
-                  : "bg-purple-600 hover:bg-purple-700"
-              }`}
-            >
-              {uploading ? "⏳ جاري الرفع..." : "📤 رفع Excel"}
+              {/* Upload Excel */}
+              <label
+                className={`flex items-center justify-center gap-2 rounded-2xl px-5 py-3.5 text-sm font-bold transition-all duration-300 ${
+                  uploading
+                    ? "cursor-not-allowed bg-[#D5CCCE] text-white"
+                    : "cursor-pointer bg-[#F2E4E1] text-[#641F2B] hover:bg-[#EBD9D8]"
+                }`}
+              >
+                <FaUpload className={uploading ? "" : "text-[#A83F55]"} />
 
-              <input
-                type="file"
-                accept=".xlsx,.xls"
-                hidden
-                disabled={uploading}
-                onChange={handleExcelUpload}
-              />
-            </label>
+                {uploading ? "جاري الرفع..." : "رفع Excel"}
+
+                <input
+                  type="file"
+                  accept=".xlsx,.xls"
+                  hidden
+                  disabled={uploading}
+                  onChange={handleExcelUpload}
+                />
+              </label>
+            </div>
           </div>
-        </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="p-4 text-right">الصورة</th>
+          {/* Result count */}
+          <div className="mt-4 flex items-center justify-between border-t border-[#E8D9D6] pt-4">
+            <p className="text-xs font-semibold text-[#806D70]">
+              عرض{" "}
+              <span className="font-black text-[#641F2B]">
+                {filteredProducts.length.toLocaleString("ar-SA")}
+              </span>{" "}
+              من أصل{" "}
+              <span className="font-black text-[#641F2B]">
+                {products.length.toLocaleString("ar-SA")}
+              </span>{" "}
+              منتج
+            </p>
 
-                <th className="p-4 text-right">اسم المنتج</th>
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="text-xs font-bold text-[#A83F55] transition hover:text-[#641F2B]"
+              >
+                مسح البحث
+              </button>
+            )}
+          </div>
+        </section>
 
-                <th className="p-4 text-right">التصنيف</th>
+        {/* Products table */}
+        <section className="overflow-hidden rounded-[28px] border border-[#E8D9D6] bg-white shadow-[0_12px_40px_rgba(100,31,43,0.06)]">
+          <div className="border-b border-[#E8D9D6] px-5 py-5 md:px-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F2E4E1] text-[#641F2B]">
+                <FaBoxOpen />
+              </div>
 
-                <th className="p-4 text-right">السعر</th>
+              <div>
+                <h2 className="text-lg font-black text-[#4A1821]">
+                  قائمة المنتجات
+                </h2>
 
-                <th className="p-4 text-center">المخزون</th>
+                <p className="mt-0.5 text-xs text-[#806D70]">
+                  جميع المنتجات المضافة إلى المتجر
+                </p>
+              </div>
+            </div>
+          </div>
 
-                <th className="p-4 text-center">الحالة</th>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[900px]">
+              <thead>
+                <tr className="border-b border-[#E8D9D6] bg-[#FBF6F1]">
+                  <th className="px-5 py-4 text-right text-xs font-black text-[#806D70]">
+                    المنتج
+                  </th>
 
-                <th className="p-4 text-center">الإجراءات</th>
-              </tr>
-            </thead>
+                  <th className="px-5 py-4 text-right text-xs font-black text-[#806D70]">
+                    التصنيف
+                  </th>
 
-            <tbody>
-              {filteredProducts.length > 0 ? (
-                filteredProducts.map((product) => {
-                  const productCategories =
-                    Array.isArray(product.categories) &&
-                    product.categories.length
-                      ? product.categories
-                      : product.category
-                        ? [product.category]
-                        : [];
+                  <th className="px-5 py-4 text-right text-xs font-black text-[#806D70]">
+                    السعر
+                  </th>
 
-                  return (
-                    <tr
-                      key={product.id}
-                      className="border-t transition hover:bg-gray-50"
-                    >
-                      {/* الصورة */}
-                      <td className="p-4">
-                        {product.images?.[0] ? (
-                          <img
-                            src={product.images[0]}
-                            alt={product.name || "صورة المنتج"}
-                            className="h-20 w-20 rounded-xl object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-gray-100 text-xs text-gray-400">
-                            بدون صورة
+                  <th className="px-5 py-4 text-center text-xs font-black text-[#806D70]">
+                    المخزون
+                  </th>
+
+                  <th className="px-5 py-4 text-center text-xs font-black text-[#806D70]">
+                    الحالة
+                  </th>
+
+                  <th className="px-5 py-4 text-center text-xs font-black text-[#806D70]">
+                    الإجراءات
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {filteredProducts.length > 0 ? (
+                  filteredProducts.map((product) => {
+                    const productCategories =
+                      Array.isArray(product.categories) &&
+                      product.categories.length
+                        ? product.categories
+                        : product.category
+                          ? [product.category]
+                          : [];
+
+                    const stock = Number(product.stock || 0);
+
+                    return (
+                      <tr
+                        key={product.id}
+                        className="group border-b border-[#E8D9D6] transition-colors duration-200 last:border-b-0 hover:bg-[#FBF6F1]"
+                      >
+                        {/* Product */}
+                        <td className="px-5 py-4">
+                          <div className="flex min-w-[260px] items-center gap-4">
+                            <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-[#E8D9D6] bg-[#F7EEE9]">
+                              {product.images?.[0] ? (
+                                <img
+                                  src={product.images[0]}
+                                  alt={product.name || "صورة المنتج"}
+                                  className="h-full w-full object-contain p-1 transition-transform duration-300 group-hover:scale-105"
+                                  loading="lazy"
+                                />
+                              ) : (
+                                <div className="flex h-full w-full items-center justify-center text-[10px] font-semibold text-[#B3A4A6]">
+                                  بدون صورة
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="min-w-0">
+                              <p className="max-w-[300px] truncate text-sm font-black text-[#4A1821]">
+                                {product.name}
+                              </p>
+
+                              <p className="mt-1 text-[11px] text-[#806D70]">
+                                ID: {product.id}
+                              </p>
+                            </div>
                           </div>
-                        )}
-                      </td>
+                        </td>
 
-                      {/* الاسم */}
-                      <td className="p-4 font-semibold">{product.name}</td>
-
-                      {/* التصنيف */}
-                      <td className="p-4">
-                        <div className="flex flex-wrap gap-2">
-                          {productCategories.length > 0 ? (
-                            productCategories.map((category, index) => (
-                              <span
-                                key={`${product.id}-${index}`}
-                                className="rounded-full bg-green-100 px-3 py-1 text-xs text-green-700"
-                              >
-                                {category}
+                        {/* Categories */}
+                        <td className="px-5 py-4">
+                          <div className="flex max-w-[260px] flex-wrap gap-1.5">
+                            {productCategories.length > 0 ? (
+                              productCategories.map((category, index) => (
+                                <span
+                                  key={`${product.id}-${index}`}
+                                  className="inline-flex items-center gap-1 rounded-full bg-[#F2E4E1] px-2.5 py-1 text-[11px] font-bold text-[#641F2B]"
+                                >
+                                  <FaTags className="text-[9px] text-[#A83F55]" />
+                                  {category}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-xs text-[#B3A4A6]">
+                                بدون تصنيف
                               </span>
-                            ))
+                            )}
+                          </div>
+                        </td>
+
+                        {/* Price */}
+                        <td className="px-5 py-4">
+                          <span className="whitespace-nowrap text-sm font-black text-[#641F2B]">
+                            {Number(product.price || 0).toLocaleString("ar-SA")}{" "}
+                            <span className="text-[10px] text-[#806D70]">
+                              ر.س
+                            </span>
+                          </span>
+                        </td>
+
+                        {/* Stock */}
+                        <td className="px-5 py-4 text-center">
+                          <span
+                            className={`inline-flex min-w-12 items-center justify-center rounded-full px-3 py-1.5 text-xs font-black ${
+                              stock > 5
+                                ? "bg-[#EEF3E5] text-[#65752F]"
+                                : stock > 0
+                                  ? "bg-[#FFF5DC] text-[#9A6B28]"
+                                  : "bg-[#FDF0F1] text-[#A83F55]"
+                            }`}
+                          >
+                            {stock}
+                          </span>
+                        </td>
+
+                        {/* Status */}
+                        <td className="px-5 py-4 text-center">
+                          {stock > 5 ? (
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#EEF3E5] px-3 py-1.5 text-[11px] font-bold text-[#65752F]">
+                              <span className="h-1.5 w-1.5 rounded-full bg-[#7A8B43]" />
+                              متوفر
+                            </span>
+                          ) : stock > 0 ? (
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FFF5DC] px-3 py-1.5 text-[11px] font-bold text-[#9A6B28]">
+                              <span className="h-1.5 w-1.5 rounded-full bg-[#D49B35]" />
+                              مخزون منخفض
+                            </span>
                           ) : (
-                            <span className="text-sm text-gray-400">
-                              بدون تصنيف
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FDF0F1] px-3 py-1.5 text-[11px] font-bold text-[#A83F55]">
+                              <span className="h-1.5 w-1.5 rounded-full bg-[#A83F55]" />
+                              غير متوفر
                             </span>
                           )}
+                        </td>
+
+                        {/* Actions */}
+                        <td className="px-5 py-4">
+                          <div className="flex justify-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                navigate(`/admin/products/edit/${product.id}`)
+                              }
+                              className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F2E4E1] text-[#641F2B] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#641F2B] hover:text-white"
+                              title="تعديل المنتج"
+                            >
+                              <FaEdit className="text-sm" />
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(product.id)}
+                              className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#FDF0F1] text-[#A83F55] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#A83F55] hover:text-white"
+                              title="حذف المنتج"
+                            >
+                              <FaTrash className="text-sm" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="px-5 py-16 text-center">
+                      <div className="mx-auto flex max-w-sm flex-col items-center">
+                        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#F2E4E1] text-[#641F2B]">
+                          {search ? (
+                            <FaSearch className="text-xl" />
+                          ) : (
+                            <FaBoxOpen className="text-xl" />
+                          )}
                         </div>
-                      </td>
 
-                      {/* السعر */}
-                      <td className="p-4 font-semibold text-green-700">
-                        {product.price} ر.س
-                      </td>
+                        <h3 className="text-lg font-black text-[#4A1821]">
+                          {search
+                            ? "لم يتم العثور على نتائج"
+                            : "لا توجد منتجات حالياً"}
+                        </h3>
 
-                      {/* المخزون */}
-                      <td className="p-4 text-center">
-                        <span
-                          className={`rounded-full px-4 py-1 text-sm font-medium ${
-                            product.stock > 5
-                              ? "bg-green-100 text-green-700"
-                              : "bg-red-100 text-red-700"
-                          }`}
-                        >
-                          {product.stock ?? 0}
-                        </span>
-                      </td>
+                        <p className="mt-2 text-sm leading-7 text-[#806D70]">
+                          {search
+                            ? "جرّب البحث باستخدام اسم منتج أو تصنيف مختلف."
+                            : "ابدأ بإضافة أول منتج إلى متجر سهرة."}
+                        </p>
 
-                      {/* الحالة */}
-                      <td className="p-4 text-center">
-                        {product.stock > 5 ? (
-                          <span className="rounded-full bg-green-100 px-4 py-1 text-sm text-green-700">
-                            متوفر
-                          </span>
-                        ) : product.stock > 0 ? (
-                          <span className="rounded-full bg-yellow-100 px-4 py-1 text-sm text-yellow-700">
-                            مخزون منخفض
-                          </span>
-                        ) : (
-                          <span className="rounded-full bg-red-100 px-4 py-1 text-sm text-red-700">
-                            غير متوفر
-                          </span>
+                        {search && (
+                          <button
+                            type="button"
+                            onClick={() => setSearch("")}
+                            className="mt-5 rounded-xl bg-[#641F2B] px-5 py-2.5 text-xs font-bold text-white transition hover:bg-[#4A1821]"
+                          >
+                            مسح البحث
+                          </button>
                         )}
-                      </td>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
 
-                      {/* الإجراءات */}
-                      <td className="p-4">
-                        <div className="flex justify-center gap-3">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              navigate(`/admin/products/edit/${product.id}`)
-                            }
-                            className="rounded-lg bg-blue-500 p-3 text-white transition hover:bg-blue-600"
-                            title="تعديل المنتج"
-                          >
-                            <FaEdit />
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(product.id)}
-                            className="rounded-lg bg-red-500 p-3 text-white transition hover:bg-red-600"
-                            title="حذف المنتج"
-                          >
-                            <FaTrash />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan="7" className="py-10 text-center text-gray-500">
-                    {search
-                      ? "لا توجد منتجات مطابقة للبحث."
-                      : "لا توجد منتجات حاليًا."}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+          {/* Mobile hint */}
+          <div className="border-t border-[#E8D9D6] bg-[#FBF6F1] px-5 py-3 text-center text-[11px] text-[#806D70] lg:hidden">
+            اسحب الجدول أفقيًا لعرض جميع التفاصيل
+          </div>
+        </section>
+      </main>
     </AdminLayout>
   );
 }

@@ -1,8 +1,11 @@
+
 import { Helmet } from "react-helmet-async";
 
-const SITE_URL = "https://shahdanstore.com";
-const STORE_NAME = "شهدان ستور";
-const BRAND_NAME = "شهدان";
+// سيتم استبداله بدومين سهرة الحقيقي عند اعتماده
+const SITE_URL = "https://example.com";
+
+const STORE_NAME = "سهرة";
+const BRAND_NAME = "سهرة";
 
 function stripHtml(value = "") {
   return value
@@ -14,9 +17,7 @@ function stripHtml(value = "") {
 export default function SEO({ product }) {
   if (!product) return null;
 
-  const title =
-    product.seoTitle?.trim() ||
-    `${product.name} | ${STORE_NAME}`;
+  const title = product.seoTitle?.trim() || `${product.name} | ${STORE_NAME}`;
 
   const plainDescription = stripHtml(product.description || "");
 
@@ -37,7 +38,6 @@ export default function SEO({ product }) {
   const image = images[0];
 
   const price = Number(product.price || 0);
-
   const stock = Number(product.stock || 0);
 
   const category = product.category || product.categories?.[0] || "";
@@ -46,15 +46,14 @@ export default function SEO({ product }) {
     "@context": "https://schema.org",
 
     "@graph": [
-      // =========================
-      // Organization
-      // =========================
       {
         "@type": "Organization",
+
         "@id": `${SITE_URL}/#organization`,
 
         name: STORE_NAME,
-        alternateName: "SHAHDAN STORE",
+
+        alternateName: "SAHRA",
 
         url: SITE_URL,
 
@@ -68,9 +67,6 @@ export default function SEO({ product }) {
         image: `${SITE_URL}/logo.png`,
       },
 
-      // =========================
-      // Breadcrumb
-      // =========================
       {
         "@type": "BreadcrumbList",
 
@@ -113,9 +109,6 @@ export default function SEO({ product }) {
         ],
       },
 
-      // =========================
-      // Product
-      // =========================
       {
         "@type": "Product",
 
@@ -156,12 +149,13 @@ export default function SEO({ product }) {
               ? "https://schema.org/InStock"
               : "https://schema.org/OutOfStock",
 
-          itemCondition:
-            "https://schema.org/NewCondition",
+          itemCondition: "https://schema.org/NewCondition",
 
           seller: {
             "@type": "Organization",
+
             "@id": `${SITE_URL}/#organization`,
+
             name: STORE_NAME,
           },
         },
@@ -171,112 +165,46 @@ export default function SEO({ product }) {
 
   return (
     <Helmet>
-      {/* =========================
-          Basic SEO
-      ========================= */}
-
       <html lang="ar" dir="rtl" />
 
       <title>{title}</title>
 
-      <meta
-        name="description"
-        content={description}
-      />
+      <meta name="description" content={description} />
 
       <meta
         name="robots"
         content="index, follow, max-image-preview:large"
       />
 
-      <meta
-        name="author"
-        content={STORE_NAME}
-      />
+      <meta name="author" content={STORE_NAME} />
 
-      {/* Canonical */}
+      <link rel="canonical" href={url} />
 
-      <link
-        rel="canonical"
-        href={url}
-      />
+      <meta property="og:type" content="product" />
 
-      {/* =========================
-          Open Graph
-      ========================= */}
+      <meta property="og:site_name" content={STORE_NAME} />
 
-      <meta
-        property="og:type"
-        content="product"
-      />
+      <meta property="og:locale" content="ar_SA" />
 
-      <meta
-        property="og:site_name"
-        content={STORE_NAME}
-      />
+      <meta property="og:title" content={title} />
 
-      <meta
-        property="og:locale"
-        content="ar_SA"
-      />
+      <meta property="og:description" content={description} />
 
-      <meta
-        property="og:title"
-        content={title}
-      />
+      <meta property="og:url" content={url} />
 
-      <meta
-        property="og:description"
-        content={description}
-      />
+      <meta property="og:image" content={image} />
 
-      <meta
-        property="og:url"
-        content={url}
-      />
+      <meta property="og:image:secure_url" content={image} />
 
-      <meta
-        property="og:image"
-        content={image}
-      />
+      <meta property="og:image:type" content="image/png" />
 
-      <meta
-        property="og:image:secure_url"
-        content={image}
-      />
+      <meta name="twitter:card" content="summary_large_image" />
 
-      <meta
-        property="og:image:type"
-        content="image/png"
-      />
+      <meta name="twitter:title" content={title} />
 
-      {/* =========================
-          Twitter / X
-      ========================= */}
+      <meta name="twitter:description" content={description} />
 
-      <meta
-        name="twitter:card"
-        content="summary_large_image"
-      />
-
-      <meta
-        name="twitter:title"
-        content={title}
-      />
-
-      <meta
-        name="twitter:description"
-        content={description}
-      />
-
-      <meta
-        name="twitter:image"
-        content={image}
-      />
-
-      {/* =========================
-          Product Schema
-      ========================= */}
+      <meta name="twitter:image" content={image} />
 
       <script
         type="application/ld+json"

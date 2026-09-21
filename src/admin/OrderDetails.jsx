@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -10,6 +11,10 @@ import {
   FaBox,
   FaMoneyBillWave,
   FaExclamationTriangle,
+  FaShoppingBag,
+  FaCheckCircle,
+  FaClock,
+  FaTruck,
 } from "react-icons/fa";
 
 import AdminLayout from "../components/layout/AdminLayout";
@@ -20,13 +25,34 @@ import WhatsAppButton from "../components/admin/WhatsAppButton";
 import { useOrders } from "../hooks/useOrders";
 import { ORDER_STATUSES } from "../context/order-statuses";
 
-const STATUS_COLORS = {
-  pending: "bg-amber-100 text-amber-700",
-  processing: "bg-sky-100 text-sky-700",
-  shipped: "bg-violet-100 text-violet-700",
-  completed: "bg-emerald-100 text-emerald-700",
-  cancelled: "bg-rose-100 text-rose-700",
+const STATUS_STYLES = {
+  pending: {
+    className: "border-amber-200 bg-amber-50 text-amber-700",
+    icon: FaClock,
+  },
+  processing: {
+    className: "border-sky-200 bg-sky-50 text-sky-700",
+    icon: FaShoppingBag,
+  },
+  shipped: {
+    className: "border-violet-200 bg-violet-50 text-violet-700",
+    icon: FaTruck,
+  },
+  completed: {
+    className: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    icon: FaCheckCircle,
+  },
+  cancelled: {
+    className: "border-rose-200 bg-rose-50 text-rose-700",
+    icon: FaTrash,
+  },
 };
+
+const getStatusStyle = (status) =>
+  STATUS_STYLES[status] || {
+    className: "border-gray-200 bg-gray-50 text-gray-700",
+    icon: FaShoppingBag,
+  };
 
 export default function OrderDetails() {
   const { id } = useParams();
@@ -41,8 +67,27 @@ export default function OrderDetails() {
   if (!order) {
     return (
       <AdminLayout>
-        <div className="mt-10 rounded-3xl bg-white p-10 text-center shadow">
-          <h2 className="text-xl font-bold">الطلب غير موجود</h2>
+        <div className="mx-auto mt-10 max-w-3xl rounded-[32px] border border-[#E8D9D6] bg-white p-10 text-center shadow-[0_15px_45px_rgba(74,24,33,0.07)]">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#F2E4E1] text-2xl text-[#641F2B]">
+            <FaBox />
+          </div>
+
+          <h2 className="mt-5 text-2xl font-black text-[#4A1821]">
+            الطلب غير موجود
+          </h2>
+
+          <p className="mt-2 text-sm text-[#806D70]">
+            ربما تم حذف الطلب أو أن الرابط غير صحيح.
+          </p>
+
+          <button
+            type="button"
+            onClick={() => navigate("/admin/orders")}
+            className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-[#641F2B] px-6 py-3 font-bold text-white shadow-lg shadow-[#641F2B]/15 transition hover:-translate-y-0.5 hover:bg-[#4A1821]"
+          >
+            <FaArrowRight />
+            العودة للطلبات
+          </button>
         </div>
       </AdminLayout>
     );
@@ -52,6 +97,9 @@ export default function OrderDetails() {
     order.items?.reduce((sum, item) => sum + Number(item.quantity || 0), 0) ||
     0;
 
+  const statusStyle = getStatusStyle(order.status);
+  const StatusIcon = statusStyle.icon;
+
   const handleDelete = async () => {
     await deleteOrder(order.id);
     navigate("/admin/orders");
@@ -59,206 +107,345 @@ export default function OrderDetails() {
 
   return (
     <AdminLayout>
-      <button
-        type="button"
-        onClick={() => navigate("/admin/orders")}
-        className="mt-6 flex items-center gap-2 text-gray-600 transition hover:text-green-600"
-      >
-        <FaArrowRight />
-        العودة للطلبات
-      </button>
+      <div className="mx-auto max-w-[1600px] pb-10">
+        {/* Back */}
+        <button
+          type="button"
+          onClick={() => navigate("/admin/orders")}
+          className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-[#806D70] transition hover:text-[#641F2B]"
+        >
+          <FaArrowRight />
+          العودة إلى الطلبات
+        </button>
 
-      <div className="mt-6 rounded-3xl bg-white p-4 shadow md:p-6">
-        {/* Header */}
+        {/* Main Header */}
+        <div className="mt-5 overflow-hidden rounded-[32px] border border-[#E8D9D6] bg-white shadow-[0_18px_50px_rgba(74,24,33,0.07)]">
+          <div className="relative overflow-hidden bg-gradient-to-br from-[#641F2B] via-[#711F31] to-[#4A1821] px-5 py-7 text-white md:px-8 md:py-9">
+            <div className="pointer-events-none absolute -left-16 -top-20 h-56 w-56 rounded-full border border-white/10" />
+            <div className="pointer-events-none absolute -bottom-28 right-10 h-64 w-64 rounded-full bg-white/5" />
 
-        <div className="flex flex-col gap-6 border-b pb-6 xl:flex-row xl:items-center xl:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold md:text-3xl">
-              طلب #{order.orderNumber}
-            </h1>
+            <div className="relative flex flex-col gap-7 xl:flex-row xl:items-center xl:justify-between">
+              <div>
+                <div className="mb-3 flex items-center gap-2 text-xs font-bold text-white/65">
+                  <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1">
+                    SAHRA ADMIN
+                  </span>
 
-            <div className="mt-3 flex flex-wrap gap-4 text-sm text-gray-500">
-              <span className="flex items-center gap-2">
-                <FaCalendarAlt />
+                  <span>تفاصيل الطلب</span>
+                </div>
 
-                {order.createdAt?.toDate
-                  ? order.createdAt.toDate().toLocaleString("ar-SA")
-                  : "-"}
-              </span>
+                <h1 className="text-2xl font-black md:text-4xl">
+                  طلب #{order.orderNumber}
+                </h1>
 
-              <span className="flex items-center gap-2">
-                <FaBox />
-                {totalItems} منتجات
-              </span>
+                <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-white/70">
+                  <span className="flex items-center gap-2">
+                    <FaCalendarAlt />
+
+                    {order.createdAt?.toDate
+                      ? order.createdAt.toDate().toLocaleString("ar-SA")
+                      : "-"}
+                  </span>
+
+                  <span className="flex items-center gap-2">
+                    <FaBox />
+                    {totalItems} منتجات
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <div
+                  className={`flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm font-black ${statusStyle.className}`}
+                >
+                  <StatusIcon />
+
+                  <select
+                    value={order.status}
+                    onChange={(e) =>
+                      updateOrderStatus(order.id, e.target.value)
+                    }
+                    className="cursor-pointer bg-transparent font-black outline-none"
+                  >
+                    {Object.entries(ORDER_STATUSES).map(([key, label]) => (
+                      <option key={key} value={key}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <OrderInvoice order={order} />
+
+                <WhatsAppButton
+                  phone={order.customer?.phone}
+                  order={order}
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteModal(true)}
+                  className="flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-5 py-2.5 font-bold text-white transition hover:bg-rose-500"
+                >
+                  <FaTrash />
+                  حذف الطلب
+                </button>
+              </div>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
-            <select
-              value={order.status}
-              onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-              className={`rounded-full px-5 py-2 font-bold ${
-                STATUS_COLORS[order.status] || "bg-gray-100 text-gray-700"
-              }`}
-            >
-              {Object.entries(ORDER_STATUSES).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
+          {/* Order Stats */}
+          <div className="grid gap-px border-t border-[#E8D9D6] bg-[#E8D9D6] sm:grid-cols-2 lg:grid-cols-5">
+            <div className="bg-white p-5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F2E4E1] text-[#641F2B]">
+                  <FaBox />
+                </div>
 
-            <OrderInvoice order={order} />
+                <div>
+                  <p className="text-xs font-semibold text-[#806D70]">
+                    عدد المنتجات
+                  </p>
 
-            <WhatsAppButton phone={order.customer?.phone} order={order} />
+                  <p className="mt-1 text-2xl font-black text-[#4A1821]">
+                    {totalItems}
+                  </p>
+                </div>
+              </div>
+            </div>
 
-            <button
-              type="button"
-              onClick={() => setShowDeleteModal(true)}
-              className="flex items-center gap-2 rounded-xl bg-red-600 px-5 py-2 text-white transition hover:bg-red-700"
-            >
-              <FaTrash />
-              حذف الطلب
-            </button>
-          </div>
-        </div>
+            <div className="bg-white p-5">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`flex h-11 w-11 items-center justify-center rounded-2xl border ${statusStyle.className}`}
+                >
+                  <StatusIcon />
+                </div>
 
-        {/* Stats */}
+                <div>
+                  <p className="text-xs font-semibold text-[#806D70]">
+                    حالة الطلب
+                  </p>
 
-        <div className="mt-8 grid gap-4 md:grid-cols-5">
-          <div className="rounded-2xl bg-blue-50 p-5">
-            <p className="text-gray-500">عدد المنتجات</p>
+                  <p className="mt-1 font-black text-[#4A1821]">
+                    {ORDER_STATUSES[order.status] || order.status}
+                  </p>
+                </div>
+              </div>
+            </div>
 
-            <h3 className="mt-2 text-3xl font-bold">{totalItems}</h3>
-          </div>
+            <div className="bg-white p-5">
+              <p className="text-xs font-semibold text-[#806D70]">
+                إجمالي المنتجات
+              </p>
 
-          <div className="rounded-2xl bg-yellow-50 p-5">
-            <p className="text-gray-500">حالة الطلب</p>
+              <p className="mt-2 text-2xl font-black text-[#4A1821]">
+                {Number(order.subtotal ?? order.total ?? 0).toFixed(2)}
+                <span className="mr-1 text-sm font-bold text-[#806D70]">
+                  ر.س
+                </span>
+              </p>
+            </div>
 
-            <h3 className="mt-2 text-xl font-bold">
-              {ORDER_STATUSES[order.status] || order.status}
-            </h3>
-          </div>
+            <div className="bg-white p-5">
+              <p className="text-xs font-semibold text-[#806D70]">
+                الشحن
+              </p>
 
-          <div className="rounded-2xl bg-blue-50 p-5">
-            <p className="text-gray-500">إجمالي المنتجات</p>
+              <p
+                className={`mt-2 text-2xl font-black ${
+                  (order.shipping ?? 0) === 0
+                    ? "text-emerald-600"
+                    : "text-[#4A1821]"
+                }`}
+              >
+                {(order.shipping ?? 0) > 0
+                  ? Number(order.shipping).toFixed(2)
+                  : "مجاني"}
 
-            <h3 className="mt-2 text-3xl font-bold">
-              {Number(order.subtotal ?? order.total ?? 0).toFixed(2)} ر.س
-            </h3>
-          </div>
+                {(order.shipping ?? 0) > 0 && (
+                  <span className="mr-1 text-sm font-bold text-[#806D70]">
+                    ر.س
+                  </span>
+                )}
+              </p>
+            </div>
 
-          <div className="rounded-2xl bg-amber-50 p-5">
-            <p className="text-gray-500">الشحن</p>
+            <div className="bg-[#FBF6F1] p-5">
+              <p className="text-xs font-semibold text-[#806D70]">
+                الإجمالي النهائي
+              </p>
 
-            <h3 className="mt-2 text-3xl font-bold">
-              {(order.shipping ?? 0) > 0
-                ? `${Number(order.shipping).toFixed(2)} ر.س`
-                : "مجاني 🎉"}
-            </h3>
-          </div>
-
-          <div className="rounded-2xl bg-green-50 p-5">
-            <p className="text-gray-500">الإجمالي النهائي</p>
-
-            <h3 className="mt-2 text-3xl font-bold">
-              {Number(order.total || 0).toFixed(2)} ر.س
-            </h3>
+              <p className="mt-2 text-2xl font-black text-[#641F2B]">
+                {Number(order.total || 0).toFixed(2)}
+                <span className="mr-1 text-sm font-bold text-[#806D70]">
+                  ر.س
+                </span>
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Customer + Products */}
-
-        <div className="mt-8 grid gap-6 lg:grid-cols-3">
+        <div className="mt-6 grid gap-6 lg:grid-cols-3">
           {/* Customer */}
+          <div className="rounded-[30px] border border-[#E8D9D6] bg-white p-5 shadow-[0_15px_45px_rgba(74,24,33,0.05)] md:p-6">
+            <div className="mb-6 flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F2E4E1] text-[#641F2B]">
+                <FaUser />
+              </div>
 
-          <div className="rounded-3xl bg-gray-50 p-6 shadow-sm">
-            <h2 className="mb-5 text-lg font-bold">بيانات العميل</h2>
+              <div>
+                <h2 className="font-black text-[#4A1821]">
+                  بيانات العميل
+                </h2>
 
-            <div className="space-y-4">
-              <div className="rounded-xl bg-white p-4 shadow-sm">
-                <div className="flex items-center gap-3">
-                  <FaUser className="text-green-600" />
+                <p className="mt-0.5 text-xs text-[#806D70]">
+                  معلومات التواصل والتوصيل
+                </p>
+              </div>
+            </div>
 
-                  <div>
-                    <p className="text-xs text-gray-500">اسم العميل</p>
+            <div className="space-y-3">
+              <div className="rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] p-4">
+                <div className="flex items-start gap-3">
+                  <FaUser className="mt-1 text-[#A83F55]" />
 
-                    <p className="font-semibold">
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-[#806D70]">
+                      اسم العميل
+                    </p>
+
+                    <p className="mt-1 break-words font-bold text-[#4A1821]">
                       {order.customer?.name || "-"}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-xl bg-white p-4 shadow-sm">
-                <div className="flex items-center gap-3">
-                  <FaPhone className="text-green-600" />
+              <div className="rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] p-4">
+                <div className="flex items-start gap-3">
+                  <FaPhone className="mt-1 text-[#A83F55]" />
 
-                  <div>
-                    <p className="text-xs text-gray-500">الهاتف</p>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-[#806D70]">
+                      رقم الهاتف
+                    </p>
 
-                    <p className="font-semibold">
+                    <p className="mt-1 break-words font-bold text-[#4A1821]">
                       {order.customer?.phone || "-"}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-xl bg-white p-4 shadow-sm">
-                <div className="flex items-center gap-3">
-                  <FaMapMarkerAlt className="text-green-600" />
+              <div className="rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] p-4">
+                <div className="flex items-start gap-3">
+                  <FaMapMarkerAlt className="mt-1 text-[#A83F55]" />
 
-                  <div>
-                    <p className="text-xs text-gray-500">المدينة</p>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-[#806D70]">
+                      المدينة
+                    </p>
 
-                    <p className="font-semibold">
+                    <p className="mt-1 break-words font-bold text-[#4A1821]">
                       {order.customer?.city || "-"}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-xl bg-white p-4 shadow-sm">
-                <p className="text-xs text-gray-500">العنوان</p>
+              <div className="rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] p-4">
+                <div className="flex items-start gap-3">
+                  <FaMapMarkerAlt className="mt-1 text-[#A83F55]" />
 
-                <p className="mt-2">{order.customer?.address || "-"}</p>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-[#806D70]">
+                      عنوان التوصيل
+                    </p>
+
+                    <p className="mt-1 break-words leading-7 text-[#4A1821]">
+                      {order.customer?.address || "-"}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Products */}
+          <div className="rounded-[30px] border border-[#E8D9D6] bg-white p-5 shadow-[0_15px_45px_rgba(74,24,33,0.05)] md:p-6 lg:col-span-2">
+            <div className="mb-6 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F2E4E1] text-[#641F2B]">
+                  <FaShoppingBag />
+                </div>
 
-          <div className="rounded-3xl bg-gray-50 p-6 lg:col-span-2">
-            <h2 className="mb-5 text-lg font-bold">المنتجات</h2>
+                <div>
+                  <h2 className="font-black text-[#4A1821]">
+                    منتجات الطلب
+                  </h2>
 
-            <div className="space-y-4">
+                  <p className="mt-0.5 text-xs text-[#806D70]">
+                    {totalItems} قطعة ضمن هذا الطلب
+                  </p>
+                </div>
+              </div>
+
+              <span className="hidden rounded-full bg-[#FBF6F1] px-4 py-2 text-xs font-bold text-[#641F2B] sm:block">
+                {order.items?.length || 0} منتجات
+              </span>
+            </div>
+
+            <div className="space-y-3">
               {order.items?.map((item, index) => (
                 <div
                   key={item.id || `${item.name}-${index}`}
-                  className="rounded-2xl bg-white p-4 shadow-sm"
+                  className="group rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] p-4 transition hover:border-[#A83F55]/40 hover:shadow-md"
                 >
                   <div className="flex gap-4">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="h-20 w-20 rounded-xl object-cover"
-                    />
+                    <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl bg-white ring-1 ring-[#E8D9D6]">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                      />
+                    </div>
 
-                    <div className="flex-1">
-                      <h3 className="font-bold">{item.name}</h3>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="line-clamp-2 font-black text-[#4A1821]">
+                        {item.name}
+                      </h3>
 
-                      <div className="mt-3 space-y-1 text-sm text-gray-500">
-                        <p>السعر: {item.price} ر.س</p>
+                      <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm text-[#806D70]">
+                        <span>
+                          السعر:{" "}
+                          <strong className="text-[#4A1821]">
+                            {Number(item.price || 0).toFixed(2)} ر.س
+                          </strong>
+                        </span>
 
-                        <p>الكمية: {item.quantity}</p>
+                        <span>
+                          الكمية:{" "}
+                          <strong className="text-[#4A1821]">
+                            {item.quantity}
+                          </strong>
+                        </span>
                       </div>
 
-                      <p className="mt-3 font-bold text-green-700">
-                        {(
-                          Number(item.price || 0) * Number(item.quantity || 0)
-                        ).toFixed(2)}{" "}
-                        ر.س
-                      </p>
+                      <div className="mt-3 flex items-center justify-between gap-3">
+                        <span className="text-xs font-semibold text-[#806D70]">
+                          إجمالي المنتج
+                        </span>
+
+                        <span className="font-black text-[#641F2B]">
+                          {(
+                            Number(item.price || 0) *
+                            Number(item.quantity || 0)
+                          ).toFixed(2)}{" "}
+                          ر.س
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -268,108 +455,174 @@ export default function OrderDetails() {
         </div>
 
         {/* Total Summary */}
+        <div className="mt-6 overflow-hidden rounded-[30px] border border-[#E8D9D6] bg-white shadow-[0_15px_45px_rgba(74,24,33,0.05)]">
+          <div className="border-b border-[#E8D9D6] bg-[#FBF6F1] px-5 py-5 md:px-7">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#641F2B] text-white">
+                <FaMoneyBillWave />
+              </div>
 
-        <div className="mt-8 rounded-3xl bg-gradient-to-r from-green-50 to-emerald-50 p-6">
-          <div className="mb-5 flex items-center gap-3 text-xl font-bold">
-            <FaMoneyBillWave className="text-green-600" />
-            ملخص المبلغ
+              <div>
+                <h2 className="font-black text-[#4A1821]">
+                  ملخص المبلغ
+                </h2>
+
+                <p className="mt-0.5 text-xs text-[#806D70]">
+                  تفاصيل القيمة النهائية للطلب
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex justify-between">
-              <span className="text-gray-500">إجمالي المنتجات</span>
+          <div className="px-5 py-6 md:px-7">
+            <div className="mx-auto max-w-3xl space-y-4">
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-sm text-[#806D70]">
+                  إجمالي المنتجات
+                </span>
 
-              <span className="font-bold">
-                {Number(order.subtotal ?? order.total ?? 0).toFixed(2)} ر.س
-              </span>
-            </div>
+                <span className="font-bold text-[#4A1821]">
+                  {Number(order.subtotal ?? order.total ?? 0).toFixed(2)} ر.س
+                </span>
+              </div>
 
-            <div className="flex justify-between">
-              <span className="text-gray-500">الشحن</span>
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-sm text-[#806D70]">الشحن</span>
 
-              <span
-                className={
-                  (order.shipping ?? 0) === 0
-                    ? "font-bold text-green-600"
-                    : "font-bold"
-                }
-              >
-                {(order.shipping ?? 0) > 0
-                  ? `${Number(order.shipping).toFixed(2)} ر.س`
-                  : "مجاني 🎉"}
-              </span>
-            </div>
+                <span
+                  className={
+                    (order.shipping ?? 0) === 0
+                      ? "font-bold text-emerald-600"
+                      : "font-bold text-[#4A1821]"
+                  }
+                >
+                  {(order.shipping ?? 0) > 0
+                    ? `${Number(order.shipping).toFixed(2)} ر.س`
+                    : "مجاني 🎉"}
+                </span>
+              </div>
 
-            <div className="flex justify-between border-t pt-4 text-2xl font-bold">
-              <span>الإجمالي النهائي</span>
+              <div className="border-t border-[#E8D9D6] pt-5">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-lg font-black text-[#4A1821]">
+                    الإجمالي النهائي
+                  </span>
 
-              <span className="text-green-700">
-                {Number(order.total || 0).toFixed(2)} ر.س
-              </span>
+                  <span className="text-2xl font-black text-[#641F2B] md:text-3xl">
+                    {Number(order.total || 0).toFixed(2)} ر.س
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         {/* History */}
+        <div className="mt-6 rounded-[30px] border border-[#E8D9D6] bg-white p-5 shadow-[0_15px_45px_rgba(74,24,33,0.05)] md:p-7">
+          <div className="mb-7 flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F2E4E1] text-[#641F2B]">
+              <FaClock />
+            </div>
 
-        <div className="mt-8 rounded-3xl bg-white p-6 shadow">
-          <h2 className="mb-6 text-lg font-bold">سجل الطلب</h2>
+            <div>
+              <h2 className="font-black text-[#4A1821]">
+                سجل الطلب
+              </h2>
 
-          <div className="space-y-5">
-            {order.history?.length > 0 ? (
-              [...order.history].reverse().map((item, index) => (
-                <div key={index} className="flex gap-4">
-                  <div className="mt-1 h-4 w-4 rounded-full bg-green-600" />
-
-                  <div>
-                    <p className="font-bold">
-                      {ORDER_STATUSES[item.status] || item.status}
-                    </p>
-
-                    <p className="text-sm text-gray-500">
-                      {item.date
-                        ? new Date(item.date).toLocaleString("ar-SA")
-                        : "-"}
-                    </p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-500">لا يوجد سجل</p>
-            )}
+              <p className="mt-0.5 text-xs text-[#806D70]">
+                التسلسل الزمني لتحديثات حالة الطلب
+              </p>
+            </div>
           </div>
+
+          {order.history?.length > 0 ? (
+            <div className="relative mr-2 space-y-6 border-r-2 border-[#E8D9D6] pr-7">
+              {[...order.history].reverse().map((item, index) => {
+                const historyStyle = getStatusStyle(item.status);
+                const HistoryIcon = historyStyle.icon;
+
+                return (
+                  <div key={index} className="relative">
+                    <div
+                      className={`absolute -right-[41px] top-0 flex h-7 w-7 items-center justify-center rounded-full border-4 border-white text-[10px] ${historyStyle.className}`}
+                    >
+                      <HistoryIcon />
+                    </div>
+
+                    <div className="rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <p className="font-black text-[#4A1821]">
+                          {ORDER_STATUSES[item.status] || item.status}
+                        </p>
+
+                        <p className="text-xs font-semibold text-[#806D70]">
+                          {item.date
+                            ? new Date(item.date).toLocaleString("ar-SA")
+                            : "-"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-[#E8D9D6] bg-[#FBF6F1] p-8 text-center">
+              <FaClock className="mx-auto text-2xl text-[#A83F55]" />
+
+              <p className="mt-3 text-sm font-semibold text-[#806D70]">
+                لا يوجد سجل لهذا الطلب حتى الآن
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Delete Modal */}
-
       {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-5">
-          <div className="w-full max-w-md rounded-[30px] bg-white p-8 text-center shadow-2xl">
-            <FaExclamationTriangle className="mx-auto mb-4 text-5xl text-red-500" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#241015]/70 p-5 backdrop-blur-sm">
+          <div className="w-full max-w-md overflow-hidden rounded-[32px] border border-[#E8D9D6] bg-white shadow-2xl">
+            <div className="bg-gradient-to-br from-[#641F2B] to-[#4A1821] px-6 py-7 text-center text-white">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-3xl">
+                <FaExclamationTriangle />
+              </div>
 
-            <h2 className="text-xl font-bold">حذف الطلب؟</h2>
+              <h2 className="mt-4 text-2xl font-black">
+                حذف الطلب؟
+              </h2>
 
-            <p className="mt-3 text-gray-500">
-              هل أنت متأكد من حذف الطلب {order.orderNumber}؟
-            </p>
+              <p className="mt-2 text-sm text-white/70">
+                هذا الإجراء سيحذف الطلب من لوحة التحكم.
+              </p>
+            </div>
 
-            <div className="mt-6 flex gap-3">
-              <button
-                type="button"
-                onClick={() => setShowDeleteModal(false)}
-                className="flex-1 rounded-xl bg-gray-200 py-3 font-bold"
-              >
-                إلغاء
-              </button>
+            <div className="p-6 text-center">
+              <p className="text-sm leading-7 text-[#806D70]">
+                هل أنت متأكد من حذف الطلب{" "}
+                <strong className="text-[#4A1821]">
+                  #{order.orderNumber}
+                </strong>
+                ؟
+              </p>
 
-              <button
-                type="button"
-                onClick={handleDelete}
-                className="flex-1 rounded-xl bg-red-600 py-3 font-bold text-white"
-              >
-                حذف
-              </button>
+              <div className="mt-6 grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteModal(false)}
+                  className="rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] py-3 font-bold text-[#4A1821] transition hover:bg-[#F2E4E1]"
+                >
+                  إلغاء
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  className="flex items-center justify-center gap-2 rounded-2xl bg-rose-600 py-3 font-bold text-white transition hover:bg-rose-700"
+                >
+                  <FaTrash />
+                  حذف الطلب
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -377,3 +630,4 @@ export default function OrderDetails() {
     </AdminLayout>
   );
 }
+

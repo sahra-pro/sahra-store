@@ -3,7 +3,7 @@ import QRCode from "qrcode";
 export default function OrderInvoice({ order }) {
   const printInvoice = async () => {
     const qrText = `
-متجر شهدان ستور
+سهرة
 رقم الطلب: ${order.orderNumber}
 العميل: ${order.customer?.name}
 الجوال: ${order.customer?.phone}
@@ -23,7 +23,6 @@ ${order.total.toFixed(2)} ريال
     const height = 750;
 
     const left = window.screen.width / 2 - width / 2;
-
     const top = window.screen.height / 2 - height / 2;
 
     const invoiceWindow = window.open(
@@ -44,305 +43,522 @@ ${order.total.toFixed(2)} ريال
       return;
     }
 
+    const orderDate = order.createdAt?.toDate
+      ? order.createdAt.toDate().toLocaleString("ar-SA")
+      : order.date
+        ? new Date(order.date).toLocaleString("ar-SA")
+        : "-";
+
     invoiceWindow.document.write(`
+      <!DOCTYPE html>
 
-    <html dir="rtl">
+      <html dir="rtl">
 
-    <head>
+      <head>
 
-    <title>
-      فاتورة ${order.orderNumber}
-    </title>
+        <meta charset="UTF-8" />
 
-    <style>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0"
+        />
 
-    body {
-      font-family: Arial, sans-serif;
-      color: #222;
-      direction: rtl;
-      width: 80mm;
-      padding: 8px;
-      margin: 0 auto;
-    }
+        <title>
+          فاتورة ${order.orderNumber}
+        </title>
 
-    h1 {
-      text-align: center;
-      color: #15803d;
-      font-size: 22px;
-      margin-bottom: 15px;
-    }
+        <style>
 
-    .card {
-      border: 1px dashed #999;
-      border-radius: 8px;
-      padding: 8px;
-      margin-bottom: 10px;
-    }
-
-    .card h3 {
-      font-size: 16px;
-      margin: 5px 0 10px;
-    }
-
-    p {
-      margin: 5px 0;
-      font-size: 13px;
-    }
-
-    .product {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border-bottom: 1px dashed #ccc;
-      padding: 8px 0;
-    }
-
-    .product img {
-      width: 45px;
-      height: 45px;
-      object-fit: cover;
-      border-radius: 5px;
-    }
-
-    .total {
-      text-align: center;
-      font-size: 20px;
-      font-weight: bold;
-      color: #15803d;
-      margin-top: 15px;
-    }
-
-    .qr {
-      text-align: center;
-      margin-top: 15px;
-    }
-
-    .qr img {
-      width: 100px;
-      height: 100px;
-    }
-
-    @media print {
-
-      @page {
-        size: 100mm 150mm;
-        margin: 5mm;
-      }
-
-      body {
-        width: 80mm;
-        padding: 0;
-      }
-
-      button {
-        display: none;
-      }
-
-    }
-
-    </style>
-
-    </head>
-
-    <body>
-
-    <h1>
-      شهدان ستور ⚡
-    </h1>
-
-    <div class="card">
-
-      <h3>
-        بيانات الطلب
-      </h3>
-
-      <p>
-        رقم الطلب:
-        ${order.orderNumber}
-      </p>
-
-      <p>
-        التاريخ:
-        ${
-          order.createdAt?.toDate
-            ? order.createdAt.toDate().toLocaleString("ar-SA")
-            : order.date
-              ? new Date(order.date).toLocaleString("ar-SA")
-              : "-"
-        }
-      </p>
-
-      <p>
-        طريقة الدفع:
-        الدفع عند الاستلام
-      </p>
-
-    </div>
-
-    <div class="card">
-
-      <h3>
-        بيانات العميل
-      </h3>
-
-      <p>
-        الاسم:
-        ${order.customer?.name || "-"}
-      </p>
-
-      <p>
-        الجوال:
-        ${order.customer?.phone || "-"}
-      </p>
-
-      <p>
-        المدينة:
-        ${order.customer?.city || "-"}
-      </p>
-
-      <p>
-        العنوان:
-        ${order.customer?.address || "-"}
-      </p>
-
-    </div>
-
-    <div class="card">
-
-      <h3>
-        المنتجات
-      </h3>
-
-      ${
-        order.items
-          ?.map(
-            (item) => `
-
-        <div class="product">
-
-          ${
-            item.image
-              ? `<img src="${item.image}" alt="${item.name || "المنتج"}" />`
-              : ""
+          * {
+            box-sizing: border-box;
           }
 
-          <div>
+          body {
+            font-family: Arial, Tahoma, sans-serif;
+            color: #35151c;
+            direction: rtl;
+            width: 80mm;
+            padding: 8px;
+            margin: 0 auto;
+            background: #ffffff;
+          }
 
-            <strong>
-              ${item.name || "منتج"}
-            </strong>
+          .invoice {
+            width: 100%;
+          }
+
+          .brand {
+            text-align: center;
+            padding: 8px 0 14px;
+            border-bottom: 2px solid #641f2b;
+            margin-bottom: 12px;
+          }
+
+          .brand-name {
+            color: #641f2b;
+            font-size: 26px;
+            font-weight: 900;
+            margin: 0;
+          }
+
+          .brand-subtitle {
+            color: #8f3046;
+            font-size: 10px;
+            margin-top: 5px;
+            letter-spacing: 1px;
+          }
+
+          .invoice-title {
+            text-align: center;
+            margin: 12px 0;
+          }
+
+          .invoice-title h2 {
+            margin: 0;
+            font-size: 17px;
+            color: #35151c;
+          }
+
+          .invoice-title p {
+            margin: 5px 0 0;
+            font-size: 11px;
+            color: #806d70;
+          }
+
+          .card {
+            border: 1px solid #e8d9d6;
+            border-radius: 9px;
+            padding: 9px;
+            margin-bottom: 9px;
+          }
+
+          .card h3 {
+            color: #641f2b;
+            font-size: 14px;
+            margin: 0 0 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #f2e4e1;
+          }
+
+          .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+            margin: 5px 0;
+          }
+
+          .label {
+            color: #806d70;
+            font-size: 11px;
+          }
+
+          .value {
+            color: #35151c;
+            font-size: 11px;
+            font-weight: bold;
+            text-align: left;
+          }
+
+          .product {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 8px 0;
+            border-bottom: 1px dashed #e8d9d6;
+          }
+
+          .product:last-child {
+            border-bottom: none;
+          }
+
+          .product img {
+            width: 42px;
+            height: 42px;
+            object-fit: cover;
+            border-radius: 7px;
+            border: 1px solid #e8d9d6;
+            flex-shrink: 0;
+          }
+
+          .product-info {
+            flex: 1;
+            min-width: 0;
+          }
+
+          .product-name {
+            color: #35151c;
+            font-size: 11px;
+            font-weight: bold;
+            line-height: 1.5;
+          }
+
+          .product-meta {
+            color: #806d70;
+            font-size: 10px;
+            margin-top: 3px;
+          }
+
+          .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 0;
+            font-size: 11px;
+          }
+
+          .summary-label {
+            color: #806d70;
+          }
+
+          .summary-value {
+            color: #35151c;
+            font-weight: bold;
+          }
+
+          .divider {
+            border: none;
+            border-top: 1px dashed #d8c7c4;
+            margin: 8px 0;
+          }
+
+          .total {
+            margin-top: 9px;
+            padding: 11px;
+            border-radius: 8px;
+            background: #641f2b;
+            color: #ffffff;
+            text-align: center;
+          }
+
+          .total-label {
+            font-size: 10px;
+            opacity: 0.8;
+          }
+
+          .total-value {
+            margin-top: 4px;
+            font-size: 21px;
+            font-weight: 900;
+          }
+
+          .cod {
+            margin-top: 9px;
+            padding: 7px;
+            border-radius: 7px;
+            background: #f2e4e1;
+            color: #641f2b;
+            text-align: center;
+            font-size: 10px;
+            font-weight: bold;
+          }
+
+          .qr {
+            text-align: center;
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px dashed #e8d9d6;
+          }
+
+          .qr img {
+            width: 92px;
+            height: 92px;
+          }
+
+          .qr p {
+            margin: 6px 0 0;
+            color: #806d70;
+            font-size: 9px;
+          }
+
+          .footer {
+            text-align: center;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #e8d9d6;
+          }
+
+          .footer strong {
+            display: block;
+            color: #641f2b;
+            font-size: 11px;
+          }
+
+          .footer span {
+            display: block;
+            margin-top: 4px;
+            color: #9a898b;
+            font-size: 8px;
+          }
+
+          @media print {
+
+            @page {
+              size: 100mm 150mm;
+              margin: 5mm;
+            }
+
+            body {
+              width: 80mm;
+              padding: 0;
+            }
+
+            .no-print {
+              display: none !important;
+            }
+
+          }
+
+        </style>
+
+      </head>
+
+      <body>
+
+        <div class="invoice">
+
+          <div class="brand">
+            <h1 class="brand-name">
+              سهرة
+            </h1>
+
+            <div class="brand-subtitle">
+              SAHRA
+            </div>
+          </div>
+
+          <div class="invoice-title">
+            <h2>
+              فاتورة الطلب
+            </h2>
 
             <p>
-              الكمية:
-              ${item.quantity ?? 0}
+              رقم الطلب: ${order.orderNumber}
             </p>
+          </div>
+
+          <div class="card">
+
+            <h3>
+              بيانات الطلب
+            </h3>
+
+            <div class="row">
+              <span class="label">
+                رقم الطلب
+              </span>
+
+              <span class="value">
+                ${order.orderNumber || "-"}
+              </span>
+            </div>
+
+            <div class="row">
+              <span class="label">
+                التاريخ
+              </span>
+
+              <span class="value">
+                ${orderDate}
+              </span>
+            </div>
+
+            <div class="row">
+              <span class="label">
+                طريقة الدفع
+              </span>
+
+              <span class="value">
+                الدفع عند الاستلام
+              </span>
+            </div>
+
+          </div>
+
+          <div class="card">
+
+            <h3>
+              بيانات العميل
+            </h3>
+
+            <div class="row">
+              <span class="label">
+                الاسم
+              </span>
+
+              <span class="value">
+                ${order.customer?.name || "-"}
+              </span>
+            </div>
+
+            <div class="row">
+              <span class="label">
+                الجوال
+              </span>
+
+              <span class="value">
+                ${order.customer?.phone || "-"}
+              </span>
+            </div>
+
+            <div class="row">
+              <span class="label">
+                المدينة
+              </span>
+
+              <span class="value">
+                ${order.customer?.city || "-"}
+              </span>
+            </div>
+
+            <div class="row">
+              <span class="label">
+                العنوان
+              </span>
+
+              <span class="value">
+                ${order.customer?.address || "-"}
+              </span>
+            </div>
+
+          </div>
+
+          <div class="card">
+
+            <h3>
+              المنتجات
+            </h3>
+
+            ${
+              order.items
+                ?.map(
+                  (item) => `
+                  <div class="product">
+
+                    ${
+                      item.image
+                        ? `
+                          <img
+                            src="${item.image}"
+                            alt="${item.name || "المنتج"}"
+                          />
+                        `
+                        : ""
+                    }
+
+                    <div class="product-info">
+
+                      <div class="product-name">
+                        ${item.name || "منتج"}
+                      </div>
+
+                      <div class="product-meta">
+                        الكمية: ${item.quantity ?? 0}
+                      </div>
+
+                      <div class="product-meta">
+                        السعر: ${Number(item.price ?? 0).toFixed(2)} ريال
+                      </div>
+
+                    </div>
+
+                  </div>
+                `,
+                )
+                .join("") || "<p>لا توجد منتجات</p>"
+            }
+
+          </div>
+
+          <div class="card">
+
+            <h3>
+              ملخص المبلغ
+            </h3>
+
+            <div class="summary-row">
+              <span class="summary-label">
+                إجمالي المنتجات
+              </span>
+
+              <span class="summary-value">
+                ${Number(order.subtotal ?? order.total ?? 0).toFixed(2)}
+                ريال
+              </span>
+            </div>
+
+            <div class="summary-row">
+              <span class="summary-label">
+                الشحن
+              </span>
+
+              <span class="summary-value">
+                ${
+                  Number(order.shipping ?? 0) > 0
+                    ? `${Number(order.shipping).toFixed(2)} ريال`
+                    : "مجاني"
+                }
+              </span>
+            </div>
+
+            <hr class="divider" />
+
+            <div class="total">
+              <div class="total-label">
+                الإجمالي النهائي
+              </div>
+
+              <div class="total-value">
+                ${Number(order.total ?? 0).toFixed(2)}
+                ريال
+              </div>
+            </div>
+
+            <div class="cod">
+              الدفع عند الاستلام
+            </div>
+
+          </div>
+
+          <div class="qr">
+
+            <img
+              src="${qrImage}"
+              alt="QR"
+            />
 
             <p>
-              السعر:
-              ${Number(item.price ?? 0).toFixed(2)}
-              ريال
+              امسح رمز QR لعرض معلومات الطلب
             </p>
 
           </div>
 
+          <div class="footer">
+            <strong>
+              شكرًا لاختيارك سهرة
+            </strong>
+
+            <span>
+              جميع الحقوق محفوظة © 2026 سهرة
+            </span>
+          </div>
+
         </div>
 
-        `,
-          )
-          .join("") || "<p>لا توجد منتجات</p>"
-      }
+        <script>
 
-    </div>
+          window.onload = function () {
+            setTimeout(() => {
+              window.print();
+            }, 500);
+          };
 
-    <div class="card">
+        </script>
 
-      <h3>
-        ملخص المبلغ
-      </h3>
+      </body>
 
-      <p style="
-        display:flex;
-        justify-content:space-between;
-      ">
-
-        <span>
-          إجمالي المنتجات
-        </span>
-
-        <span>
-          ${(order.subtotal ?? order.total).toFixed(2)}
-          ريال
-        </span>
-
-      </p>
-
-      <p style="
-        display:flex;
-        justify-content:space-between;
-      ">
-
-        <span>
-          الشحن
-        </span>
-
-        <span>
-          ${
-            (order.shipping ?? 0) > 0
-              ? `${Number(order.shipping).toFixed(2)} ريال`
-              : "مجاني 🎉"
-          }
-        </span>
-
-      </p>
-
-      <hr style="
-        border:none;
-        border-top:1px dashed #ccc;
-        margin:10px 0;
-      ">
-
-      <div class="total">
-
-        الإجمالي النهائي
-
-        <br><br>
-
-        ${Number(order.total ?? 0).toFixed(2)}
-        ريال
-
-      </div>
-
-    </div>
-
-    <div class="qr">
-
-      <img
-        src="${qrImage}"
-        alt="QR"
-      />
-
-      <p>
-        امسح لعرض معلومات الطلب
-      </p>
-
-    </div>
-
-    <script>
-
-      window.onload = function () {
-
-        setTimeout(() => {
-          window.print();
-        }, 500);
-
-      };
-
-    </script>
-
-    </body>
-
-    </html>
-
+      </html>
     `);
 
     invoiceWindow.document.close();
@@ -352,16 +568,9 @@ ${order.total.toFixed(2)} ريال
     <button
       type="button"
       onClick={printInvoice}
-      className="
-        rounded-lg
-        bg-green-600
-        px-4
-        py-2
-        text-white
-        hover:bg-green-700
-      "
+      className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#641F2B] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#4A1821] hover:shadow-md"
     >
-      🧾 طباعة فاتورة
+      🧾 طباعة الفاتورة
     </button>
   );
 }

@@ -1,4 +1,3 @@
-
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   FaTachometerAlt,
@@ -9,7 +8,7 @@ import {
   FaCog,
   FaSignOutAlt,
   FaStar,
-  
+  FaTimes,
 } from "react-icons/fa";
 
 import { useAuth } from "../../hooks/useAuth";
@@ -69,116 +68,144 @@ function Sidebar({ newOrdersCount = 0, isOpen = false, onClose }) {
     <aside
       dir="rtl"
       className={`
-        fixed top-0 right-0 z-50
-        flex h-screen w-72 flex-col
-        overflow-y-auto
-        bg-[#30291f] text-white
-        shadow-[-10px_0_40px_rgba(48,41,31,0.18)]
-        transition-transform duration-300
+        fixed right-0 top-0 z-50
+        flex h-screen w-[280px] flex-col
+        border-l border-slate-200
+        bg-white
+        shadow-[-8px_0_30px_rgba(15,23,42,0.06)]
+        transition-transform duration-300 ease-out
         lg:translate-x-0
         ${isOpen ? "translate-x-0" : "translate-x-full"}
       `}
     >
-     
-{/* Brand Header */}
-<div className="relative overflow-hidden border-b border-white/10 px-6 py-7 text-center">
-  {/* Decorative circles */}
-  <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-[#b88a44]/10" />
-  <div className="pointer-events-none absolute -bottom-16 -left-10 h-32 w-32 rounded-full bg-[#c7a15a]/5" />
+      {/* Brand */}
+      <div className="relative border-b border-slate-100 px-5 py-5">
+        <div className="flex items-center justify-between">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#f2e4e1]">
+              <img
+                src="/logo.png"
+                alt="سهرة"
+                className="max-h-10 max-w-[44px] object-contain"
+              />
+            </div>
 
-  <div className="relative">
-    <div className="mx-auto flex h-20 items-center justify-center">
-      <img
-        src="/logo.png"
-        alt="شهدان ستور"
-        className="max-h-20 max-w-[190px] object-contain"
-      />
-    </div>
+            <div className="min-w-0">
+              <p className="truncate text-lg font-black tracking-tight text-[#641F2B]">
+                سهرة
+              </p>
 
-    <p className="mt-4 text-[10px] font-bold uppercase tracking-[0.3em] text-[#c7a15a]">
-      SHAHDAN
-    </p>
+              <p className="mt-0.5 text-[11px] font-medium text-slate-400">
+                إدارة المتجر
+              </p>
+            </div>
+          </div>
 
-    <div className="mx-auto mt-4 h-px w-16 bg-gradient-to-r from-transparent via-[#b88a44] to-transparent" />
+          {/* Mobile close */}
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="إغلاق القائمة"
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 lg:hidden"
+          >
+            <FaTimes />
+          </button>
+        </div>
+      </div>
 
-    <p className="mt-3 text-xs text-white/50">
-      لوحة التحكم
-    </p>
-  </div>
-</div>
+      {/* Store status */}
+      <div className="px-4 pt-5">
+        <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 px-3.5 py-3">
+          <div className="flex items-center gap-2.5">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+            </span>
 
+            <span className="text-xs font-semibold text-slate-600">
+              المتجر نشط
+            </span>
+          </div>
 
+          <span className="text-[10px] font-medium text-slate-400">SAHRA</span>
+        </div>
+      </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 py-5">
-        <p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-white/35">
-          الإدارة
+      <nav className="flex-1 overflow-y-auto px-4 py-5">
+        <p className="mb-3 px-2 text-[11px] font-bold text-slate-400">
+          القائمة الرئيسية
         </p>
 
-        {menu.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            onClick={onClose}
-            className={({ isActive }) =>
-              `group relative mb-2 flex items-center justify-between overflow-hidden rounded-xl px-4 py-3.5 text-sm font-semibold transition-all duration-300 ${
-                isActive
-                  ? "bg-gradient-to-l from-[#b88a44] to-[#8a642f] text-white shadow-lg shadow-black/10"
-                  : "text-white/65 hover:bg-white/[0.07] hover:text-white"
-              }`
-            }
-          >
-            {({ isActive }) => (
-              <>
-                {/* Active indicator */}
-                {isActive && (
-                  <span className="absolute right-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-l-full bg-[#f8e6b8]" />
-                )}
+        <div className="space-y-1">
+          {menu.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              onClick={onClose}
+              className={({ isActive }) =>
+                `group relative flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200 ${
+                  isActive
+                    ? "bg-[#f2e4e1] text-[#641F2B]"
+                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`flex h-9 w-9 items-center justify-center rounded-lg text-[15px] transition-colors ${
+                        isActive
+                          ? "bg-[#641F2B] text-white shadow-sm"
+                          : "bg-slate-100 text-slate-400 group-hover:bg-slate-200 group-hover:text-slate-600"
+                      }`}
+                    >
+                      {item.icon}
+                    </span>
 
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`flex h-9 w-9 items-center justify-center rounded-lg text-base transition-all duration-300 ${
-                      isActive
-                        ? "bg-white/15 text-[#f8e6b8]"
-                        : "bg-white/[0.05] text-[#c7a15a] group-hover:bg-[#b88a44]/10"
-                    }`}
-                  >
-                    {item.icon}
-                  </span>
+                    <span>{item.name}</span>
+                  </div>
 
-                  <span>{item.name}</span>
-                </div>
-
-                {item.badge > 0 && (
-                  <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-[#a94b43] px-2 text-[11px] font-black text-white shadow-sm">
-                    {item.badge}
-                  </span>
-                )}
-              </>
-            )}
-          </NavLink>
-        ))}
+                  {item.badge > 0 && (
+                    <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-[#A83F55] px-1.5 text-[10px] font-black text-white">
+                      {item.badge > 99 ? "99+" : item.badge}
+                    </span>
+                  )}
+                </>
+              )}
+            </NavLink>
+          ))}
+        </div>
       </nav>
 
-      {/* Bottom Brand Note */}
-      <div className="mx-4 mb-4 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-center">
-        <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#b88a44]">
-          SHAHDAN STORE
-        </p>
+      {/* Quick info */}
+      <div className="px-4 pb-4">
+        <div className="rounded-2xl border border-[#e8d9d6] bg-[#fbf6f1] p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-[#641F2B] shadow-sm">
+              <FaBoxOpen />
+            </div>
 
-        <p className="mt-1 text-[10px] text-white/35">
-          إدارة المتجر
-        </p>
+            <div>
+              <p className="text-xs font-bold text-slate-700">إدارة أسهل</p>
+
+              <p className="mt-0.5 text-[10px] text-slate-400">
+                تحكم كامل بمتجرك
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Logout */}
-      <div className="border-t border-white/10 p-4">
+      <div className="border-t border-slate-100 p-4">
         <button
           type="button"
           onClick={handleLogout}
-          className="group flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-semibold text-white/60 transition-all duration-300 hover:bg-[#a94b43]/15 hover:text-[#e7a09a]"
+          className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-500 transition-all duration-200 hover:bg-red-50 hover:text-red-600"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/[0.05] transition-colors group-hover:bg-[#a94b43]/15">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-400 transition-colors group-hover:bg-red-100 group-hover:text-red-500">
             <FaSignOutAlt />
           </span>
 
@@ -190,4 +217,3 @@ function Sidebar({ newOrdersCount = 0, isOpen = false, onClose }) {
 }
 
 export default Sidebar;
-

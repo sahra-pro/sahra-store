@@ -9,18 +9,33 @@ import {
   FaReceipt,
   FaPhoneAlt,
   FaCheckCircle,
+  FaShoppingBag,
+  FaCalendarAlt,
+  FaArrowLeft,
 } from "react-icons/fa";
 
 import { useOrders } from "../hooks/useOrders";
 import { ORDER_STATUSES } from "../context/order-statuses";
 
 const STATUS_COLORS = {
-  pending: "bg-[#f8e6b8] text-[#8a642f]",
-  processing: "bg-[#eee5d5] text-[#8a642f]",
-  shipped: "bg-[#e7dfd1] text-[#6f572e]",
-  completed: "bg-[#e7eadf] text-[#5f6b43]",
-  cancelled: "bg-[#f6e2df] text-[#a34f46]",
+  pending: "bg-[#FFF3D9] text-[#8A642F]",
+  processing: "bg-[#F2E4E1] text-[#8F3046]",
+  shipped: "bg-[#EEE3EA] text-[#641F2B]",
+  completed: "bg-[#E7EDE0] text-[#65723F]",
+  cancelled: "bg-[#F8E1E1] text-[#A34F46]",
 };
+
+function OrderStatus({ status }) {
+  const statusClass = STATUS_COLORS[status] || "bg-[#F2E4E1] text-[#641F2B]";
+
+  return (
+    <span
+      className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-bold ${statusClass}`}
+    >
+      {ORDER_STATUSES[status] || "غير محدد"}
+    </span>
+  );
+}
 
 function OrderCard({ order }) {
   const [expanded, setExpanded] = useState(false);
@@ -29,157 +44,216 @@ function OrderCard({ order }) {
   const subtotal = Number(order?.subtotal ?? order?.total ?? 0);
   const shipping = Number(order?.shipping || 0);
 
-  const statusClass =
-    STATUS_COLORS[order.status] || "bg-[#f8f3e8] text-[#5f574c]";
-
   return (
-    <div className="overflow-hidden rounded-[24px] border border-[#eadfca] bg-white shadow-[0_10px_35px_rgba(92,67,35,0.07)] transition-all hover:shadow-[0_16px_45px_rgba(92,67,35,0.11)]">
-      {/* ORDER HEADER */}
+    <article className="overflow-hidden rounded-[30px] border border-[#E8D9D6] bg-white shadow-[0_12px_45px_rgba(100,31,43,0.06)]">
+      {/* Main order row */}
       <button
         type="button"
         onClick={() => setExpanded((current) => !current)}
-        className="flex w-full items-center justify-between gap-3 p-4 text-right transition hover:bg-[#fdfbf7] md:p-5"
+        className="w-full text-right"
       >
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="hidden h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-[#f8f3e8] text-[#b88a44] sm:flex">
-            <FaReceipt />
-          </div>
+        <div className="grid gap-5 p-5 sm:p-6 md:grid-cols-[1fr_auto] md:items-center">
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#F2E4E1] text-[#641F2B]">
+              <FaReceipt className="text-lg" />
+            </div>
 
-          <div className="min-w-0">
-            <p className="truncate font-bold text-[#30291f]">
-              {order.orderNumber}
-            </p>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-bold text-[#A83F55]">
+                  رقم الطلب
+                </span>
 
-            <p className="mt-1 text-xs text-[#8a8175] md:text-sm">
-              {new Date(order.date).toLocaleDateString("ar-SA")}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 md:gap-4">
-          <span
-            className={`rounded-full px-2.5 py-1 text-[10px] font-bold md:px-3 md:py-1.5 md:text-xs ${statusClass}`}
-          >
-            {ORDER_STATUSES[order.status] || "غير محدد"}
-          </span>
-
-          <div className="text-left">
-            <p className="text-sm font-black text-[#30291f] md:text-base">
-              {total.toFixed(2)} ر.س
-            </p>
-
-            {shipping > 0 && (
-              <p className="hidden text-[10px] text-[#8a8175] sm:block">
-                شامل الشحن
-              </p>
-            )}
-          </div>
-
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f8f3e8] text-[#8a8175]">
-            <FaChevronDown
-              className={`text-xs transition-transform duration-300 ${
-                expanded ? "rotate-180 text-[#b88a44]" : ""
-              }`}
-            />
-          </div>
-        </div>
-      </button>
-
-      {/* ORDER DETAILS */}
-      {expanded && (
-        <div className="border-t border-[#eee5d5] bg-[#fdfbf7] p-4 md:p-5">
-          {/* ITEMS */}
-          <div className="flex flex-col gap-3">
-            {(order.items || []).map((item) => {
-              const itemPrice = Number(item.price || 0);
-              const quantity = Number(item.quantity || 0);
-
-              return (
-                <div
-                  key={item.id}
-                  className="flex items-center gap-3 rounded-2xl border border-[#eadfca] bg-white p-3"
-                >
-                  <img
-                    src={
-                      item.image ||
-                      item.images?.[0] ||
-                      "https://via.placeholder.com/100"
-                    }
-                    alt={item.name || "منتج شهدان"}
-                    className="h-14 w-14 rounded-xl border border-[#eadfca] object-cover md:h-16 md:w-16"
-                  />
-
-                  <div className="min-w-0 flex-1">
-                    <p className="line-clamp-2 text-sm font-semibold text-[#30291f]">
-                      {item.name}
-                    </p>
-
-                    <p className="mt-1 text-xs text-[#8a8175]">
-                      {quantity} × {itemPrice} ر.س
-                    </p>
-                  </div>
-
-                  <p className="whitespace-nowrap text-sm font-bold text-[#8a642f]">
-                    {(itemPrice * quantity).toFixed(2)} ر.س
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* SHIPPING INFORMATION */}
-          <div className="mt-4 rounded-2xl border border-[#eadfca] bg-white p-4 text-sm">
-            <div className="flex items-start gap-3">
-              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[#f8f3e8] text-[#b88a44]">
-                <FaMapMarkerAlt />
+                <span className="font-black text-[#4A1821]">
+                  #{order.orderNumber}
+                </span>
               </div>
 
-              <div>
-                <p className="font-bold text-[#30291f]">عنوان التوصيل</p>
+              <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-[#806D70]">
+                <span className="flex items-center gap-1.5">
+                  <FaCalendarAlt />
+                  {new Date(order.date).toLocaleDateString("ar-SA")}
+                </span>
 
-                <p className="mt-1 leading-6 text-[#8a8175]">
-                  {order.customer?.city || "—"}
-                  {" — "}
-                  {order.customer?.address || "—"}
-                </p>
+                <span className="h-1 w-1 rounded-full bg-[#D8C0C3]" />
+
+                <span>
+                  {(order.items || []).length}{" "}
+                  {(order.items || []).length === 1 ? "منتج" : "منتجات"}
+                </span>
               </div>
             </div>
           </div>
 
-          {/* TOTALS */}
-          <div className="mt-4 rounded-2xl border border-[#eadfca] bg-[#f8f3e8] p-4 text-sm text-[#5f574c]">
+          <div className="flex items-center justify-between gap-4 border-t border-[#F0E6E3] pt-4 md:min-w-[260px] md:border-0 md:pt-0">
+            <div>
+              <OrderStatus status={order.status} />
+
+              <p className="mt-2 text-lg font-black text-[#641F2B]">
+                {total.toFixed(2)} <span className="text-xs">ر.س</span>
+              </p>
+            </div>
+
+            <div
+              className={`flex h-10 w-10 items-center justify-center rounded-full border border-[#E8D9D6] text-[#806D70] transition-all duration-300 ${
+                expanded
+                  ? "rotate-180 border-[#D8B6B9] bg-[#F2E4E1] text-[#641F2B]"
+                  : "bg-[#FBF6F1]"
+              }`}
+            >
+              <FaChevronDown className="text-xs" />
+            </div>
+          </div>
+        </div>
+      </button>
+
+      {/* Details */}
+      {expanded && (
+        <div className="border-t border-[#F0E6E3] bg-[#FBF6F1] p-5 sm:p-6">
+          {/* Products */}
+          <div>
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#641F2B] text-white">
+                <FaShoppingBag className="text-xs" />
+              </div>
+
+              <div>
+                <h3 className="text-sm font-black text-[#4A1821]">المنتجات</h3>
+
+                <p className="mt-0.5 text-[11px] text-[#806D70]">
+                  المنتجات الموجودة في هذا الطلب
+                </p>
+              </div>
+            </div>
+
             <div className="space-y-3">
-              <div className="flex justify-between">
+              {(order.items || []).map((item) => {
+                const itemPrice = Number(item.price || 0);
+                const quantity = Number(item.quantity || 0);
+
+                return (
+                  <div
+                    key={item.id}
+                    className="flex items-center gap-3 rounded-2xl border border-[#E8D9D6] bg-white p-3 sm:gap-4 sm:p-4"
+                  >
+                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-[#E8D9D6] bg-[#FBF6F1] sm:h-20 sm:w-20">
+                      <img
+                        src={
+                          item.image || item.images?.[0] || "/placeholder.png"
+                        }
+                        alt={item.name || "منتج من سهرة"}
+                        className="h-full w-full object-contain"
+                      />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <p className="line-clamp-2 text-sm font-bold leading-6 text-[#4A1821]">
+                        {item.name}
+                      </p>
+
+                      <p className="mt-1 text-xs text-[#806D70]">
+                        الكمية {quantity} × {itemPrice} ر.س
+                      </p>
+                    </div>
+
+                    <div className="text-left">
+                      <p className="whitespace-nowrap text-sm font-black text-[#641F2B]">
+                        {(itemPrice * quantity).toFixed(2)}
+                      </p>
+
+                      <span className="text-[10px] text-[#806D70]">ر.س</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Delivery */}
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <div className="rounded-2xl border border-[#E8D9D6] bg-white p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F2E4E1] text-[#641F2B]">
+                  <FaMapMarkerAlt />
+                </div>
+
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-[#806D70]">
+                    عنوان التوصيل
+                  </p>
+
+                  <p className="mt-1 text-sm font-bold leading-6 text-[#4A1821]">
+                    {order.customer?.city || "—"}
+                    {" — "}
+                    {order.customer?.address || "—"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {order.customer?.phone && (
+              <div className="rounded-2xl border border-[#E8D9D6] bg-white p-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F2E4E1] text-[#641F2B]">
+                    <FaPhoneAlt />
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-bold text-[#806D70]">
+                      رقم الجوال
+                    </p>
+
+                    <p
+                      dir="ltr"
+                      className="mt-1 text-right text-sm font-bold text-[#4A1821]"
+                    >
+                      {order.customer.phone}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Totals */}
+          <div className="mt-6 rounded-2xl border border-[#E8D9D6] bg-white p-5">
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between gap-4 text-[#806D70]">
                 <span>إجمالي المنتجات</span>
-                <span className="font-semibold text-[#30291f]">
+
+                <span className="font-bold text-[#4A1821]">
                   {subtotal.toFixed(2)} ر.س
                 </span>
               </div>
 
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-4 text-[#806D70]">
                 <span>الشحن</span>
 
                 <span
                   className={
                     shipping === 0
-                      ? "font-bold text-[#8a642f]"
-                      : "font-semibold text-[#30291f]"
+                      ? "font-bold text-[#65723F]"
+                      : "font-bold text-[#4A1821]"
                   }
                 >
-                  {shipping > 0 ? `${shipping.toFixed(2)} ر.س` : "مجاني 🎉"}
+                  {shipping > 0 ? `${shipping.toFixed(2)} ر.س` : "مجاني"}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between border-t border-[#ddcfb7] pt-3 text-base font-black text-[#30291f]">
-                <span>الإجمالي</span>
+              <div className="flex items-center justify-between gap-4 border-t border-[#E8D9D6] pt-4">
+                <span className="font-black text-[#4A1821]">
+                  الإجمالي النهائي
+                </span>
 
-                <span className="text-[#b88a44]">{total.toFixed(2)} ر.س</span>
+                <span className="text-xl font-black text-[#641F2B]">
+                  {total.toFixed(2)} <span className="text-xs">ر.س</span>
+                </span>
               </div>
             </div>
           </div>
         </div>
       )}
-    </div>
+    </article>
   );
 }
 
@@ -214,170 +288,180 @@ export default function TrackOrder() {
   };
 
   return (
-    <section className="min-h-screen bg-gradient-to-b from-[#f8f3e8] via-white to-[#f8f3e8] py-10 md:py-16">
-      <div className="mx-auto max-w-4xl px-4 sm:px-6">
-        {/* =====================================================
-            PAGE HEADER
-        ====================================================== */}
-        <div className="mb-8 text-center md:mb-10">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-[#eadfca] bg-white text-[#b88a44] shadow-[0_8px_25px_rgba(184,138,68,0.15)]">
-            <FaTruck className="text-2xl" />
+    <section
+      dir="rtl"
+      className="min-h-screen bg-[#FBF6F1] py-8 sm:py-12 md:py-16"
+    >
+      <div className="mx-auto max-w-5xl px-4 sm:px-6">
+        {/* Intro */}
+        <div className="mb-8 overflow-hidden rounded-[34px] bg-[#4A1821] shadow-[0_20px_60px_rgba(74,24,33,0.14)]">
+          <div className="relative px-6 py-10 sm:px-10 sm:py-12 md:px-14">
+            <div className="absolute -left-20 -top-20 h-56 w-56 rounded-full border border-white/10" />
+            <div className="absolute -bottom-32 right-1/3 h-72 w-72 rounded-full border border-[#D49B35]/10" />
+
+            <div className="relative grid gap-8 md:grid-cols-[1fr_auto] md:items-center">
+              <div>
+                <p className="mb-3 text-xs font-bold tracking-[0.35em] text-[#E8C9CE]">
+                  SAHRA
+                </p>
+
+                <h1 className="text-3xl font-black leading-tight text-white sm:text-4xl md:text-5xl">
+                  أين وصل طلبك؟
+                </h1>
+
+                <p className="mt-4 max-w-xl text-sm leading-8 text-white/70 sm:text-base">
+                  أدخل رقم الطلب ورقم الجوال المستخدم عند الشراء، وسنساعدك في
+                  الوصول إلى تفاصيل طلبك وحالته.
+                </p>
+              </div>
+
+              <div className="hidden h-28 w-28 items-center justify-center rounded-[32px] border border-white/10 bg-white/[0.07] text-white/90 md:flex">
+                <FaTruck className="text-5xl" />
+              </div>
+            </div>
           </div>
-
-          <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-[#b88a44]">
-            شهدان ستور
-          </p>
-
-          <h1 className="text-3xl font-black text-[#30291f] md:text-5xl">
-            متابعة الطلب
-            <span className="mr-2 text-[#b88a44]">📦</span>
-          </h1>
-
-          <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-[#8a8175] md:text-base">
-            تابع حالة طلبك بسهولة باستخدام رقم الطلب ورقم الجوال، بدون الحاجة
-            إلى تسجيل الدخول.
-          </p>
         </div>
 
-        {/* =====================================================
-            SEARCH CARD
-        ====================================================== */}
-        <form
-          onSubmit={handleSearch}
-          className="mb-10 overflow-hidden rounded-[28px] border border-[#eadfca] bg-white shadow-[0_15px_45px_rgba(92,67,35,0.09)]"
-        >
-          <div className="border-b border-[#eee5d5] bg-[#fdfbf7] p-5 md:p-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#f8f3e8] text-[#b88a44]">
+        {/* Search */}
+        <div className="relative z-10 -mt-2 mb-10 px-0 sm:-mt-3 sm:px-6">
+          <form
+            onSubmit={handleSearch}
+            className="rounded-[30px] border border-[#E8D9D6] bg-white p-5 shadow-[0_18px_55px_rgba(100,31,43,0.09)] sm:p-7"
+          >
+            <div className="mb-6 flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#F2E4E1] text-[#641F2B]">
                 <FaSearch />
               </div>
 
               <div>
-                <h2 className="font-bold text-[#30291f]">البحث عن طلب</h2>
+                <h2 className="font-black text-[#4A1821]">البحث عن طلب</h2>
 
-                <p className="mt-1 text-xs text-[#8a8175]">
-                  أدخل بيانات الطلب لمعرفة حالته
+                <p className="mt-1 text-xs text-[#806D70]">
+                  نحتاج فقط إلى رقم الطلب ورقم الجوال.
                 </p>
               </div>
             </div>
-          </div>
 
-          <div className="p-5 md:p-6">
-            <div className="grid gap-4 sm:grid-cols-2">
-              {/* ORDER NUMBER */}
+            <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className="mb-2 block text-xs font-bold text-[#5f574c]">
+                <label className="mb-2 block text-xs font-bold text-[#5F5154]">
                   رقم الطلب
                 </label>
 
-                <input
-                  type="text"
-                  value={orderNumber}
-                  onChange={(e) => setOrderNumber(e.target.value)}
-                  placeholder="مثال: ORD-1001"
-                  className="w-full rounded-xl border border-[#eadfca] bg-[#fdfbf7] p-3.5 text-sm text-[#30291f] outline-none transition placeholder:text-[#aaa093] focus:border-[#b88a44] focus:bg-white focus:ring-4 focus:ring-[#b88a44]/10"
-                />
+                <div className="relative">
+                  <FaReceipt className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-[#A83F55]" />
+
+                  <input
+                    type="text"
+                    value={orderNumber}
+                    onChange={(e) => setOrderNumber(e.target.value)}
+                    placeholder="مثال: ORD-1001"
+                    className="w-full rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] py-4 pl-4 pr-11 text-sm text-[#4A1821] outline-none transition-all placeholder:text-[#A69A9C] focus:border-[#A83F55] focus:bg-white focus:ring-4 focus:ring-[#A83F55]/10"
+                  />
+                </div>
               </div>
 
-              {/* PHONE */}
               <div>
-                <label className="mb-2 block text-xs font-bold text-[#5f574c]">
+                <label className="mb-2 block text-xs font-bold text-[#5F5154]">
                   رقم الجوال
                 </label>
 
                 <div className="relative">
-                  <FaPhoneAlt className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-[#b88a44]" />
+                  <FaPhoneAlt className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-[#A83F55]" />
 
                   <input
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="رقم الجوال المستخدم بالطلب"
-                    className="w-full rounded-xl border border-[#eadfca] bg-[#fdfbf7] py-3.5 pl-3 pr-10 text-sm text-[#30291f] outline-none transition placeholder:text-[#aaa093] focus:border-[#b88a44] focus:bg-white focus:ring-4 focus:ring-[#b88a44]/10"
+                    className="w-full rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] py-4 pl-4 pr-11 text-sm text-[#4A1821] outline-none transition-all placeholder:text-[#A69A9C] focus:border-[#A83F55] focus:bg-white focus:ring-4 focus:ring-[#A83F55]/10"
                   />
                 </div>
               </div>
             </div>
 
-            {/* SEARCH BUTTON */}
             <button
               type="submit"
               disabled={searching}
-              className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#b88a44] to-[#9d7337] py-3.5 font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:from-[#9d7337] hover:to-[#8a642f] hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#641F2B] py-4 font-bold text-white shadow-[0_10px_25px_rgba(100,31,43,0.16)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#4A1821] hover:shadow-[0_14px_30px_rgba(100,31,43,0.2)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               <FaSearch />
 
-              {searching ? "جارِ البحث..." : "بحث عن الطلب"}
+              {searching ? "جارٍ البحث..." : "عرض حالة الطلب"}
             </button>
 
-            {/* NOT FOUND */}
             {searchResult === null && (
-              <div className="mt-5 rounded-xl border border-[#efd7d2] bg-[#fdf4f2] p-4 text-center text-sm text-[#a34f46]">
-                ما لقينا طلب مطابق لرقم الطلب والجوال المدخلين.
+              <div className="mt-5 rounded-2xl border border-[#F0D4D4] bg-[#FFF7F7] p-4 text-center text-sm text-[#A34F46]">
+                لم يتم العثور على طلب مطابق للبيانات المدخلة.
               </div>
             )}
 
-            {/* RESULT */}
             {searchResult && (
-              <div className="mt-6">
-                <div className="mb-3 flex items-center gap-2 text-sm font-bold text-[#8a642f]">
+              <div className="mt-7">
+                <div className="mb-4 flex items-center gap-2 text-sm font-bold text-[#65723F]">
                   <FaCheckCircle />
-                  تم العثور على الطلب
+                  تم العثور على طلبك
                 </div>
 
                 <OrderCard order={searchResult} />
               </div>
             )}
-          </div>
-        </form>
+          </form>
+        </div>
 
-        {/* =====================================================
-            SAVED ORDERS
-        ====================================================== */}
+        {/* Saved orders */}
         <div>
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-5 flex items-end justify-between gap-4">
             <div>
-              <h2 className="font-bold text-[#30291f] md:text-xl">
-                طلباتك من هذا الجهاز
+              <p className="mb-1 text-xs font-bold tracking-wider text-[#A83F55]">
+                سجل الطلبات
+              </p>
+
+              <h2 className="text-xl font-black text-[#4A1821] sm:text-2xl">
+                طلباتك المحفوظة
               </h2>
 
-              <p className="mt-1 text-xs text-[#8a8175]">
-                الطلبات التي تم حفظها على هذا الجهاز والمتصفح
+              <p className="mt-1.5 text-xs leading-6 text-[#806D70]">
+                الطلبات التي تم حفظها على هذا الجهاز والمتصفح.
               </p>
             </div>
 
-            <FaReceipt className="text-xl text-[#b88a44]" />
+            <div className="hidden h-12 w-12 items-center justify-center rounded-2xl bg-white text-[#641F2B] shadow-sm sm:flex">
+              <FaReceipt />
+            </div>
           </div>
 
-          {/* LOADING */}
           {myOrdersLoading ? (
-            <div className="rounded-[24px] border border-[#eadfca] bg-white p-12 text-center text-sm text-[#8a8175] shadow-sm">
-              <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-[#eadfca] border-t-[#b88a44]" />
-              جارٍ تحميل طلباتك...
+            <div className="rounded-[30px] border border-[#E8D9D6] bg-white p-12 text-center shadow-[0_10px_35px_rgba(100,31,43,0.05)]">
+              <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-[#E8D9D6] border-t-[#641F2B]" />
+
+              <p className="text-sm text-[#806D70]">جارٍ تحميل طلباتك...</p>
             </div>
           ) : myOrders.length === 0 ? (
-            /* EMPTY */
-            <div className="rounded-[24px] border border-[#eadfca] bg-white p-10 text-center shadow-[0_10px_35px_rgba(92,67,35,0.06)]">
-              <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-[#f8f3e8] text-[#b88a44]">
+            <div className="rounded-[30px] border border-[#E8D9D6] bg-white px-6 py-12 text-center shadow-[0_12px_40px_rgba(100,31,43,0.05)]">
+              <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-[#F2E4E1] text-[#641F2B]">
                 <FaBoxOpen className="text-3xl" />
               </div>
 
-              <h3 className="font-bold text-[#30291f]">لا توجد طلبات سابقة</h3>
+              <h3 className="text-lg font-black text-[#4A1821]">
+                لا توجد طلبات محفوظة
+              </h3>
 
-              <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-[#8a8175]">
-                ما فيه طلبات سابقة من هذا الجهاز والمتصفح.
+              <p className="mx-auto mt-2 max-w-sm text-sm leading-7 text-[#806D70]">
+                عندما تقوم بإتمام طلب، ستظهر طلباتك هنا على هذا الجهاز.
               </p>
 
               <Link
                 to="/products"
-                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#b88a44] px-6 py-3 text-sm font-bold text-white shadow-md transition hover:bg-[#9d7337] hover:shadow-lg"
+                className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-[#641F2B] px-7 py-3.5 text-sm font-bold text-white shadow-[0_10px_25px_rgba(100,31,43,0.14)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#4A1821]"
               >
+                <FaShoppingBag />
                 تصفح المنتجات
+                <FaArrowLeft className="text-xs" />
               </Link>
             </div>
           ) : (
-            /* ORDERS */
-            <div className="flex flex-col gap-4">
+            <div className="space-y-4">
               {myOrders.map((order) => (
                 <OrderCard key={order.id} order={order} />
               ))}
@@ -385,10 +469,10 @@ export default function TrackOrder() {
           )}
         </div>
 
-        {/* FOOTER NOTE */}
-        <div className="mt-10 flex items-center justify-center gap-2 border-t border-[#eee5d5] pt-6 text-xs text-[#8a8175]">
-          <FaCheckCircle className="text-[#b88a44]" />
-          نحرص في شهدان ستور على تقديم تجربة طلب موثوقة ومريحة
+        {/* Bottom note */}
+        <div className="mt-10 flex flex-col items-center justify-center gap-2 border-t border-[#E8D9D6] pt-7 text-center text-xs text-[#A69A9C] sm:flex-row">
+          <FaCheckCircle className="text-[#7A8B43]" />
+          <span>سهرة تحرص على تقديم تجربة طلب واضحة وموثوقة ومريحة.</span>
         </div>
       </div>
     </section>

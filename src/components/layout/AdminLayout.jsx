@@ -7,12 +7,14 @@ function AdminLayout({ children, newOrdersCount = 0 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Overlay للجوال */}
+    <div className="min-h-screen bg-[#f7f8fa] text-slate-900">
+      {/* Mobile overlay */}
       {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+        <button
+          type="button"
+          aria-label="إغلاق القائمة الجانبية"
           onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 z-40 cursor-default bg-slate-950/40 backdrop-blur-[2px] lg:hidden"
         />
       )}
 
@@ -23,11 +25,13 @@ function AdminLayout({ children, newOrdersCount = 0 }) {
         onClose={() => setSidebarOpen(false)}
       />
 
-      {/* المحتوى */}
+      {/* Main application area */}
       <div className="min-h-screen lg:mr-72">
         <Header onMenuClick={() => setSidebarOpen(true)} />
 
-        <main className="p-4 md:p-6 lg:p-8">{children}</main>
+        <main className="min-h-[calc(100vh-72px)] p-4 sm:p-5 md:p-6 lg:p-8">
+          <div className="mx-auto w-full max-w-[1600px]">{children}</div>
+        </main>
       </div>
     </div>
   );
