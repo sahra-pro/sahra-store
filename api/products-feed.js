@@ -1,15 +1,18 @@
+
 import { adminDb } from "./firebaseAdmin.js";
 
-const SITE_URL = (process.env.SITE_URL || "https://shahdanstore.com").replace(
-  /\/+$/,
-  "",
-);
+const SITE_URL = (
+  process.env.SITE_URL || "https://sahrastore.vercel.app"
+).replace(/\/+$/, "");
 
 // تنظيف النصوص من HTML والإيموجي والمسافات الزائدة
 function cleanText(value = "") {
   return String(value)
     .replace(/<[^>]*>/g, " ")
-    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "")
+    .replace(
+      /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,
+      "",
+    )
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -41,10 +44,14 @@ export default async function handler(req, res) {
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0"
   xmlns:g="http://base.google.com/ns/1.0">
+
   <channel>
-    <title>شهدان ستور - منتجات شهدان</title>
+
+    <title>سهرة - منتجات سهرة</title>
+
     <link>${escapeXml(SITE_URL)}</link>
-    <description>منتجات شهدان ستور</description>
+
+    <description>منتجات سهرة المختارة بعناية</description>
 `;
 
     snapshot.forEach((doc) => {
@@ -56,9 +63,13 @@ export default async function handler(req, res) {
 
       const description = cleanText(product.description || "");
 
-      const slug = String(product.slug || doc.id).trim();
+      const slug = String(
+        product.seoSlug || product.slug || doc.id,
+      ).trim();
 
-      const productUrl = `${SITE_URL}/product/${encodeURIComponent(slug)}`;
+      const productUrl = `${SITE_URL}/product/${encodeURIComponent(
+        slug,
+      )}`;
 
       const images = Array.isArray(product.images)
         ? product.images.filter(Boolean).map(cleanUrl)
@@ -75,7 +86,9 @@ export default async function handler(req, res) {
         .slice(1)
         .map(
           (img) =>
-            `      <g:additional_image_link>${escapeXml(img)}</g:additional_image_link>\n`,
+            `      <g:additional_image_link>${escapeXml(
+              img,
+            )}</g:additional_image_link>\n`,
         )
         .join("");
 
@@ -90,23 +103,30 @@ export default async function handler(req, res) {
       const price = priceNumber.toFixed(2);
 
       const hasSalePrice =
-        Number.isFinite(oldPriceNumber) && oldPriceNumber > priceNumber;
+        Number.isFinite(oldPriceNumber) &&
+        oldPriceNumber > priceNumber;
 
       const oldPrice = oldPriceNumber.toFixed(2);
 
       const stock = Number(product.stock || 0);
 
-      const availability = stock > 0 ? "in stock" : "out of stock";
+      const availability =
+        stock > 0 ? "in stock" : "out of stock";
 
-      const category = cleanText(product.category || "Health & Beauty");
+      const category = cleanText(
+        product.category || "Health & Beauty",
+      );
 
       xml += `
     <item>
+
       <g:id>${escapeXml(id)}</g:id>
 
       <g:title><![CDATA[${escapeCdata(title)}]]></g:title>
 
-      <g:description><![CDATA[${escapeCdata(description)}]]></g:description>
+      <g:description><![CDATA[${escapeCdata(
+        description,
+      )}]]></g:description>
 
       <g:link>${escapeXml(productUrl)}</g:link>
 
@@ -125,15 +145,20 @@ ${
 `
 }
 
-      <g:brand>شهدان</g:brand>
+      <g:brand>سهرة</g:brand>
 
       <g:identifier_exists>false</g:identifier_exists>
 
-      <g:product_type><![CDATA[${escapeCdata(category)}]]></g:product_type>
+      <g:product_type><![CDATA[${escapeCdata(
+        category,
+      )}]]></g:product_type>
 
-      <g:google_product_category>Health &amp; Beauty &gt; Health Care</g:google_product_category>
+      <g:google_product_category>
+        Health &amp; Beauty &gt; Health Care
+      </g:google_product_category>
 
       <g:adult>no</g:adult>
+
     </item>
 `;
     });
@@ -142,14 +167,21 @@ ${
   </channel>
 </rss>`;
 
-    res.setHeader("Content-Type", "application/xml; charset=utf-8");
+    res.setHeader(
+      "Content-Type",
+      "application/xml; charset=utf-8",
+    );
 
-    res.setHeader("Cache-Control", "public, max-age=300, s-maxage=300");
+    res.setHeader(
+      "Cache-Control",
+      "public, max-age=300, s-maxage=300",
+    );
 
     return res.status(200).send(xml);
   } catch (error) {
     console.error("Product feed error:", error);
 
-    res.status(500).send("Feed Error");
+    return res.status(500).send("Feed Error");
   }
 }
+
