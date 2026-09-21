@@ -1,3 +1,4 @@
+
 const BOT_UA_REGEX =
   /googlebot|google-inspectiontool|storebot-google|bingbot|yandex|baiduspider|duckduckbot|facebookexternalhit|twitterbot|linkedinbot|whatsapp|slackbot|telegrambot|discordbot|applebot/i;
 
@@ -114,20 +115,23 @@ function stripHtml(value = "") {
 }
 
 function renderProductHtml(product, requestedSlug) {
-  const SITE_URL = "https://shahdanstore.com";
-  const STORE_NAME = "شهدان ستور";
-  const BRAND_NAME = "شهدان";
+  const SITE_URL = "https://sahrastore.vercel.app";
+  const STORE_NAME = "سهرة";
+  const BRAND_NAME = "سهرة";
 
-  const title = product.seoTitle?.trim() || `${product.name} | ${STORE_NAME}`;
+  const title =
+    product.seoTitle?.trim() || `${product.name} | ${STORE_NAME}`;
 
   const description =
     product.seoDescription?.trim() ||
     stripHtml(product.description || "").slice(0, 300) ||
     `اشترِ ${product.name} من ${STORE_NAME}.`;
 
-  const finalSlug = product.seoSlug || product.slug || requestedSlug;
+  const finalSlug =
+    product.seoSlug || product.slug || requestedSlug;
 
-  const url = `${SITE_URL}/product/${encodeURIComponent(finalSlug)}`;
+  const url =
+    `${SITE_URL}/product/${encodeURIComponent(finalSlug)}`;
 
   const images =
     Array.isArray(product.images) && product.images.length > 0
@@ -139,7 +143,8 @@ function renderProductHtml(product, requestedSlug) {
   const price = Number(product.price || 0);
   const stock = Number(product.stock || 0);
 
-  const category = product.category || product.categories?.[0] || "";
+  const category =
+    product.category || product.categories?.[0] || "";
 
   const schema = {
     "@context": "https://schema.org",
@@ -148,13 +153,14 @@ function renderProductHtml(product, requestedSlug) {
         "@type": "Organization",
         "@id": `${SITE_URL}/#organization`,
         name: STORE_NAME,
-        alternateName: "SHAHDAN STORE",
+        alternateName: "SAHRA",
         url: SITE_URL,
         logo: {
           "@type": "ImageObject",
           url: `${SITE_URL}/logo.png`,
         },
       },
+
       {
         "@type": "Product",
         "@id": url,
@@ -162,22 +168,29 @@ function renderProductHtml(product, requestedSlug) {
         image: images,
         description,
         sku: product.id,
+
         ...(category ? { category } : {}),
+
         brand: {
           "@type": "Brand",
           name: BRAND_NAME,
         },
+
         offers: {
           "@type": "Offer",
           "@id": `${url}#offer`,
           url,
           priceCurrency: "SAR",
           price: price.toFixed(2),
+
           availability:
             stock > 0
               ? "https://schema.org/InStock"
               : "https://schema.org/OutOfStock",
-          itemCondition: "https://schema.org/NewCondition",
+
+          itemCondition:
+            "https://schema.org/NewCondition",
+
           seller: {
             "@type": "Organization",
             "@id": `${SITE_URL}/#organization`,
@@ -261,6 +274,11 @@ function renderProductHtml(product, requestedSlug) {
   />
 
   <meta
+    property="og:image:alt"
+    content="${escapeHtml(product.name || STORE_NAME)}"
+  />
+
+  <meta
     name="twitter:card"
     content="summary_large_image"
   />
@@ -323,7 +341,9 @@ export default async function middleware(request) {
   try {
     // صفحة المنتج
     if (url.pathname.startsWith("/product/")) {
-      const slug = decodeURIComponent(url.pathname.replace("/product/", ""));
+      const slug = decodeURIComponent(
+        url.pathname.replace("/product/", ""),
+      );
 
       if (!slug) return;
 
@@ -337,16 +357,19 @@ export default async function middleware(request) {
 
       return new Response(html, {
         status: 200,
+
         headers: {
           "Content-Type": "text/html; charset=utf-8",
-          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+          "Cache-Control":
+            "public, s-maxage=60, stale-while-revalidate=300",
         },
       });
     }
 
     return;
   } catch (error) {
-    console.error("Shahdan middleware error:", error);
+    console.error("Sahra middleware error:", error);
     return;
   }
 }
+
