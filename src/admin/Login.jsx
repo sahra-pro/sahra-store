@@ -1,12 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import {
-  FaBolt,
-  FaEnvelope,
-  FaLock,
-  FaArrowLeft,
-  FaShieldAlt,
-} from "react-icons/fa";
+import { FaEnvelope, FaLock, FaArrowLeft, FaShieldAlt } from "react-icons/fa";
 
 import { useAuth } from "../hooks/useAuth";
 
@@ -62,8 +56,13 @@ function Login() {
       <div className="relative z-10 w-full max-w-md">
         {/* Brand */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#641F2B] text-[#F2E4E1] shadow-[0_15px_35px_rgba(100,31,43,0.20)]">
-            <FaBolt className="text-2xl" />
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#641F2B] shadow-[0_15px_35px_rgba(100,31,43,0.20)]">
+            {" "}
+            <img
+              src="/logo.png"
+              alt="شعار سهرة"
+              className="h-12 w-12 object-contain"
+            />{" "}
           </div>
 
           <p className="text-xs font-bold uppercase tracking-[0.4em] text-[#A83F55]">
