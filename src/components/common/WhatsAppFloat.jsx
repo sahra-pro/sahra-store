@@ -14,27 +14,41 @@ export default function WhatsAppFloat() {
 
   const currentProduct = getProductBySlug(slug);
 
-  let message = "السلام عليكم، أريد الاستفسار عن منتجات سهرة.";
+  let message = `السلام عليكم 👋
+
+أرغب بالاستفسار عن منتجات سهرة.
+
+هل يمكن مساعدتي؟`;
 
   if (location.pathname.startsWith("/product/") && currentProduct) {
-    message = `السلام عليكم
+    const productSlug = currentProduct.seoSlug || currentProduct.slug || slug;
 
-أرغب بالاستفسار عن هذا المنتج في سهرة:
+    const productUrl = `${window.location.origin}/product/${encodeURIComponent(
+      productSlug,
+    )}`;
 
-- المنتج: ${currentProduct.name}
-- السعر: ${currentProduct.price} ر.س
+    message = `السلام عليكم 👋
+
+أرغب بالاستفسار عن هذا المنتج من سهرة:
+
+🛍️ المنتج:
+${currentProduct.name}
+
+💰 السعر:
+${Number(currentProduct.price || 0).toFixed(2)} ر.س
 
 🔗 رابط المنتج:
-${window.location.href}
+${productUrl}
 
-هل المنتج متوفر؟`;
+هل المنتج متوفر حاليًا؟`;
   }
 
-  const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(
+    message,
+  )}`;
 
   return (
     <div className="fixed bottom-[120px] left-5 z-[9999] md:bottom-5">
-      {/* نبضة هوية سهرة */}
       <span
         className="
           absolute inset-0
