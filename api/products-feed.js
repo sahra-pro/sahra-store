@@ -1,18 +1,15 @@
-
 import { adminDb } from "./firebaseAdmin.js";
 
-const SITE_URL = (
-  process.env.SITE_URL || "https://sahrastore.vercel.app"
-).replace(/\/+$/, "");
+const SITE_URL = (process.env.SITE_URL || "https://sahracart.com").replace(
+  /\/+$/,
+  "",
+);
 
 // تنظيف النصوص من HTML والإيموجي والمسافات الزائدة
 function cleanText(value = "") {
   return String(value)
     .replace(/<[^>]*>/g, " ")
-    .replace(
-      /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,
-      "",
-    )
+    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -63,13 +60,9 @@ export default async function handler(req, res) {
 
       const description = cleanText(product.description || "");
 
-      const slug = String(
-        product.seoSlug || product.slug || doc.id,
-      ).trim();
+      const slug = String(product.seoSlug || product.slug || doc.id).trim();
 
-      const productUrl = `${SITE_URL}/product/${encodeURIComponent(
-        slug,
-      )}`;
+      const productUrl = `${SITE_URL}/product/${encodeURIComponent(slug)}`;
 
       const images = Array.isArray(product.images)
         ? product.images.filter(Boolean).map(cleanUrl)
@@ -103,19 +96,15 @@ export default async function handler(req, res) {
       const price = priceNumber.toFixed(2);
 
       const hasSalePrice =
-        Number.isFinite(oldPriceNumber) &&
-        oldPriceNumber > priceNumber;
+        Number.isFinite(oldPriceNumber) && oldPriceNumber > priceNumber;
 
       const oldPrice = oldPriceNumber.toFixed(2);
 
       const stock = Number(product.stock || 0);
 
-      const availability =
-        stock > 0 ? "in stock" : "out of stock";
+      const availability = stock > 0 ? "in stock" : "out of stock";
 
-      const category = cleanText(
-        product.category || "Health & Beauty",
-      );
+      const category = cleanText(product.category || "Health & Beauty");
 
       xml += `
     <item>
@@ -124,9 +113,7 @@ export default async function handler(req, res) {
 
       <g:title><![CDATA[${escapeCdata(title)}]]></g:title>
 
-      <g:description><![CDATA[${escapeCdata(
-        description,
-      )}]]></g:description>
+      <g:description><![CDATA[${escapeCdata(description)}]]></g:description>
 
       <g:link>${escapeXml(productUrl)}</g:link>
 
@@ -149,9 +136,7 @@ ${
 
       <g:identifier_exists>false</g:identifier_exists>
 
-      <g:product_type><![CDATA[${escapeCdata(
-        category,
-      )}]]></g:product_type>
+      <g:product_type><![CDATA[${escapeCdata(category)}]]></g:product_type>
 
       <g:google_product_category>
         Health &amp; Beauty &gt; Health Care
@@ -167,15 +152,9 @@ ${
   </channel>
 </rss>`;
 
-    res.setHeader(
-      "Content-Type",
-      "application/xml; charset=utf-8",
-    );
+    res.setHeader("Content-Type", "application/xml; charset=utf-8");
 
-    res.setHeader(
-      "Cache-Control",
-      "public, max-age=300, s-maxage=300",
-    );
+    res.setHeader("Cache-Control", "public, max-age=300, s-maxage=300");
 
     return res.status(200).send(xml);
   } catch (error) {
@@ -184,4 +163,3 @@ ${
     return res.status(500).send("Feed Error");
   }
 }
-

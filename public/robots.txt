@@ -9,4 +9,4 @@ Disallow: /wishlist
 Disallow: /order-success
 Disallow: /order-confirmation/
 
-Sitemap: https://sahrastore.vercel.app/sitemap.xml
+Sitemap: https://sahracart.com/sitemap.xml

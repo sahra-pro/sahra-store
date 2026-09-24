@@ -13,9 +13,10 @@ if (!getApps().length) {
 
 const db = getFirestore();
 
-const SITE_URL = (
-  process.env.SITE_URL || "https://sahrastore.vercel.app"
-).replace(/\/$/, "");
+const SITE_URL = (process.env.SITE_URL || "https://sahracart.com").replace(
+  /\/$/,
+  "",
+);
 
 export default async function handler(req, res) {
   try {

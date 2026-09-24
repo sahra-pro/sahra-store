@@ -1,4 +1,3 @@
-
 const BOT_UA_REGEX =
   /googlebot|google-inspectiontool|storebot-google|bingbot|yandex|baiduspider|duckduckbot|facebookexternalhit|twitterbot|linkedinbot|whatsapp|slackbot|telegrambot|discordbot|applebot/i;
 
@@ -115,23 +114,20 @@ function stripHtml(value = "") {
 }
 
 function renderProductHtml(product, requestedSlug) {
-  const SITE_URL = "https://sahrastore.vercel.app";
+  const SITE_URL = "https://sahracart.com";
   const STORE_NAME = "سهرة";
   const BRAND_NAME = "سهرة";
 
-  const title =
-    product.seoTitle?.trim() || `${product.name} | ${STORE_NAME}`;
+  const title = product.seoTitle?.trim() || `${product.name} | ${STORE_NAME}`;
 
   const description =
     product.seoDescription?.trim() ||
     stripHtml(product.description || "").slice(0, 300) ||
     `اشترِ ${product.name} من ${STORE_NAME}.`;
 
-  const finalSlug =
-    product.seoSlug || product.slug || requestedSlug;
+  const finalSlug = product.seoSlug || product.slug || requestedSlug;
 
-  const url =
-    `${SITE_URL}/product/${encodeURIComponent(finalSlug)}`;
+  const url = `${SITE_URL}/product/${encodeURIComponent(finalSlug)}`;
 
   const images =
     Array.isArray(product.images) && product.images.length > 0
@@ -143,8 +139,7 @@ function renderProductHtml(product, requestedSlug) {
   const price = Number(product.price || 0);
   const stock = Number(product.stock || 0);
 
-  const category =
-    product.category || product.categories?.[0] || "";
+  const category = product.category || product.categories?.[0] || "";
 
   const schema = {
     "@context": "https://schema.org",
@@ -188,8 +183,7 @@ function renderProductHtml(product, requestedSlug) {
               ? "https://schema.org/InStock"
               : "https://schema.org/OutOfStock",
 
-          itemCondition:
-            "https://schema.org/NewCondition",
+          itemCondition: "https://schema.org/NewCondition",
 
           seller: {
             "@type": "Organization",
@@ -341,9 +335,7 @@ export default async function middleware(request) {
   try {
     // صفحة المنتج
     if (url.pathname.startsWith("/product/")) {
-      const slug = decodeURIComponent(
-        url.pathname.replace("/product/", ""),
-      );
+      const slug = decodeURIComponent(url.pathname.replace("/product/", ""));
 
       if (!slug) return;
 
@@ -360,8 +352,7 @@ export default async function middleware(request) {
 
         headers: {
           "Content-Type": "text/html; charset=utf-8",
-          "Cache-Control":
-            "public, s-maxage=60, stale-while-revalidate=300",
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
         },
       });
     }
@@ -372,4 +363,3 @@ export default async function middleware(request) {
     return;
   }
 }
-
