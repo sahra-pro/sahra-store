@@ -1,3 +1,4 @@
+
 import { useMemo, useState } from "react";
 import {
   FaChevronLeft,
@@ -5,6 +6,23 @@ import {
   FaExpand,
   FaTimes,
 } from "react-icons/fa";
+
+function optimizeCloudinaryImage(url, width) {
+  if (!url || !url.includes("res.cloudinary.com")) {
+    return url;
+  }
+
+  const uploadMarker = "/upload/";
+
+  if (!url.includes(uploadMarker)) {
+    return url;
+  }
+
+  return url.replace(
+    uploadMarker,
+    `${uploadMarker}f_auto,q_auto,w_${width}/`,
+  );
+}
 
 function ProductGallery({ product }) {
   const images = useMemo(() => {
@@ -17,6 +35,9 @@ function ProductGallery({ product }) {
   const [showPreview, setShowPreview] = useState(false);
 
   const selectedImage = images[currentIndex] || images[0];
+
+  const mainImage = optimizeCloudinaryImage(selectedImage, 1200);
+  const previewImage = optimizeCloudinaryImage(selectedImage, 1800);
 
   const nextImage = () => {
     setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
@@ -47,28 +68,29 @@ function ProductGallery({ product }) {
                   aria-label={`عرض الصورة ${index + 1}`}
                   aria-current={currentIndex === index ? "true" : undefined}
                   className={`
-            group
-            relative
-            h-[82px]
-            w-[82px]
-            shrink-0
-            overflow-hidden
-            rounded-2xl
-            border
-            bg-[#FBF6F1]
-            transition-all
-            duration-300
-            ${
-              currentIndex === index
-                ? "border-[#641F2B] shadow-[0_6px_20px_rgba(100,31,43,0.10)]"
-                : "border-[#E8D9D6] hover:border-[#C99BA3]"
-            }
-          `}
+                    group
+                    relative
+                    h-[82px]
+                    w-[82px]
+                    shrink-0
+                    overflow-hidden
+                    rounded-2xl
+                    border
+                    bg-[#FBF6F1]
+                    transition-all
+                    duration-300
+                    ${
+                      currentIndex === index
+                        ? "border-[#641F2B] shadow-[0_6px_20px_rgba(100,31,43,0.10)]"
+                        : "border-[#E8D9D6] hover:border-[#C99BA3]"
+                    }
+                  `}
                 >
                   <img
-                    src={image}
+                    src={optimizeCloudinaryImage(image, 180)}
                     alt={`${product.name || "منتج سهرة"} - صورة ${index + 1}`}
                     loading="lazy"
+                    decoding="async"
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
 
@@ -103,9 +125,12 @@ function ProductGallery({ product }) {
               <div className="relative flex h-[390px] items-center justify-center sm:h-[480px] md:h-[560px]">
                 <img
                   key={selectedImage}
-                  src={selectedImage}
+                  src={mainImage}
                   alt={product.name || "منتج سهرة"}
                   onClick={() => setShowPreview(true)}
+                  loading={currentIndex === 0 ? "eager" : "lazy"}
+                  fetchPriority={currentIndex === 0 ? "high" : "auto"}
+                  decoding="async"
                   className="
                     relative
                     z-10
@@ -280,9 +305,10 @@ function ProductGallery({ product }) {
                     `}
                   >
                     <img
-                      src={image}
+                      src={optimizeCloudinaryImage(image, 180)}
                       alt={`${product.name || "منتج سهرة"} - صورة ${index + 1}`}
                       loading="lazy"
+                      decoding="async"
                       className="h-full w-full object-cover"
                     />
                   </button>
@@ -416,9 +442,10 @@ function ProductGallery({ product }) {
 
           {/* Image */}
           <img
-            src={selectedImage}
+            src={previewImage}
             alt={product.name || "منتج سهرة"}
             onClick={(event) => event.stopPropagation()}
+            decoding="async"
             className="
               max-h-[88vh]
               max-w-[92vw]
@@ -456,3 +483,4 @@ function ProductGallery({ product }) {
 }
 
 export default ProductGallery;
+

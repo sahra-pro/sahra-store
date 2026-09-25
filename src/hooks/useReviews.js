@@ -8,16 +8,24 @@ export function useReviews(productId) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!productId) return;
-
     const fetchReviews = async () => {
       try {
-        const q = query(
-          collection(db, "reviews"),
-          where("productId", "==", productId),
-          where("approved", "==", true),
-          orderBy("createdAt", "desc"),
-        );
+        let q;
+
+        if (productId) {
+          q = query(
+            collection(db, "reviews"),
+            where("productId", "==", productId),
+            where("approved", "==", true),
+            orderBy("createdAt", "desc"),
+          );
+        } else {
+          q = query(
+            collection(db, "reviews"),
+            where("approved", "==", true),
+            orderBy("createdAt", "desc"),
+          );
+        }
 
         const snapshot = await getDocs(q);
 
@@ -29,6 +37,7 @@ export function useReviews(productId) {
         setReviews(data);
       } catch (error) {
         console.error("Reviews error:", error);
+        setReviews([]);
       } finally {
         setLoading(false);
       }
@@ -40,7 +49,7 @@ export function useReviews(productId) {
   const averageRating =
     reviews.length > 0
       ? (
-          reviews.reduce((sum, item) => sum + Number(item.rating), 0) /
+          reviews.reduce((sum, item) => sum + Number(item.rating || 0), 0) /
           reviews.length
         ).toFixed(1)
       : 0;

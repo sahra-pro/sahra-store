@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import {
   FaEdit,
@@ -8,6 +9,8 @@ import {
   FaBoxOpen,
   FaImage,
   FaCheckCircle,
+  FaArrowUp,
+  FaArrowDown,
 } from "react-icons/fa";
 
 import AdminLayout from "../components/layout/AdminLayout";
@@ -28,6 +31,21 @@ function Categories() {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [reordering, setReordering] = useState(false);
+
+  const sortedCategories = [...categories].sort((a, b) => {
+    const orderA =
+      typeof a.sortOrder === "number" ? a.sortOrder : Number.MAX_SAFE_INTEGER;
+
+    const orderB =
+      typeof b.sortOrder === "number" ? b.sortOrder : Number.MAX_SAFE_INTEGER;
+
+    if (orderA !== orderB) {
+      return orderA - orderB;
+    }
+
+    return (a.name || "").localeCompare(b.name || "", "ar");
+  });
 
   const productCount = (categoryName) =>
     products.filter((product) => product.category === categoryName).length;
@@ -117,14 +135,31 @@ function Categories() {
 
     try {
       if (editingId) {
+        const currentCategory = categories.find(
+          (category) => category.id === editingId,
+        );
+
         await updateCategory(editingId, {
           name: form.name.trim(),
           image: form.image,
+          sortOrder: currentCategory?.sortOrder ?? 0,
         });
       } else {
+        const nextSortOrder =
+          categories.length > 0
+            ? Math.max(
+                ...categories.map((category, index) =>
+                  typeof category.sortOrder === "number"
+                    ? category.sortOrder
+                    : index,
+                ),
+              ) + 1
+            : 0;
+
         await addCategory({
           name: form.name.trim(),
           image: form.image,
+          sortOrder: nextSortOrder,
         });
       }
 
@@ -150,6 +185,39 @@ function Categories() {
     } catch (error) {
       console.error("Category delete error:", error);
       alert("حدث خطأ أثناء حذف التصنيف.");
+    }
+  };
+
+  const moveCategory = async (index, direction) => {
+    if (reordering) return;
+
+    const newIndex = index + direction;
+
+    if (newIndex < 0 || newIndex >= sortedCategories.length) {
+      return;
+    }
+
+    const reordered = [...sortedCategories];
+    const [movedCategory] = reordered.splice(index, 1);
+
+    reordered.splice(newIndex, 0, movedCategory);
+
+    try {
+      setReordering(true);
+      setError("");
+
+      await Promise.all(
+        reordered.map((category, newOrder) =>
+          updateCategory(category.id, {
+            sortOrder: newOrder,
+          }),
+        ),
+      );
+    } catch (error) {
+      console.error("Category reorder error:", error);
+      setError("حدث خطأ أثناء إعادة ترتيب التصنيفات.");
+    } finally {
+      setReordering(false);
     }
   };
 
@@ -377,18 +445,28 @@ function Categories() {
                 <h2 className="text-xl font-black text-[#4A1821]">
                   التصنيفات الحالية
                 </h2>
+
                 <p className="mt-1 text-sm text-[#806D70]">
                   إدارة وتنظيم أقسام منتجات سهرة.
                 </p>
               </div>
             </div>
+
+            {categories.length > 1 && (
+              <div className="mt-4 flex items-center gap-2 rounded-2xl bg-[#FBF6F1] px-4 py-3 text-xs font-semibold text-[#806D70]">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#F2E4E1] text-[#641F2B]">
+                  ↕
+                </span>
+                استخدم الأسهم لترتيب التصنيفات حسب ترتيب ظهورها في المتجر.
+              </div>
+            )}
           </div>
 
           {categories.length > 0 ? (
             <>
               {/* Mobile cards */}
               <div className="grid gap-4 p-4 md:hidden">
-                {categories.map((category) => {
+                {sortedCategories.map((category, index) => {
                   const count = productCount(category.name);
 
                   return (
@@ -411,9 +489,15 @@ function Categories() {
                         )}
 
                         <div className="min-w-0 flex-1">
-                          <h3 className="truncate font-bold text-[#4A1821]">
-                            {category.name}
-                          </h3>
+                          <div className="flex items-center gap-2">
+                            <span className="flex h-7 min-w-7 items-center justify-center rounded-lg bg-[#641F2B] px-2 text-[10px] font-black text-white">
+                              {index + 1}
+                            </span>
+
+                            <h3 className="truncate font-bold text-[#4A1821]">
+                              {category.name}
+                            </h3>
+                          </div>
 
                           <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-[#F2E4E1] px-3 py-1 text-xs font-bold text-[#641F2B]">
                             <FaBoxOpen />
@@ -423,6 +507,29 @@ function Categories() {
                       </div>
 
                       <div className="mt-4 flex gap-2 border-t border-[#E8D9D6] pt-4">
+                        <button
+                          type="button"
+                          onClick={() => moveCategory(index, -1)}
+                          disabled={index === 0 || reordering}
+                          className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#E8D9D6] bg-white text-[#641F2B] transition hover:bg-[#F2E4E1] disabled:cursor-not-allowed disabled:opacity-30"
+                          title="نقل للأعلى"
+                        >
+                          <FaArrowUp />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => moveCategory(index, 1)}
+                          disabled={
+                            index === sortedCategories.length - 1 ||
+                            reordering
+                          }
+                          className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#E8D9D6] bg-white text-[#641F2B] transition hover:bg-[#F2E4E1] disabled:cursor-not-allowed disabled:opacity-30"
+                          title="نقل للأسفل"
+                        >
+                          <FaArrowDown />
+                        </button>
+
                         <button
                           type="button"
                           onClick={() => openEditForm(category)}
@@ -435,10 +542,10 @@ function Categories() {
                         <button
                           type="button"
                           onClick={() => handleDelete(category)}
-                          className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-white py-2.5 text-sm font-bold text-red-600 shadow-sm transition hover:bg-red-50"
+                          className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-red-600 shadow-sm transition hover:bg-red-50"
+                          title="حذف"
                         >
                           <FaTrash />
-                          حذف
                         </button>
                       </div>
                     </div>
@@ -448,9 +555,13 @@ function Categories() {
 
               {/* Desktop table */}
               <div className="hidden overflow-x-auto md:block">
-                <table className="w-full min-w-[720px]">
+                <table className="w-full min-w-[820px]">
                   <thead>
                     <tr className="border-b border-[#E8D9D6] bg-[#FBF6F1]">
+                      <th className="w-20 px-6 py-4 text-center text-xs font-bold text-[#806D70]">
+                        الترتيب
+                      </th>
+
                       <th className="px-6 py-4 text-right text-xs font-bold text-[#806D70]">
                         الصورة
                       </th>
@@ -470,7 +581,7 @@ function Categories() {
                   </thead>
 
                   <tbody>
-                    {categories.map((category) => {
+                    {sortedCategories.map((category, index) => {
                       const count = productCount(category.name);
 
                       return (
@@ -478,6 +589,39 @@ function Categories() {
                           key={category.id}
                           className="border-b border-[#E8D9D6] last:border-b-0 transition-colors hover:bg-[#FBF6F1]"
                         >
+                          <td className="px-6 py-5">
+                            <div className="flex flex-col items-center gap-2">
+                              <span className="flex h-8 min-w-8 items-center justify-center rounded-lg bg-[#641F2B] px-2 text-xs font-black text-white">
+                                {index + 1}
+                              </span>
+
+                              <div className="flex gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => moveCategory(index, -1)}
+                                  disabled={index === 0 || reordering}
+                                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#E8D9D6] bg-white text-[#641F2B] transition hover:bg-[#F2E4E1] disabled:cursor-not-allowed disabled:opacity-25"
+                                  title="نقل للأعلى"
+                                >
+                                  <FaArrowUp className="text-[10px]" />
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => moveCategory(index, 1)}
+                                  disabled={
+                                    index === sortedCategories.length - 1 ||
+                                    reordering
+                                  }
+                                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#E8D9D6] bg-white text-[#641F2B] transition hover:bg-[#F2E4E1] disabled:cursor-not-allowed disabled:opacity-25"
+                                  title="نقل للأسفل"
+                                >
+                                  <FaArrowDown className="text-[10px]" />
+                                </button>
+                              </div>
+                            </div>
+                          </td>
+
                           <td className="px-6 py-5">
                             {category.image ? (
                               <img
@@ -565,3 +709,4 @@ function Categories() {
 }
 
 export default Categories;
+

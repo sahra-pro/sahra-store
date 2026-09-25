@@ -18,6 +18,7 @@ import ShippingPolicy from "../pages/ShippingPolicy";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
 import Terms from "../pages/Terms";
 import About from "../pages/About";
+import CustomerTestimonialsPage from "../pages/CustomerTestimonials";
 
 // Admin Pages
 import Login from "../admin/Login";
@@ -29,6 +30,7 @@ import AdminSettings from "../admin/Settings";
 import ProductForm from "../admin/ProductForm";
 import OrderDetails from "../admin/OrderDetails";
 import Reviews from "../admin/Reviews";
+import CustomerTestimonials from "../admin/CustomerTestimonials";
 
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -80,6 +82,11 @@ const router = createBrowserRouter([
       {
         path: "about",
         element: <About />,
+      },
+
+      {
+        path: "customer-testimonials",
+        element: <CustomerTestimonialsPage />,
       },
 
       {
@@ -163,6 +170,11 @@ const router = createBrowserRouter([
           {
             path: "reviews",
             element: <Reviews />,
+          },
+
+          {
+            path: "customer-testimonials",
+            element: <CustomerTestimonials />,
           },
 
           {

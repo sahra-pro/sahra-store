@@ -132,10 +132,11 @@ function Header() {
 
   return (
     <>
+      {" "}
       <header className="fixed left-0 right-0 top-0 z-[99990]">
         {/* =========================================
-            Announcement Bar
-            ========================================= */}
+Announcement Bar
+========================================= */}
         {settings?.announcementBar?.enabled && (
           <div
             className="h-10 overflow-hidden"
@@ -145,7 +146,9 @@ function Header() {
               color: settings?.announcementBar?.textColor || "#ffffff",
             }}
           >
+            {" "}
             <div className="relative flex h-full items-center justify-center overflow-hidden px-4">
+              {" "}
               <AnimatePresence initial={false}>
                 <motion.div
                   key={currentMessage}
@@ -158,18 +161,19 @@ function Header() {
                   }}
                   className="absolute inset-0 flex items-center justify-center will-change-transform"
                 >
+                  {" "}
                   <span className="whitespace-nowrap text-sm font-medium">
-                    {messages[currentMessage]}
+                    {messages[currentMessage]}{" "}
                   </span>
-                </motion.div>
-              </AnimatePresence>
-            </div>
+                </motion.div>{" "}
+              </AnimatePresence>{" "}
+            </div>{" "}
           </div>
         )}
 
         {/* =========================================
-            Main Header
-            ========================================= */}
+        Main Header
+        ========================================= */}
         <div className="border-b border-[#E8D9D6] bg-[#FBF6F1]/95 shadow-sm backdrop-blur-xl transition-all duration-300">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
             {/* Mobile menu */}
@@ -186,8 +190,8 @@ function Header() {
             </button>
 
             {/* =========================================
-                Logo
-                ========================================= */}
+            Logo
+            ========================================= */}
             <Link to="/" className="group flex items-center gap-3">
               <div className="h-12 w-12 overflow-hidden rounded-full border border-[#A83F55]/30 bg-white shadow-sm transition-all duration-300 group-hover:scale-105 group-hover:shadow-md sm:h-14 sm:w-14">
                 <img
@@ -209,8 +213,8 @@ function Header() {
             </Link>
 
             {/* =========================================
-                Desktop Navigation
-                ========================================= */}
+            Desktop Navigation
+            ========================================= */}
             <nav className="hidden gap-8 font-medium md:flex">
               <Link
                 to="/"
@@ -246,6 +250,17 @@ function Header() {
               </Link>
 
               <Link
+                to="/customer-testimonials"
+                className={`relative py-2 transition ${
+                  isActive("/customer-testimonials")
+                    ? "font-semibold text-[#8F3046]"
+                    : "text-[#4A1821] hover:text-[#8F3046]"
+                }`}
+              >
+                آراء العملاء
+              </Link>
+
+              <Link
                 to="/about"
                 className={`relative py-2 transition ${
                   isActive("/about")
@@ -258,8 +273,8 @@ function Header() {
             </nav>
 
             {/* =========================================
-                Desktop Search
-                ========================================= */}
+            Desktop Search
+            ========================================= */}
             <form
               onSubmit={handleSearchSubmit}
               className="hidden items-center overflow-hidden rounded-full border border-[#E8D9D6] bg-white lg:flex"
@@ -282,8 +297,8 @@ function Header() {
             </form>
 
             {/* =========================================
-                Icons
-                ========================================= */}
+            Icons
+            ========================================= */}
             <div className="flex items-center gap-2 text-xl sm:gap-3">
               {/* Track order */}
               <Link
@@ -358,10 +373,9 @@ function Header() {
           </div>
         </div>
       </header>
-
       {/* =========================================
-          Mobile Drawer
-          ========================================= */}
+      Mobile Drawer
+      ========================================= */}
       {menuOpen && (
         <div className="fixed inset-0 z-[2147483647] md:hidden">
           {/* Overlay */}
@@ -471,10 +485,22 @@ function Header() {
                 className={`rounded-2xl px-4 py-3 transition-all duration-300 active:scale-95 ${
                   isActive("/categories")
                     ? "bg-[#F2E4E1] font-semibold text-[#8F3046] shadow-sm"
-                    : "text-[#4A1821] hover:bg-[#8F3046] hover:text-white"
+                    : "text-[#4A1821] hover:bg-[#F2E4E1] hover:text-[#8F3046]"
                 }`}
               >
                 التصنيفات
+              </Link>
+
+              <Link
+                to="/customer-testimonials"
+                onClick={closeMenu}
+                className={`rounded-2xl px-4 py-3 transition-all duration-300 active:scale-95 ${
+                  isActive("/customer-testimonials")
+                    ? "bg-[#F2E4E1] font-semibold text-[#8F3046] shadow-sm"
+                    : "text-[#4A1821] hover:bg-[#F2E4E1] hover:text-[#8F3046]"
+                }`}
+              >
+                آراء العملاء
               </Link>
 
               <Link
@@ -557,7 +583,6 @@ function Header() {
           </div>
         </div>
       )}
-
       {/* Space for fixed header */}
       <div
         className={

@@ -3,8 +3,34 @@ import { FaLayerGroup } from "react-icons/fa";
 
 import { useStore } from "../../hooks/useStore";
 
+function optimizeCloudinaryImage(url, width = 320) {
+  if (!url || !url.includes("res.cloudinary.com")) {
+    return url;
+  }
+
+  if (!url.includes("/upload/")) {
+    return url;
+  }
+
+  return url.replace("/upload/", `/upload/f_auto,q_auto,w_${width}/`);
+}
+
 function Categories() {
   const { categories } = useStore();
+
+  const sortedCategories = [...categories].sort((a, b) => {
+    const orderA =
+      typeof a.sortOrder === "number" ? a.sortOrder : Number.MAX_SAFE_INTEGER;
+
+    const orderB =
+      typeof b.sortOrder === "number" ? b.sortOrder : Number.MAX_SAFE_INTEGER;
+
+    if (orderA !== orderB) {
+      return orderA - orderB;
+    }
+
+    return (a.name || "").localeCompare(b.name || "", "ar");
+  });
 
   return (
     <section
@@ -29,7 +55,7 @@ function Categories() {
           </p>
         </div>
 
-        {categories.length === 0 ? (
+        {sortedCategories.length === 0 ? (
           <div className="rounded-3xl border border-[#E8D9D6] bg-white px-6 py-12 text-center shadow-sm">
             <FaLayerGroup className="mx-auto mb-4 text-3xl text-[#A83F55]" />
 
@@ -41,8 +67,13 @@ function Categories() {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-5 lg:grid-cols-4">
-            {categories.map((item) => {
+            {sortedCategories.map((item) => {
               const categoryImage = item.image || item.imageUrl;
+
+              const optimizedCategoryImage = optimizeCloudinaryImage(
+                categoryImage,
+                320,
+              );
 
               return (
                 <Link
@@ -56,12 +87,13 @@ function Categories() {
                   {/* Category Image */}
                   <div className="relative mx-auto mb-5 flex h-24 w-24 items-center justify-center rounded-full border border-[#E8D9D6] bg-[#F9F1ED] p-1.5 shadow-sm transition-all duration-500 group-hover:scale-105 group-hover:border-[#A83F55] group-hover:shadow-md md:h-28 md:w-28 lg:h-32 lg:w-32">
                     <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-white">
-                      {categoryImage ? (
+                      {optimizedCategoryImage ? (
                         <img
-                          src={categoryImage}
+                          src={optimizedCategoryImage}
                           alt={item.name}
                           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                           loading="lazy"
+                          decoding="async"
                           onError={(e) => {
                             e.currentTarget.style.display = "none";
                             e.currentTarget.parentElement.innerHTML =
@@ -82,6 +114,7 @@ function Categories() {
                   {/* Bottom Arrow */}
                   <div className="mt-3 flex items-center justify-center gap-1 text-[11px] font-semibold text-[#9B8588] transition-all duration-300 group-hover:gap-2 group-hover:text-[#641F2B]">
                     <span>استكشف التصنيف</span>
+
                     <span className="transition-transform duration-300 group-hover:-translate-x-1">
                       ←
                     </span>

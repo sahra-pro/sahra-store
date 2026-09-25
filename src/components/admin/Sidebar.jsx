@@ -8,6 +8,7 @@ import {
   FaCog,
   FaSignOutAlt,
   FaStar,
+  FaImages,
   FaTimes,
 } from "react-icons/fa";
 
@@ -58,6 +59,11 @@ function Sidebar({ newOrdersCount = 0, isOpen = false, onClose }) {
       path: "/admin/reviews",
     },
     {
+      name: "آراء العملاء",
+      icon: <FaImages />,
+      path: "/admin/customer-testimonials",
+    },
+    {
       name: "الإعدادات",
       icon: <FaCog />,
       path: "/admin/settings",
@@ -67,8 +73,7 @@ function Sidebar({ newOrdersCount = 0, isOpen = false, onClose }) {
   return (
     <aside
       dir="rtl"
-      className={`
-        fixed right-0 top-0 z-50
+      className={`         fixed right-0 top-0 z-50
         flex h-screen w-[280px] flex-col
         border-l border-slate-200
         bg-white
@@ -78,18 +83,21 @@ function Sidebar({ newOrdersCount = 0, isOpen = false, onClose }) {
         ${isOpen ? "translate-x-0" : "translate-x-full"}
       `}
     >
-      {/* Brand */}
+      {/* Brand */}{" "}
       <div className="relative border-b border-slate-100 px-5 py-5">
+        {" "}
         <div className="flex items-center justify-between">
+          {" "}
           <div className="flex min-w-0 items-center gap-3">
+            {" "}
             <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#f2e4e1]">
+              {" "}
               <img
                 src="/logo.png"
                 alt="سهرة"
                 className="max-h-10 max-w-[44px] object-contain"
-              />
+              />{" "}
             </div>
-
             <div className="min-w-0">
               <p className="truncate text-lg font-black tracking-tight text-[#641F2B]">
                 سهرة
@@ -100,7 +108,6 @@ function Sidebar({ newOrdersCount = 0, isOpen = false, onClose }) {
               </p>
             </div>
           </div>
-
           {/* Mobile close */}
           <button
             type="button"
@@ -112,7 +119,6 @@ function Sidebar({ newOrdersCount = 0, isOpen = false, onClose }) {
           </button>
         </div>
       </div>
-
       {/* Store status */}
       <div className="px-4 pt-5">
         <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 px-3.5 py-3">
@@ -130,7 +136,6 @@ function Sidebar({ newOrdersCount = 0, isOpen = false, onClose }) {
           <span className="text-[10px] font-medium text-slate-400">SAHRA</span>
         </div>
       </div>
-
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-4 py-5">
         <p className="mb-3 px-2 text-[11px] font-bold text-slate-400">
@@ -178,7 +183,6 @@ function Sidebar({ newOrdersCount = 0, isOpen = false, onClose }) {
           ))}
         </div>
       </nav>
-
       {/* Quick info */}
       <div className="px-4 pb-4">
         <div className="rounded-2xl border border-[#e8d9d6] bg-[#fbf6f1] p-4">
@@ -197,7 +201,6 @@ function Sidebar({ newOrdersCount = 0, isOpen = false, onClose }) {
           </div>
         </div>
       </div>
-
       {/* Logout */}
       <div className="border-t border-slate-100 p-4">
         <button

@@ -17,6 +17,20 @@ import { useStore } from "../hooks/useStore";
 import { useCart } from "../hooks/useCart";
 import { useWishlist } from "../hooks/useWishlist";
 
+function optimizeCloudinaryImage(url, width) {
+  if (!url || !url.includes("res.cloudinary.com")) {
+    return url;
+  }
+
+  const uploadMarker = "/upload/";
+
+  if (!url.includes(uploadMarker)) {
+    return url;
+  }
+
+  return url.replace(uploadMarker, `${uploadMarker}f_auto,q_auto,w_${width}/`);
+}
+
 export default function Products() {
   const { products, categories } = useStore();
   const { addToCart } = useCart();
@@ -28,7 +42,21 @@ export default function Products() {
   const activeCategory = searchParams.get("category") || "";
   const search = searchParams.get("search") || "";
   const sort = searchParams.get("sort") || "default";
+  const sortedCategories = useMemo(() => {
+    return [...categories].sort((a, b) => {
+      const orderA =
+        typeof a.sortOrder === "number" ? a.sortOrder : Number.MAX_SAFE_INTEGER;
 
+      const orderB =
+        typeof b.sortOrder === "number" ? b.sortOrder : Number.MAX_SAFE_INTEGER;
+
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      }
+
+      return (a.name || "").localeCompare(b.name || "", "ar");
+    });
+  }, [categories]);
   const handleSearchChange = (value) => {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
@@ -251,7 +279,7 @@ export default function Products() {
           </div>
 
           {/* CATEGORIES */}
-          {categories.length > 0 && (
+          {sortedCategories.length > 0 && (
             <div className="mb-7 md:mb-10">
               <div className="mb-4 flex items-end justify-between">
                 <div>
@@ -308,7 +336,7 @@ export default function Products() {
                 </button>
 
                 {/* CATEGORIES */}
-                {categories.map((cat) => {
+                {sortedCategories.map((cat) => {
                   const categoryImage =
                     cat.image || cat.imageUrl || cat.icon || "";
 
@@ -328,9 +356,10 @@ export default function Products() {
                       <div className="relative h-[72px] w-full flex-shrink-0 overflow-hidden bg-[#F7EEE9] sm:h-[78px] md:h-[88px]">
                         {categoryImage ? (
                           <img
-                            src={categoryImage}
+                            src={optimizeCloudinaryImage(categoryImage, 300)}
                             alt={cat.name}
                             loading="lazy"
+                            decoding="async"
                             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                           />
                         ) : (
@@ -426,6 +455,14 @@ export default function Products() {
                 const productUrl =
                   product.seoSlug || product.slug || product.id;
 
+                const productImage =
+                  product.images?.[0] || "https://via.placeholder.com/500";
+
+                const optimizedProductImage = optimizeCloudinaryImage(
+                  productImage,
+                  500,
+                );
+
                 const wished = isInWishlist(product.id);
                 const isAdded = addedId === product.id;
 
@@ -461,12 +498,10 @@ export default function Products() {
                     <Link to={`/product/${productUrl}`} className="block">
                       <div className="relative aspect-square overflow-hidden bg-[#F7EEE9]">
                         <img
-                          src={
-                            product.images?.[0] ||
-                            "https://via.placeholder.com/500"
-                          }
+                          src={optimizedProductImage}
                           alt={product.name || "منتج من سهرة"}
                           loading="lazy"
+                          decoding="async"
                           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                       </div>

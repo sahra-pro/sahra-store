@@ -2,7 +2,7 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const SITE_URL = (process.env.SITE_URL || "https://example.com").replace(
+const SITE_URL = (process.env.SITE_URL || "https://sahracart.com").replace(
   /\/$/,
   "",
 );
@@ -76,9 +76,42 @@ export default async function handler(req, res) {
     const orderNumber = escapeHtml(order.orderNumber || "");
     const customerName = escapeHtml(customer.name || "");
     const customerPhone = escapeHtml(customer.phone || "");
-    const customerCity = escapeHtml(customer.city || "");
-    const customerAddress = escapeHtml(customer.address || "");
+
+    const customerCity = escapeHtml(customer.city || "غير محددة");
+    const customerNeighborhood = escapeHtml(
+      customer.neighborhood || "غير محدد",
+    );
+
+    const customerAddress = escapeHtml(
+      customer.address || customer.shortAddress || "غير محدد",
+    );
+
     const customerNotes = escapeHtml(customer.notes || "لا يوجد");
+
+    const latitude = Number(customer.latitude);
+    const longitude = Number(customer.longitude);
+
+    const hasLocation =
+      Number.isFinite(latitude) &&
+      Number.isFinite(longitude) &&
+      latitude >= -90 &&
+      latitude <= 90 &&
+      longitude >= -180 &&
+      longitude <= 180;
+
+    const mapUrl = hasLocation
+      ? `https://www.google.com/maps?q=${latitude},${longitude}`
+      : "";
+
+    const shippingCompany = order.shippingCompany || {};
+
+    const shippingCompanyName = escapeHtml(shippingCompany.name || "غير محددة");
+
+    const shippingCompanyFee = Number(shippingCompany.extraFee || 0).toFixed(2);
+
+    const paymentMethod = escapeHtml(
+      order.paymentMethod || "الدفع عند الاستلام",
+    );
 
     const subtotal = Number(order.subtotal || 0).toFixed(2);
     const shipping = Number(order.shipping || 0).toFixed(2);
@@ -112,6 +145,8 @@ export default async function handler(req, res) {
               overflow:hidden;
             "
           >
+
+            <!-- Header -->
             <div
               style="
                 background:#641f2b;
@@ -140,6 +175,8 @@ export default async function handler(req, res) {
             </div>
 
             <div style="padding:24px;">
+
+              <!-- Customer -->
               <h2
                 style="
                   margin:0 0 18px;
@@ -158,12 +195,13 @@ export default async function handler(req, res) {
                 "
               >
                 <tbody>
+
                   <tr>
                     <td
                       style="
                         padding:9px 0;
                         font-weight:bold;
-                        width:120px;
+                        width:130px;
                       "
                     >
                       الاسم
@@ -209,10 +247,25 @@ export default async function handler(req, res) {
                       style="
                         padding:9px 0;
                         font-weight:bold;
+                      "
+                    >
+                      الحي
+                    </td>
+
+                    <td style="padding:9px 0;">
+                      ${customerNeighborhood}
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td
+                      style="
+                        padding:9px 0;
+                        font-weight:bold;
                         vertical-align:top;
                       "
                     >
-                      العنوان
+                      العنوان المختصر
                     </td>
 
                     <td style="padding:9px 0;">
@@ -235,9 +288,134 @@ export default async function handler(req, res) {
                       ${customerNotes}
                     </td>
                   </tr>
+
                 </tbody>
               </table>
 
+              <!-- Location -->
+              <h2
+                style="
+                  margin:0 0 14px;
+                  font-size:18px;
+                  color:#641f2b;
+                "
+              >
+                موقع التوصيل
+              </h2>
+
+              ${
+                hasLocation
+                  ? `
+                    <div
+                      style="
+                        background:#f2e4e1;
+                        border:1px solid #e8d9d6;
+                        border-radius:14px;
+                        padding:16px;
+                        margin-bottom:24px;
+                      "
+                    >
+                      <div
+                        style="
+                          margin-bottom:10px;
+                          font-size:13px;
+                          color:#806d70;
+                        "
+                      >
+                        تم تحديد موقع العميل على الخريطة.
+                      </div>
+
+                      <div
+                        style="
+                          margin-bottom:12px;
+                          font-size:13px;
+                        "
+                      >
+                        الإحداثيات:
+                        ${latitude.toFixed(6)},
+                        ${longitude.toFixed(6)}
+                      </div>
+
+                      <a
+                        href="${mapUrl}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style="
+                          display:inline-block;
+                          background:#641f2b;
+                          color:#ffffff;
+                          padding:11px 18px;
+                          text-decoration:none;
+                          border-radius:10px;
+                          font-weight:bold;
+                          font-size:14px;
+                        "
+                      >
+                        📍 فتح موقع العميل على الخريطة
+                      </a>
+                    </div>
+                  `
+                  : `
+                    <div
+                      style="
+                        background:#fbf6f1;
+                        border:1px solid #e8d9d6;
+                        border-radius:14px;
+                        padding:14px 16px;
+                        margin-bottom:24px;
+                        color:#806d70;
+                      "
+                    >
+                      لم يتم تسجيل إحداثيات الموقع.
+                    </div>
+                  `
+              }
+
+              <!-- Shipping -->
+              <h2
+                style="
+                  margin:0 0 14px;
+                  font-size:18px;
+                  color:#641f2b;
+                "
+              >
+                شركة الشحن
+              </h2>
+
+              <div
+                style="
+                  background:#fbf6f1;
+                  border:1px solid #e8d9d6;
+                  border-radius:14px;
+                  padding:16px;
+                  margin-bottom:24px;
+                "
+              >
+                <div
+                  style="
+                    display:flex;
+                    justify-content:space-between;
+                    gap:15px;
+                    margin-bottom:8px;
+                  "
+                >
+                  <span>الشركة</span>
+                  <strong>${shippingCompanyName}</strong>
+                </div>
+
+                <div
+                  style="
+                    display:flex;
+                    justify-content:space-between;
+                    gap:15px;
+                  "
+                >
+                  <span>الرسوم الإضافية</span>
+                  <strong>${shippingCompanyFee} ر.س</strong>
+                </div>
+              </div>
+
+              <!-- Products -->
               <h2
                 style="
                   margin:0 0 14px;
@@ -257,6 +435,7 @@ export default async function handler(req, res) {
               >
                 <thead>
                   <tr style="background:#f7eee9;">
+
                     <th
                       style="
                         padding:11px;
@@ -286,6 +465,7 @@ export default async function handler(req, res) {
                     >
                       السعر
                     </th>
+
                   </tr>
                 </thead>
 
@@ -294,6 +474,7 @@ export default async function handler(req, res) {
                 </tbody>
               </table>
 
+              <!-- Totals -->
               <div
                 style="
                   background:#fbf6f1;
@@ -302,6 +483,7 @@ export default async function handler(req, res) {
                   padding:18px;
                 "
               >
+
                 <div
                   style="
                     display:flex;
@@ -321,6 +503,7 @@ export default async function handler(req, res) {
                   "
                 >
                   <span>الشحن</span>
+
                   <strong>
                     ${
                       Number(order.shipping || 0) > 0
@@ -344,8 +527,10 @@ export default async function handler(req, res) {
                   <strong>الإجمالي</strong>
                   <strong>${total} ر.س</strong>
                 </div>
+
               </div>
 
+              <!-- Payment -->
               <div
                 style="
                   margin-top:24px;
@@ -356,9 +541,10 @@ export default async function handler(req, res) {
                 "
               >
                 <strong>طريقة الدفع:</strong>
-                الدفع عند الاستلام
+                ${paymentMethod}
               </div>
 
+              <!-- Admin Button -->
               <a
                 href="${SITE_URL}/admin/orders"
                 style="
@@ -374,8 +560,10 @@ export default async function handler(req, res) {
               >
                 عرض الطلبات
               </a>
+
             </div>
 
+            <!-- Footer -->
             <div
               style="
                 border-top:1px solid #e8d9d6;
@@ -387,6 +575,7 @@ export default async function handler(req, res) {
             >
               شكرًا لاختيارك ${STORE_NAME}
             </div>
+
           </div>
         </div>
       `,

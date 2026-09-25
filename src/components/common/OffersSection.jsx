@@ -3,6 +3,18 @@ import { FaArrowLeft, FaTag } from "react-icons/fa";
 
 import { useStore } from "../../hooks/useStore";
 
+function optimizeCloudinaryImage(url, width = 500) {
+  if (!url || !url.includes("res.cloudinary.com")) {
+    return url;
+  }
+
+  if (!url.includes("/upload/")) {
+    return url;
+  }
+
+  return url.replace("/upload/", `/upload/f_auto,q_auto,w_${width}/`);
+}
+
 function OffersSection() {
   const { products } = useStore();
 
@@ -51,6 +63,14 @@ function OffersSection() {
 
             const discount = Math.round(((oldPrice - price) / oldPrice) * 100);
 
+            const productImage =
+              product.images?.[0] || "https://via.placeholder.com/500";
+
+            const optimizedProductImage = optimizeCloudinaryImage(
+              productImage,
+              500,
+            );
+
             return (
               <Link
                 key={product.id}
@@ -66,12 +86,11 @@ function OffersSection() {
                 {/* Product Image */}
                 <div className="relative aspect-square overflow-hidden bg-[#F7EEE9]">
                   <img
-                    src={
-                      product.images?.[0] || "https://via.placeholder.com/500"
-                    }
+                    src={optimizedProductImage}
                     alt={product.name || "منتج من سهرة"}
                     className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                     loading="lazy"
+                    decoding="async"
                   />
 
                   {/* Image Overlay */}
