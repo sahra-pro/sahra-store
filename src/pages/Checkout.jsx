@@ -135,11 +135,9 @@ function Checkout() {
   const reverseGeocode = useCallback(async (lat, lng) => {
     try {
       const apiKey = import.meta.env.VITE_MAPTILER_API_KEY;
-
       if (!apiKey) {
         throw new Error("MapTiler API key is missing");
       }
-
       const url = `https://api.maptiler.com/geocoding/${encodeURIComponent(lng)},${encodeURIComponent(lat)}.json?language=ar&key=${encodeURIComponent(apiKey)}`;
       const response = await fetch(url, {
         headers: { Accept: "application/json" },
@@ -149,53 +147,56 @@ function Checkout() {
           `MapTiler reverse geocoding failed: ${response.status}`,
         );
       }
-
       const data = await response.json();
-
       const features = Array.isArray(data?.features) ? data.features : [];
-
-      const findFeature = (types) => {
-        for (const feature of features) {
-          const placeTypes = Array.isArray(feature?.place_type)
-            ? feature.place_type
-            : [];
-
+      const getName = (item) => {
+        if (!item) return "";
+        return (
+          item?.text ||
+          item?.properties?.name ||
+          item?.properties?.name_ar ||
+          item?.place_name ||
+          ""
+        );
+      };
+      const getPlaceTypes = (item) => {
+        if (!item) return [];
+        return Array.isArray(item?.place_type) ? item.place_type : [];
+      };
+      const allItems = [];
+      for (const feature of features) {
+        allItems.push(feature);
+        if (Array.isArray(feature?.context)) {
+          allItems.push(...feature.context);
+        }
+      }
+      const findByType = (types) => {
+        for (const item of allItems) {
+          const placeTypes = getPlaceTypes(item);
           if (types.some((type) => placeTypes.includes(type))) {
-            return feature?.text || feature?.place_name || "";
-          }
-
-          if (Array.isArray(feature?.context)) {
-            for (const contextItem of feature.context) {
-              const contextTypes = Array.isArray(contextItem?.place_type)
-                ? contextItem.place_type
-                : [];
-
-              if (types.some((type) => contextTypes.includes(type))) {
-                return contextItem?.text || contextItem?.place_name || "";
-              }
+            const name = getName(item);
+            if (name) {
+              return name;
             }
           }
         }
-
         return "";
       };
+      const city = findByType(["municipality", "locality", "place"]);
+      const neighborhood = findByType([
+        "neighbourhood",
+        "neighborhood",
+        "suburb",
+        "quarter",
+        "district",
+        "municipal_district",
+        "residential",
+      ]);
 
-      const city = findFeature(["municipality", "locality", "place"]) || "";
-
-      const neighborhood =
-        findFeature(["neighbourhood", "suburb", "quarter"]) || "";
-
-      return {
-        city,
-        neighborhood,
-      };
+      return { city, neighborhood };
     } catch (error) {
       console.error("Reverse geocoding error:", error);
-
-      return {
-        city: "",
-        neighborhood: "",
-      };
+      return { city: "", neighborhood: "" };
     }
   }, []);
 
@@ -304,6 +305,16 @@ function Checkout() {
       }
 
       const data = await response.json();
+      console.log(
+        "MAPTILER FEATURES DETAILS:",
+        data.features?.map((feature) => ({
+          text: feature.text,
+          place_name: feature.place_name,
+          place_type: feature.place_type,
+          properties: feature.properties,
+          context: feature.context,
+        })),
+      );
 
       const results = Array.isArray(data?.features) ? data.features : [];
 
@@ -339,7 +350,18 @@ function Checkout() {
   };
 
   useEffect(() => {
-    if (!mapContainerRef.current || mapRef.current) {
+    if (
+      activeSection !== "delivery" ||
+      !mapContainerRef.current ||
+      mapRef.current
+    ) {
+      return;
+    }
+
+    const apiKey = import.meta.env.VITE_MAPTILER_API_KEY;
+
+    if (!apiKey) {
+      console.error("MapTiler API key is missing");
       return;
     }
 
@@ -357,13 +379,17 @@ function Checkout() {
       .addTo(map);
 
     L.tileLayer(
-      `https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${
-        import.meta.env.VITE_MAPTILER_API_KEY
-      }`,
+      `https://api.maptiler.com/maps/streets-v4/{z}/{x}/{y}.png?key=${encodeURIComponent(
+        apiKey,
+      )}`,
       {
+        tileSize: 512,
+        zoomOffset: -1,
+        minZoom: 1,
         maxZoom: 20,
         attribution:
-          '&copy; <a href="https://www.maptiler.com/copyright/" target="_blank" rel="noreferrer">MapTiler</a> &copy; OpenStreetMap contributors',
+          '&copy; <a href="https://www.maptiler.com/copyright/" target="_blank" rel="noreferrer">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors',
+        crossOrigin: true,
       },
     ).addTo(map);
 
@@ -373,9 +399,11 @@ function Checkout() {
 
     mapRef.current = map;
 
-    setTimeout(() => {
-      map.invalidateSize();
-    }, 100);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        map.invalidateSize();
+      });
+    });
 
     return () => {
       map.off();
@@ -383,7 +411,7 @@ function Checkout() {
       mapRef.current = null;
       markerRef.current = null;
     };
-  }, [handleMapLocation]);
+  }, [activeSection, handleMapLocation]);
 
   const handleUseMyLocation = () => {
     if (!navigator.geolocation) {
