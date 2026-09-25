@@ -7,6 +7,7 @@ import {
   FaUser,
   FaShoppingBag,
   FaTruck,
+  FaLocationArrow,
 } from "react-icons/fa";
 
 import { useOrders } from "../hooks/useOrders";
@@ -69,6 +70,39 @@ export default function OrderConfirmation() {
   if (notFound || !order) {
     return <Navigate to="/" replace />;
   }
+
+  const customer = order.customer || {};
+
+  const city = customer.city?.trim() || "";
+  const neighborhood = customer.neighborhood?.trim() || "";
+
+  const shortAddress =
+    customer.shortAddress?.trim() || customer.address?.trim() || "";
+
+  const notes = customer.notes?.trim() || "";
+
+  const latitude =
+    customer.latitude !== undefined && customer.latitude !== null
+      ? Number(customer.latitude)
+      : null;
+
+  const longitude =
+    customer.longitude !== undefined && customer.longitude !== null
+      ? Number(customer.longitude)
+      : null;
+
+  const hasCoordinates =
+    Number.isFinite(latitude) && Number.isFinite(longitude);
+
+  const shippingMethod =
+    order.shippingMethod?.name ||
+    order.shippingMethodName ||
+    order.shippingCompany ||
+    (typeof order.shippingMethod === "string" ? order.shippingMethod : "");
+
+  const mapsUrl = hasCoordinates
+    ? `https://www.google.com/maps?q=${latitude},${longitude}`
+    : "";
 
   return (
     <section
@@ -162,6 +196,7 @@ export default function OrderConfirmation() {
               </div>
 
               <div className="grid gap-5 p-5 sm:grid-cols-2 sm:p-6">
+                {/* Name */}
                 <div className="flex gap-3">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[#A83F55] shadow-sm">
                     <FaUser className="text-sm" />
@@ -171,11 +206,12 @@ export default function OrderConfirmation() {
                     <p className="text-xs text-[#806D70]">الاسم</p>
 
                     <p className="mt-1 font-bold text-[#4A1821]">
-                      {order.customer.name}
+                      {customer.name || "—"}
                     </p>
                   </div>
                 </div>
 
+                {/* Phone */}
                 <div className="flex gap-3">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[#A83F55] shadow-sm">
                     <FaPhone className="text-sm" />
@@ -188,46 +224,121 @@ export default function OrderConfirmation() {
                       dir="ltr"
                       className="mt-1 text-right font-bold text-[#4A1821]"
                     >
-                      {order.customer.phone}
+                      {customer.phone || "—"}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[#A83F55] shadow-sm">
-                    <FaMapMarkerAlt className="text-sm" />
+                {/* City */}
+                {city && (
+                  <div className="flex gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[#A83F55] shadow-sm">
+                      <FaMapMarkerAlt className="text-sm" />
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="text-xs text-[#806D70]">المدينة</p>
+
+                      <p className="mt-1 font-bold text-[#4A1821]">{city}</p>
+                    </div>
                   </div>
+                )}
 
-                  <div className="min-w-0">
-                    <p className="text-xs text-[#806D70]">المدينة</p>
+                {/* Neighborhood */}
+                {neighborhood && (
+                  <div className="flex gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[#A83F55] shadow-sm">
+                      <FaMapMarkerAlt className="text-sm" />
+                    </div>
 
-                    <p className="mt-1 font-bold text-[#4A1821]">
-                      {order.customer.city}
-                    </p>
+                    <div className="min-w-0">
+                      <p className="text-xs text-[#806D70]">الحي</p>
+
+                      <p className="mt-1 font-bold text-[#4A1821]">
+                        {neighborhood}
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
 
-                <div className="flex gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[#A83F55] shadow-sm">
-                    <FaMapMarkerAlt className="text-sm" />
+                {/* Short Address */}
+                {shortAddress && (
+                  <div className="flex gap-3 sm:col-span-2">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[#A83F55] shadow-sm">
+                      <FaMapMarkerAlt className="text-sm" />
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="text-xs text-[#806D70]">العنوان المختصر</p>
+
+                      <p className="mt-1 font-bold leading-6 text-[#4A1821]">
+                        {shortAddress}
+                      </p>
+                    </div>
                   </div>
+                )}
 
-                  <div className="min-w-0">
-                    <p className="text-xs text-[#806D70]">العنوان</p>
+                {/* Shipping Company */}
+                {shippingMethod && (
+                  <div className="flex gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[#A83F55] shadow-sm">
+                      <FaTruck className="text-sm" />
+                    </div>
 
-                    <p className="mt-1 font-bold leading-6 text-[#4A1821]">
-                      {order.customer.address}
-                    </p>
+                    <div className="min-w-0">
+                      <p className="text-xs text-[#806D70]">شركة الشحن</p>
+
+                      <p className="mt-1 font-bold text-[#4A1821]">
+                        {shippingMethod}
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {order.customer.notes && (
+                {/* Map Location */}
+                {hasCoordinates && (
+                  <div className="sm:col-span-2">
+                    <div className="rounded-2xl border border-[#E8D9D6] bg-white p-4">
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F2E4E1] text-[#641F2B]">
+                            <FaLocationArrow className="text-sm" />
+                          </div>
+
+                          <div>
+                            <p className="font-black text-[#4A1821]">
+                              موقع التوصيل
+                            </p>
+
+                            <p
+                              dir="ltr"
+                              className="mt-1 text-xs text-[#806D70]"
+                            >
+                              {latitude.toFixed(6)}, {longitude.toFixed(6)}
+                            </p>
+                          </div>
+                        </div>
+
+                        <a
+                          href={mapsUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#641F2B] px-5 py-3 text-sm font-bold text-white transition-all duration-300 hover:bg-[#4A1821] hover:shadow-[0_8px_20px_rgba(100,31,43,0.16)]"
+                        >
+                          <FaMapMarkerAlt />
+                          فتح الموقع على الخريطة
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Notes */}
+                {notes && (
                   <div className="border-t border-[#F0E6E3] pt-5 sm:col-span-2">
                     <p className="text-xs text-[#806D70]">الملاحظات</p>
 
-                    <p className="mt-1 leading-7 text-[#5F5154]">
-                      {order.customer.notes}
-                    </p>
+                    <p className="mt-1 leading-7 text-[#5F5154]">{notes}</p>
                   </div>
                 )}
               </div>

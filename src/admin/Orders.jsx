@@ -9,8 +9,13 @@ import {
   FaSearch,
   FaMoneyBillWave,
   FaChevronLeft,
+  FaFileExcel,
+  FaCheckSquare,
+  FaSquare,
+  FaTimes,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import * as XLSX from "xlsx";
 
 import AdminLayout from "../components/layout/AdminLayout";
 import { useOrders } from "../hooks/useOrders";
@@ -33,10 +38,15 @@ const STATUS_ICONS = {
 };
 
 function Orders() {
-  const { orders, updateOrderStatus } = useOrders();
+  const { orders, updateOrderStatus, deleteOrder } = useOrders();
 
   const [statusFilter, setStatusFilter] = useState("");
   const [search, setSearch] = useState("");
+
+  const [selectedOrders, setSelectedOrders] = useState([]);
+
+  const [bulkAction, setBulkAction] = useState("");
+  const [isBulkProcessing, setIsBulkProcessing] = useState(false);
 
   const navigate = useNavigate();
 
@@ -48,6 +58,8 @@ function Orders() {
         ${order.orderNumber || ""}
         ${order.customer?.name || ""}
         ${order.customer?.phone || ""}
+        ${order.customer?.city || ""}
+        ${order.customer?.neighborhood || ""}
       `.toLowerCase();
 
       const matchSearch = text.includes(search.toLowerCase());
@@ -72,12 +84,279 @@ function Orders() {
     (order) => order.status === "completed",
   ).length;
 
+  const selectedCount = selectedOrders.length;
+
+  const allFilteredSelected =
+    filteredOrders.length > 0 &&
+    filteredOrders.every((order) => selectedOrders.includes(order.id));
+
   const getStatusIcon = (status) => {
     return STATUS_ICONS[status] || FaShoppingBag;
   };
 
   const getStatusClass = (status) => {
     return STATUS_COLORS[status] || "bg-gray-50 text-gray-700 border-gray-200";
+  };
+
+  const toggleOrderSelection = (orderId) => {
+    setSelectedOrders((prev) =>
+      prev.includes(orderId)
+        ? prev.filter((id) => id !== orderId)
+        : [...prev, orderId],
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (allFilteredSelected) {
+      setSelectedOrders((prev) =>
+        prev.filter((id) => !filteredOrders.some((order) => order.id === id)),
+      );
+
+      return;
+    }
+
+    setSelectedOrders((prev) => {
+      const next = new Set(prev);
+
+      filteredOrders.forEach((order) => {
+        next.add(order.id);
+      });
+
+      return Array.from(next);
+    });
+  };
+
+  const clearSelection = () => {
+    setSelectedOrders([]);
+    setBulkAction("");
+  };
+
+  const getSelectedOrderObjects = () => {
+    return orders.filter((order) => selectedOrders.includes(order.id));
+  };
+
+  const formatDate = (value, withTime = false) => {
+    if (!value) return "-";
+
+    try {
+      const date = value?.toDate ? value.toDate() : new Date(value);
+
+      if (Number.isNaN(date.getTime())) {
+        return "-";
+      }
+
+      return date.toLocaleString("ar-SA", {
+        dateStyle: "short",
+        ...(withTime ? { timeStyle: "short" } : {}),
+      });
+    } catch {
+      return "-";
+    }
+  };
+
+  const getCustomerData = (order) => {
+    const customer = order.customer || {};
+
+    const city = customer.city || order.city || "";
+
+    const neighborhood = customer.neighborhood || order.neighborhood || "";
+
+    const shortAddress =
+      customer.address ||
+      customer.shortAddress ||
+      order.address ||
+      order.shortAddress ||
+      "";
+
+    const notes =
+      customer.notes ||
+      customer.deliveryNotes ||
+      order.notes ||
+      order.deliveryNotes ||
+      "";
+
+    const latitude =
+      customer.latitude ?? order.latitude ?? order.location?.latitude ?? "";
+
+    const longitude =
+      customer.longitude ?? order.longitude ?? order.location?.longitude ?? "";
+
+    const shippingMethod =
+      order.shippingMethod ||
+      order.shippingCompany ||
+      order.shipping?.method ||
+      order.shipping?.company ||
+      null;
+
+    const shippingMethodName =
+      typeof shippingMethod === "string"
+        ? shippingMethod
+        : shippingMethod?.name ||
+          shippingMethod?.title ||
+          order.shippingMethodName ||
+          order.shippingCompanyName ||
+          "";
+
+    return {
+      city,
+      neighborhood,
+      shortAddress,
+      notes,
+      latitude,
+      longitude,
+      shippingMethodName,
+    };
+  };
+
+  const exportOrdersToExcel = (ordersToExport, filePrefix = "sahra-orders") => {
+    if (!ordersToExport.length) {
+      window.alert("لا توجد طلبات لتصديرها.");
+      return;
+    }
+
+    const rows = ordersToExport.map((order) => {
+      const customer = order.customer || {};
+      const delivery = getCustomerData(order);
+
+      const products = Array.isArray(order.items)
+        ? order.items
+            .map((item) => {
+              const quantity = Number(item.quantity || 0);
+              const price = Number(item.price || 0);
+
+              return `${item.name || "منتج"} × ${quantity} = ${(
+                price * quantity
+              ).toFixed(2)} ر.س`;
+            })
+            .join(" | ")
+        : "";
+
+      const totalItems = Array.isArray(order.items)
+        ? order.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0)
+        : 0;
+
+      const shippingAmount = Number(
+        order.shippingCost ?? order.shippingFee ?? order.shipping ?? 0,
+      );
+
+      const paymentMethod =
+        order.paymentMethod === "cod" ||
+        order.paymentMethod === "cash_on_delivery" ||
+        !order.paymentMethod
+          ? "الدفع عند الاستلام"
+          : order.paymentMethod;
+
+      return {
+        "رقم الطلب": order.orderNumber || "",
+        "حالة الطلب": ORDER_STATUSES[order.status] || order.status || "",
+        "اسم العميل": customer.name || "",
+        "رقم الهاتف": customer.phone || "",
+        المدينة: delivery.city,
+        الحي: delivery.neighborhood,
+        "العنوان المختصر": delivery.shortAddress,
+        "ملاحظات التوصيل": delivery.notes,
+        "خط العرض": delivery.latitude,
+        "خط الطول": delivery.longitude,
+        "شركة الشحن": delivery.shippingMethodName,
+        "طريقة الدفع": paymentMethod,
+        "عدد المنتجات": totalItems,
+        المنتجات: products,
+        "إجمالي المنتجات": Number(order.subtotal ?? order.total ?? 0).toFixed(
+          2,
+        ),
+        "رسوم الشحن": shippingAmount.toFixed(2),
+        "الإجمالي النهائي": Number(order.total || 0).toFixed(2),
+        "تاريخ الطلب": formatDate(order.createdAt, true),
+        "معرف الطلب": order.id || "",
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+
+    worksheet["!cols"] = [
+      { wch: 16 },
+      { wch: 16 },
+      { wch: 24 },
+      { wch: 18 },
+      { wch: 18 },
+      { wch: 22 },
+      { wch: 30 },
+      { wch: 35 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 24 },
+      { wch: 20 },
+      { wch: 14 },
+      { wch: 60 },
+      { wch: 18 },
+      { wch: 15 },
+      { wch: 18 },
+      { wch: 22 },
+      { wch: 32 },
+    ];
+
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "الطلبات");
+
+    const now = new Date();
+    const datePart = now.toISOString().slice(0, 10);
+
+    XLSX.writeFile(workbook, `${filePrefix}-${datePart}.xlsx`);
+  };
+
+  const exportSelectedOrders = () => {
+    const selected = getSelectedOrderObjects();
+
+    exportOrdersToExcel(selected, "sahra-selected-orders");
+  };
+
+  const exportFilteredOrders = () => {
+    exportOrdersToExcel(filteredOrders, "sahra-orders");
+  };
+
+  const handleBulkAction = async () => {
+    if (!bulkAction || selectedCount === 0) {
+      return;
+    }
+
+    const selected = getSelectedOrderObjects();
+
+    setIsBulkProcessing(true);
+
+    try {
+      if (bulkAction.startsWith("status:")) {
+        const newStatus = bulkAction.replace("status:", "");
+
+        await Promise.all(
+          selected.map((order) => updateOrderStatus(order.id, newStatus)),
+        );
+
+        clearSelection();
+        return;
+      }
+
+      if (bulkAction === "delete") {
+        const confirmed = window.confirm(
+          `هل أنت متأكد من حذف ${selected.length} طلب؟\n\nهذا الإجراء لا يمكن التراجع عنه.`,
+        );
+
+        if (!confirmed) {
+          return;
+        }
+
+        await Promise.all(selected.map((order) => deleteOrder(order.id)));
+
+        clearSelection();
+      }
+    } catch (error) {
+      console.error("Bulk order action error:", error);
+
+      window.alert("حدث خطأ أثناء تنفيذ الإجراء. يرجى المحاولة مرة أخرى.");
+    } finally {
+      setIsBulkProcessing(false);
+      setBulkAction("");
+    }
   };
 
   return (
@@ -230,6 +509,7 @@ function Orders() {
                     <h2 className="text-xl font-black text-[#4A1821]">
                       قائمة الطلبات
                     </h2>
+
                     <p className="mt-1 text-xs text-[#806D70]">
                       إدارة ومتابعة جميع الطلبات الواردة
                     </p>
@@ -295,7 +575,9 @@ function Orders() {
                     }`}
                   >
                     <Icon className="text-xs" />
+
                     {label}
+
                     <span
                       className={`rounded-full px-2 py-0.5 text-xs ${
                         statusFilter === key
@@ -309,6 +591,107 @@ function Orders() {
                 );
               })}
             </div>
+          </div>
+
+          {/* Bulk Actions */}
+          <div className="border-b border-[#E8D9D6] bg-white px-5 py-4 md:px-7">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={toggleSelectAll}
+                  className="inline-flex items-center gap-2 rounded-xl border border-[#E8D9D6] bg-[#FBF6F1] px-4 py-2.5 text-sm font-bold text-[#4A1821] transition hover:border-[#A83F55] hover:bg-[#F2E4E1]"
+                >
+                  {allFilteredSelected ? <FaCheckSquare /> : <FaSquare />}
+
+                  {allFilteredSelected ? "إلغاء تحديد الكل" : "تحديد الكل"}
+                </button>
+
+                {selectedCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={clearSelection}
+                    className="inline-flex items-center gap-2 rounded-xl border border-[#E8D9D6] bg-white px-4 py-2.5 text-sm font-bold text-[#806D70] transition hover:border-[#A83F55] hover:text-[#641F2B]"
+                  >
+                    <FaTimes />
+                    إلغاء التحديد
+                  </button>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <button
+                  type="button"
+                  onClick={exportSelectedOrders}
+                  disabled={selectedCount === 0}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-bold text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <FaFileExcel />
+                  تصدير المحدد
+                  {selectedCount > 0 && <span>({selectedCount})</span>}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={exportFilteredOrders}
+                  disabled={filteredOrders.length === 0}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#D8B8B9] bg-[#F2E4E1] px-4 py-2.5 text-sm font-bold text-[#641F2B] transition hover:bg-[#E8D9D6] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <FaFileExcel />
+                  تصدير المعروض
+                </button>
+              </div>
+            </div>
+
+            {selectedCount > 0 && (
+              <div className="mt-4 rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] p-3">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+                  <div className="flex items-center gap-2 text-sm font-bold text-[#4A1821]">
+                    <FaCheckCircle className="text-[#A83F55]" />
+                    تم تحديد{" "}
+                    <span className="text-[#641F2B]">{selectedCount}</span> طلب
+                  </div>
+
+                  <div className="flex flex-1 flex-col gap-2 sm:flex-row">
+                    <select
+                      value={bulkAction}
+                      onChange={(e) => setBulkAction(e.target.value)}
+                      disabled={isBulkProcessing}
+                      className="min-w-0 flex-1 rounded-xl border border-[#E8D9D6] bg-white px-4 py-2.5 text-sm font-bold text-[#4A1821] outline-none focus:border-[#A83F55] focus:ring-4 focus:ring-[#F2E4E1]"
+                    >
+                      <option value="">اختر إجراءً...</option>
+
+                      {Object.entries(ORDER_STATUSES).map(([key, label]) => (
+                        <option key={key} value={`status:${key}`}>
+                          تغيير الحالة إلى: {label}
+                        </option>
+                      ))}
+
+                      <option value="delete">حذف الطلبات المحددة</option>
+                    </select>
+
+                    <button
+                      type="button"
+                      onClick={handleBulkAction}
+                      disabled={!bulkAction || isBulkProcessing}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#641F2B] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#4A1821] disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      {isBulkProcessing ? (
+                        <>
+                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                          جارٍ التنفيذ...
+                        </>
+                      ) : (
+                        <>
+                          <FaCheckCircle />
+                          تنفيذ
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Result summary */}
@@ -340,91 +723,121 @@ function Orders() {
             {filteredOrders.length > 0 ? (
               filteredOrders.map((order) => {
                 const StatusIcon = getStatusIcon(order.status);
+                const isSelected = selectedOrders.includes(order.id);
 
                 return (
                   <div
                     key={order.id}
-                    className="rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] p-4"
+                    className={`rounded-2xl border p-4 transition ${
+                      isSelected
+                        ? "border-[#A83F55] bg-[#FDF5F3] shadow-[0_8px_25px_rgba(100,31,43,0.08)]"
+                        : "border-[#E8D9D6] bg-[#FBF6F1]"
+                    }`}
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-xs text-[#806D70]">رقم الطلب</p>
-                        <p className="mt-1 font-black text-[#641F2B]">
-                          #{order.orderNumber}
-                        </p>
-                      </div>
-
-                      <span
-                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold ${getStatusClass(
-                          order.status,
-                        )}`}
-                      >
-                        <StatusIcon className="text-[10px]" />
-                        {ORDER_STATUSES[order.status] || order.status}
-                      </span>
-                    </div>
-
-                    <div className="mt-4 border-t border-[#E8D9D6] pt-4">
-                      <p className="font-bold text-[#4A1821]">
-                        {order.customer?.name || "-"}
-                      </p>
-
-                      <p className="mt-1 text-sm text-[#806D70]">
-                        {order.customer?.phone || "-"}
-                      </p>
-                    </div>
-
-                    <div className="mt-4 grid grid-cols-2 gap-3">
-                      <div className="rounded-xl bg-white p-3">
-                        <p className="text-xs text-[#806D70]">المنتجات</p>
-                        <p className="mt-1 font-black text-[#4A1821]">
-                          {order.items?.length || 0}
-                        </p>
-                      </div>
-
-                      <div className="rounded-xl bg-white p-3">
-                        <p className="text-xs text-[#806D70]">الإجمالي</p>
-                        <p className="mt-1 font-black text-[#641F2B]">
-                          {Number(order.total || 0).toFixed(2)} ر.س
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="mt-3">
-                      <p className="mb-2 text-xs text-[#806D70]">تاريخ الطلب</p>
-                      <p className="text-sm font-semibold text-[#4A1821]">
-                        {order.createdAt?.toDate
-                          ? order.createdAt.toDate().toLocaleDateString("ar-SA")
-                          : "-"}
-                      </p>
-                    </div>
-
-                    <div className="mt-4 flex gap-2 border-t border-[#E8D9D6] pt-4">
-                      <select
-                        value={order.status}
-                        onChange={(e) =>
-                          updateOrderStatus(order.id, e.target.value)
-                        }
-                        className={`min-w-0 flex-1 rounded-xl border px-3 py-2.5 text-sm font-bold outline-none ${getStatusClass(
-                          order.status,
-                        )}`}
-                      >
-                        {Object.entries(ORDER_STATUSES).map(([key, label]) => (
-                          <option key={key} value={key}>
-                            {label}
-                          </option>
-                        ))}
-                      </select>
-
+                    <div className="flex items-start gap-3">
                       <button
                         type="button"
-                        onClick={() => navigate(`/admin/orders/${order.id}`)}
-                        className="flex items-center justify-center gap-2 rounded-xl bg-[#641F2B] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#4A1821]"
-                        title="عرض الطلب"
+                        onClick={() => toggleOrderSelection(order.id)}
+                        className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#E8D9D6] bg-white text-[#641F2B]"
+                        title={isSelected ? "إلغاء تحديد الطلب" : "تحديد الطلب"}
                       >
-                        <FaEye />
-                        عرض
+                        {isSelected ? <FaCheckSquare /> : <FaSquare />}
                       </button>
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-xs text-[#806D70]">رقم الطلب</p>
+
+                            <p className="mt-1 font-black text-[#641F2B]">
+                              #{order.orderNumber}
+                            </p>
+                          </div>
+
+                          <span
+                            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold ${getStatusClass(
+                              order.status,
+                            )}`}
+                          >
+                            <StatusIcon className="text-[10px]" />
+                            {ORDER_STATUSES[order.status] || order.status}
+                          </span>
+                        </div>
+
+                        <div className="mt-4 border-t border-[#E8D9D6] pt-4">
+                          <p className="font-bold text-[#4A1821]">
+                            {order.customer?.name || "-"}
+                          </p>
+
+                          <p className="mt-1 text-sm text-[#806D70]">
+                            {order.customer?.phone || "-"}
+                          </p>
+                        </div>
+
+                        <div className="mt-4 grid grid-cols-2 gap-3">
+                          <div className="rounded-xl bg-white p-3">
+                            <p className="text-xs text-[#806D70]">المنتجات</p>
+
+                            <p className="mt-1 font-black text-[#4A1821]">
+                              {order.items?.length || 0}
+                            </p>
+                          </div>
+
+                          <div className="rounded-xl bg-white p-3">
+                            <p className="text-xs text-[#806D70]">الإجمالي</p>
+
+                            <p className="mt-1 font-black text-[#641F2B]">
+                              {Number(order.total || 0).toFixed(2)} ر.س
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="mt-3">
+                          <p className="mb-2 text-xs text-[#806D70]">
+                            تاريخ الطلب
+                          </p>
+
+                          <p className="text-sm font-semibold text-[#4A1821]">
+                            {order.createdAt?.toDate
+                              ? order.createdAt
+                                  .toDate()
+                                  .toLocaleDateString("ar-SA")
+                              : "-"}
+                          </p>
+                        </div>
+
+                        <div className="mt-4 flex gap-2 border-t border-[#E8D9D6] pt-4">
+                          <select
+                            value={order.status}
+                            onChange={(e) =>
+                              updateOrderStatus(order.id, e.target.value)
+                            }
+                            className={`min-w-0 flex-1 rounded-xl border px-3 py-2.5 text-sm font-bold outline-none ${getStatusClass(
+                              order.status,
+                            )}`}
+                          >
+                            {Object.entries(ORDER_STATUSES).map(
+                              ([key, label]) => (
+                                <option key={key} value={key}>
+                                  {label}
+                                </option>
+                              ),
+                            )}
+                          </select>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              navigate(`/admin/orders/${order.id}`)
+                            }
+                            className="flex items-center justify-center gap-2 rounded-xl bg-[#641F2B] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#4A1821]"
+                            title="عرض الطلب"
+                          >
+                            <FaEye />
+                            عرض
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 );
@@ -446,9 +859,22 @@ function Orders() {
 
           {/* Desktop Table */}
           <div className="hidden overflow-x-auto md:block">
-            <table className="w-full min-w-[1050px]">
+            <table className="w-full min-w-[1150px]">
               <thead>
                 <tr className="border-y border-[#E8D9D6] bg-[#FBF6F1]">
+                  <th className="w-14 px-4 py-4 text-center">
+                    <button
+                      type="button"
+                      onClick={toggleSelectAll}
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-[#641F2B] transition hover:bg-[#F2E4E1]"
+                      title={
+                        allFilteredSelected ? "إلغاء تحديد الكل" : "تحديد الكل"
+                      }
+                    >
+                      {allFilteredSelected ? <FaCheckSquare /> : <FaSquare />}
+                    </button>
+                  </th>
+
                   <th className="px-6 py-4 text-right text-xs font-bold text-[#806D70]">
                     رقم الطلب
                   </th>
@@ -482,11 +908,28 @@ function Orders() {
               <tbody>
                 {filteredOrders.length > 0 ? (
                   filteredOrders.map((order) => {
+                    const isSelected = selectedOrders.includes(order.id);
+
                     return (
                       <tr
                         key={order.id}
-                        className="border-b border-[#E8D9D6] transition-colors hover:bg-[#FBF6F1]"
+                        className={`border-b border-[#E8D9D6] transition-colors ${
+                          isSelected ? "bg-[#FDF5F3]" : "hover:bg-[#FBF6F1]"
+                        }`}
                       >
+                        <td className="px-4 py-5 text-center">
+                          <button
+                            type="button"
+                            onClick={() => toggleOrderSelection(order.id)}
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-[#641F2B] transition hover:bg-[#F2E4E1]"
+                            title={
+                              isSelected ? "إلغاء تحديد الطلب" : "تحديد الطلب"
+                            }
+                          >
+                            {isSelected ? <FaCheckSquare /> : <FaSquare />}
+                          </button>
+                        </td>
+
                         <td className="px-6 py-5">
                           <div>
                             <span className="font-black text-[#641F2B]">
@@ -570,7 +1013,7 @@ function Orders() {
                   })
                 ) : (
                   <tr>
-                    <td colSpan="7" className="px-6 py-16 text-center">
+                    <td colSpan="8" className="px-6 py-16 text-center">
                       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#F2E4E1] text-2xl text-[#641F2B]">
                         <FaShoppingBag />
                       </div>

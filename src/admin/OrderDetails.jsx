@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -15,6 +14,8 @@ import {
   FaCheckCircle,
   FaClock,
   FaTruck,
+  FaMapMarkedAlt,
+  FaStickyNote,
 } from "react-icons/fa";
 
 import AdminLayout from "../components/layout/AdminLayout";
@@ -100,6 +101,64 @@ export default function OrderDetails() {
   const statusStyle = getStatusStyle(order.status);
   const StatusIcon = statusStyle.icon;
 
+  /*
+   * بيانات التوصيل الجديدة
+   * نستخدم أكثر من fallback حتى لا تتأثر الطلبات القديمة.
+   */
+  const customer = order.customer || {};
+
+  const city = customer.city || order.city || "";
+  const neighborhood = customer.neighborhood || order.neighborhood || "";
+
+  const shortAddress =
+    customer.address ||
+    customer.shortAddress ||
+    order.address ||
+    order.shortAddress ||
+    "";
+
+  const deliveryNotes =
+    customer.notes ||
+    customer.deliveryNotes ||
+    order.notes ||
+    order.deliveryNotes ||
+    "";
+
+  const latitude =
+    customer.latitude ?? order.latitude ?? order.location?.latitude ?? null;
+
+  const longitude =
+    customer.longitude ?? order.longitude ?? order.location?.longitude ?? null;
+
+  const hasCoordinates =
+    Number.isFinite(Number(latitude)) && Number.isFinite(Number(longitude));
+
+  const shippingMethod =
+    order.shippingMethod ||
+    order.shippingCompany ||
+    order.shipping?.method ||
+    order.shipping?.company ||
+    null;
+
+  const shippingMethodName =
+    typeof shippingMethod === "string"
+      ? shippingMethod
+      : shippingMethod?.name ||
+        shippingMethod?.title ||
+        order.shippingMethodName ||
+        order.shippingCompanyName ||
+        "";
+
+  const shippingAmount = Number(
+    order.shippingCost ?? order.shippingFee ?? order.shipping ?? 0,
+  );
+
+  const mapUrl = hasCoordinates
+    ? `https://www.google.com/maps?q=${encodeURIComponent(
+        `${Number(latitude)},${Number(longitude)}`,
+      )}`
+    : "";
+
   const handleDelete = async () => {
     await deleteOrder(order.id);
     navigate("/admin/orders");
@@ -177,10 +236,7 @@ export default function OrderDetails() {
 
                 <OrderInvoice order={order} />
 
-                <WhatsAppButton
-                  phone={order.customer?.phone}
-                  order={order}
-                />
+                <WhatsAppButton phone={order.customer?.phone} order={order} />
 
                 <button
                   type="button"
@@ -248,22 +304,16 @@ export default function OrderDetails() {
             </div>
 
             <div className="bg-white p-5">
-              <p className="text-xs font-semibold text-[#806D70]">
-                الشحن
-              </p>
+              <p className="text-xs font-semibold text-[#806D70]">الشحن</p>
 
               <p
                 className={`mt-2 text-2xl font-black ${
-                  (order.shipping ?? 0) === 0
-                    ? "text-emerald-600"
-                    : "text-[#4A1821]"
+                  shippingAmount === 0 ? "text-emerald-600" : "text-[#4A1821]"
                 }`}
               >
-                {(order.shipping ?? 0) > 0
-                  ? Number(order.shipping).toFixed(2)
-                  : "مجاني"}
+                {shippingAmount > 0 ? shippingAmount.toFixed(2) : "مجاني"}
 
-                {(order.shipping ?? 0) > 0 && (
+                {shippingAmount > 0 && (
                   <span className="mr-1 text-sm font-bold text-[#806D70]">
                     ر.س
                   </span>
@@ -296,9 +346,7 @@ export default function OrderDetails() {
               </div>
 
               <div>
-                <h2 className="font-black text-[#4A1821]">
-                  بيانات العميل
-                </h2>
+                <h2 className="font-black text-[#4A1821]">بيانات العميل</h2>
 
                 <p className="mt-0.5 text-xs text-[#806D70]">
                   معلومات التواصل والتوصيل
@@ -307,6 +355,7 @@ export default function OrderDetails() {
             </div>
 
             <div className="space-y-3">
+              {/* Name */}
               <div className="rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] p-4">
                 <div className="flex items-start gap-3">
                   <FaUser className="mt-1 text-[#A83F55]" />
@@ -317,12 +366,13 @@ export default function OrderDetails() {
                     </p>
 
                     <p className="mt-1 break-words font-bold text-[#4A1821]">
-                      {order.customer?.name || "-"}
+                      {customer.name || "-"}
                     </p>
                   </div>
                 </div>
               </div>
 
+              {/* Phone */}
               <div className="rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] p-4">
                 <div className="flex items-start gap-3">
                   <FaPhone className="mt-1 text-[#A83F55]" />
@@ -333,12 +383,13 @@ export default function OrderDetails() {
                     </p>
 
                     <p className="mt-1 break-words font-bold text-[#4A1821]">
-                      {order.customer?.phone || "-"}
+                      {customer.phone || "-"}
                     </p>
                   </div>
                 </div>
               </div>
 
+              {/* City */}
               <div className="rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] p-4">
                 <div className="flex items-start gap-3">
                   <FaMapMarkerAlt className="mt-1 text-[#A83F55]" />
@@ -349,23 +400,137 @@ export default function OrderDetails() {
                     </p>
 
                     <p className="mt-1 break-words font-bold text-[#4A1821]">
-                      {order.customer?.city || "-"}
+                      {city || "-"}
                     </p>
                   </div>
                 </div>
               </div>
 
+              {/* Neighborhood */}
+              <div className="rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] p-4">
+                <div className="flex items-start gap-3">
+                  <FaMapMarkerAlt className="mt-1 text-[#A83F55]" />
+
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-[#806D70]">الحي</p>
+
+                    <p className="mt-1 break-words font-bold text-[#4A1821]">
+                      {neighborhood || "-"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Short Address */}
               <div className="rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] p-4">
                 <div className="flex items-start gap-3">
                   <FaMapMarkerAlt className="mt-1 text-[#A83F55]" />
 
                   <div className="min-w-0">
                     <p className="text-xs font-semibold text-[#806D70]">
-                      عنوان التوصيل
+                      العنوان المختصر
                     </p>
 
                     <p className="mt-1 break-words leading-7 text-[#4A1821]">
-                      {order.customer?.address || "-"}
+                      {shortAddress || "-"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Delivery Notes */}
+              <div className="rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] p-4">
+                <div className="flex items-start gap-3">
+                  <FaStickyNote className="mt-1 text-[#A83F55]" />
+
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-[#806D70]">
+                      ملاحظات التوصيل
+                    </p>
+
+                    <p className="mt-1 break-words leading-7 text-[#4A1821]">
+                      {deliveryNotes || "-"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Map Location */}
+              <div className="rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] p-4">
+                <div className="flex items-start gap-3">
+                  <FaMapMarkedAlt className="mt-1 text-[#A83F55]" />
+
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold text-[#806D70]">
+                      موقع العميل على الخريطة
+                    </p>
+
+                    {hasCoordinates ? (
+                      <>
+                        <div className="mt-2 rounded-xl border border-[#E8D9D6] bg-white p-3">
+                          <div className="grid grid-cols-2 gap-3 text-xs">
+                            <div>
+                              <span className="block text-[#806D70]">
+                                خط العرض
+                              </span>
+
+                              <strong className="mt-1 block break-all text-[#4A1821]">
+                                {Number(latitude).toFixed(6)}
+                              </strong>
+                            </div>
+
+                            <div>
+                              <span className="block text-[#806D70]">
+                                خط الطول
+                              </span>
+
+                              <strong className="mt-1 block break-all text-[#4A1821]">
+                                {Number(longitude).toFixed(6)}
+                              </strong>
+                            </div>
+                          </div>
+                        </div>
+
+                        <a
+                          href={mapUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-3 inline-flex items-center gap-2 rounded-xl bg-[#641F2B] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#4A1821]"
+                        >
+                          <FaMapMarkedAlt />
+                          فتح الموقع على الخريطة
+                        </a>
+                      </>
+                    ) : (
+                      <p className="mt-1 text-sm font-semibold text-[#806D70]">
+                        لم يتم حفظ موقع على الخريطة لهذا الطلب.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Shipping Company */}
+              <div className="rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] p-4">
+                <div className="flex items-start gap-3">
+                  <FaTruck className="mt-1 text-[#A83F55]" />
+
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold text-[#806D70]">
+                      شركة الشحن
+                    </p>
+
+                    <p className="mt-1 break-words font-bold text-[#4A1821]">
+                      {shippingMethodName || "لم يتم تحديد شركة شحن"}
+                    </p>
+
+                    <p className="mt-1 text-xs text-[#806D70]">
+                      رسوم الشحن:{" "}
+                      <span className="font-bold text-[#4A1821]">
+                        {shippingAmount > 0
+                          ? `${shippingAmount.toFixed(2)} ر.س`
+                          : "مجاني"}
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -382,9 +547,7 @@ export default function OrderDetails() {
                 </div>
 
                 <div>
-                  <h2 className="font-black text-[#4A1821]">
-                    منتجات الطلب
-                  </h2>
+                  <h2 className="font-black text-[#4A1821]">منتجات الطلب</h2>
 
                   <p className="mt-0.5 text-xs text-[#806D70]">
                     {totalItems} قطعة ضمن هذا الطلب
@@ -440,8 +603,7 @@ export default function OrderDetails() {
 
                         <span className="font-black text-[#641F2B]">
                           {(
-                            Number(item.price || 0) *
-                            Number(item.quantity || 0)
+                            Number(item.price || 0) * Number(item.quantity || 0)
                           ).toFixed(2)}{" "}
                           ر.س
                         </span>
@@ -463,9 +625,7 @@ export default function OrderDetails() {
               </div>
 
               <div>
-                <h2 className="font-black text-[#4A1821]">
-                  ملخص المبلغ
-                </h2>
+                <h2 className="font-black text-[#4A1821]">ملخص المبلغ</h2>
 
                 <p className="mt-0.5 text-xs text-[#806D70]">
                   تفاصيل القيمة النهائية للطلب
@@ -477,12 +637,18 @@ export default function OrderDetails() {
           <div className="px-5 py-6 md:px-7">
             <div className="mx-auto max-w-3xl space-y-4">
               <div className="flex items-center justify-between gap-4">
-                <span className="text-sm text-[#806D70]">
-                  إجمالي المنتجات
-                </span>
+                <span className="text-sm text-[#806D70]">إجمالي المنتجات</span>
 
                 <span className="font-bold text-[#4A1821]">
                   {Number(order.subtotal ?? order.total ?? 0).toFixed(2)} ر.س
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-sm text-[#806D70]">شركة الشحن</span>
+
+                <span className="font-bold text-[#4A1821]">
+                  {shippingMethodName || "-"}
                 </span>
               </div>
 
@@ -491,14 +657,26 @@ export default function OrderDetails() {
 
                 <span
                   className={
-                    (order.shipping ?? 0) === 0
+                    shippingAmount === 0
                       ? "font-bold text-emerald-600"
                       : "font-bold text-[#4A1821]"
                   }
                 >
-                  {(order.shipping ?? 0) > 0
-                    ? `${Number(order.shipping).toFixed(2)} ر.س`
+                  {shippingAmount > 0
+                    ? `${shippingAmount.toFixed(2)} ر.س`
                     : "مجاني 🎉"}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-sm text-[#806D70]">طريقة الدفع</span>
+
+                <span className="font-bold text-[#4A1821]">
+                  {order.paymentMethod === "cod" ||
+                  order.paymentMethod === "cash_on_delivery" ||
+                  !order.paymentMethod
+                    ? "الدفع عند الاستلام"
+                    : order.paymentMethod}
                 </span>
               </div>
 
@@ -525,9 +703,7 @@ export default function OrderDetails() {
             </div>
 
             <div>
-              <h2 className="font-black text-[#4A1821]">
-                سجل الطلب
-              </h2>
+              <h2 className="font-black text-[#4A1821]">سجل الطلب</h2>
 
               <p className="mt-0.5 text-xs text-[#806D70]">
                 التسلسل الزمني لتحديثات حالة الطلب
@@ -587,9 +763,7 @@ export default function OrderDetails() {
                 <FaExclamationTriangle />
               </div>
 
-              <h2 className="mt-4 text-2xl font-black">
-                حذف الطلب؟
-              </h2>
+              <h2 className="mt-4 text-2xl font-black">حذف الطلب؟</h2>
 
               <p className="mt-2 text-sm text-white/70">
                 هذا الإجراء سيحذف الطلب من لوحة التحكم.
@@ -599,9 +773,7 @@ export default function OrderDetails() {
             <div className="p-6 text-center">
               <p className="text-sm leading-7 text-[#806D70]">
                 هل أنت متأكد من حذف الطلب{" "}
-                <strong className="text-[#4A1821]">
-                  #{order.orderNumber}
-                </strong>
+                <strong className="text-[#4A1821]">#{order.orderNumber}</strong>
                 ؟
               </p>
 
@@ -630,4 +802,3 @@ export default function OrderDetails() {
     </AdminLayout>
   );
 }
-
