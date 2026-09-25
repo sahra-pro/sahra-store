@@ -129,7 +129,7 @@ export default function Footer() {
         {/* Bottom */}
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-[#71333F] pt-6 md:flex-row">
           <p className="text-sm text-[#CDB9BA]">
-            © 2026 سهرة ستور | جميع الحقوق محفوظة
+            © 2026 سهرة | جميع الحقوق محفوظة
           </p>
 
           <div className="flex gap-4 text-2xl">

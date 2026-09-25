@@ -6,6 +6,7 @@ import {
   FaShippingFast,
   FaBoxOpen,
 } from "react-icons/fa";
+import { FaGlobe, FaInfoCircle } from "react-icons/fa";
 
 export default function ShippingPolicy() {
   return (
@@ -52,24 +53,90 @@ export default function ShippingPolicy() {
 
             {/* Content */}
             <div className="space-y-8 p-6 md:p-12">
-              {/* Shipping Area */}
+              {/* Delivery Duration */}{" "}
               <div className="rounded-[24px] border border-[#E8D9D6] bg-[#FBF6F1] p-6 md:p-7">
-                <div className="mb-4 flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#F2E4E1] text-[#A83F55]">
-                    <FaMapMarkerAlt />
-                  </div>
-
-                  <h2 className="text-2xl font-black text-[#4A1821]">
-                    أين نقوم بالتوصيل؟
-                  </h2>
-                </div>
-
-                <p className="leading-8 text-[#806D70]">
-                  يتم شحن الطلبات إلى العناوين التي يحددها العميل أثناء إتمام
-                  الطلب، وفق نطاق التوصيل المتاح للمتجر وخدمة الشحن المستخدمة.
-                </p>
+                {" "}
+                {/* Header */}{" "}
+                <div className="mb-6 text-center">
+                  {" "}
+                  <p className="text-xs font-black tracking-[0.3em] text-[#A83F55]">
+                    {" "}
+                    SAHRA™{" "}
+                  </p>{" "}
+                  <div className="mt-2 flex items-center justify-center gap-3">
+                    {" "}
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#F2E4E1] text-[#A83F55]">
+                      {" "}
+                      <FaTruck />{" "}
+                    </div>{" "}
+                    <h2 className="text-2xl font-black text-[#4A1821]">
+                      {" "}
+                      مدة التوصيل{" "}
+                    </h2>{" "}
+                  </div>{" "}
+                </div>{" "}
+                {/* Delivery Times */}{" "}
+                <div className="grid gap-4 sm:grid-cols-3">
+                  {" "}
+                  {/* Saudi Arabia */}{" "}
+                  <div className="group rounded-2xl border border-[#E8D9D6] bg-white p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:border-[#D6A5AD] hover:shadow-[0_12px_30px_rgba(74,24,33,0.08)]">
+                    {" "}
+                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#F2E4E1] text-[#641F2B]">
+                      {" "}
+                      <FaTruck />{" "}
+                    </div>{" "}
+                    <h3 className="font-black text-[#4A1821]">
+                      {" "}
+                      السعودية{" "}
+                    </h3>{" "}
+                    <p className="mt-2 text-sm font-bold text-[#A83F55]">
+                      {" "}
+                      خلال 3 أيام عمل{" "}
+                    </p>{" "}
+                  </div>{" "}
+                  {/* Gulf Countries */}{" "}
+                  <div className="group rounded-2xl border border-[#E8D9D6] bg-white p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:border-[#D6A5AD] hover:shadow-[0_12px_30px_rgba(74,24,33,0.08)]">
+                    {" "}
+                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#F2E4E1] text-[#641F2B]">
+                      {" "}
+                      <FaGlobe />{" "}
+                    </div>{" "}
+                    <h3 className="font-black text-[#4A1821]">
+                      {" "}
+                      دول الخليج{" "}
+                    </h3>{" "}
+                    <p className="mt-2 text-sm font-bold text-[#A83F55]">
+                      {" "}
+                      خلال 6 أيام عمل{" "}
+                    </p>{" "}
+                  </div>{" "}
+                  {/* Turkey */}{" "}
+                  <div className="group rounded-2xl border border-[#E8D9D6] bg-white p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:border-[#D6A5AD] hover:shadow-[0_12px_30px_rgba(74,24,33,0.08)]">
+                    {" "}
+                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#F2E4E1] text-[#641F2B]">
+                      {" "}
+                      <FaMapMarkerAlt />{" "}
+                    </div>{" "}
+                    <h3 className="font-black text-[#4A1821]"> تركيا </h3>{" "}
+                    <p className="mt-2 text-sm font-bold text-[#A83F55]">
+                      {" "}
+                      في نفس اليوم{" "}
+                    </p>{" "}
+                  </div>{" "}
+                </div>{" "}
+                {/* Note */}{" "}
+                <div className="mt-6 flex items-start gap-3 rounded-2xl border border-[#E8D9D6] bg-white/70 p-4">
+                  {" "}
+                  <div className="mt-0.5 shrink-0 text-[#D49B35]">
+                    {" "}
+                    <FaInfoCircle />{" "}
+                  </div>{" "}
+                  <p className="text-sm leading-7 text-[#806D70]">
+                    {" "}
+                    قد تختلف المدة في حالات استثنائية لدى شركة الشحن.{" "}
+                  </p>{" "}
+                </div>{" "}
               </div>
-
               {/* Processing */}
               <div>
                 <div className="mb-4 flex items-center gap-3">
@@ -88,7 +155,6 @@ export default function ShippingPolicy() {
                   وطبيعة الطلب.
                 </p>
               </div>
-
               {/* Delivery Time */}
               <div>
                 <div className="mb-4 flex items-center gap-3">
@@ -129,7 +195,6 @@ export default function ShippingPolicy() {
                   الظروف التشغيلية، أو أي عوامل خارجة عن نطاق المتجر.
                 </p>
               </div>
-
               {/* Shipping Fees */}
               <div className="rounded-[24px] bg-[#641F2B] p-6 text-white md:p-8">
                 <div className="mb-4 flex items-center gap-3">
@@ -146,7 +211,6 @@ export default function ShippingPolicy() {
                   للشحن المجاني من وقت لآخر.
                 </p>
               </div>
-
               {/* Tracking */}
               <div>
                 <h2 className="mb-4 text-2xl font-black text-[#4A1821]">
@@ -159,7 +223,6 @@ export default function ShippingPolicy() {
                   عند وجود أي استفسار متعلق بالطلب أو التوصيل.
                 </p>
               </div>
-
               {/* Important Note */}
               <div className="rounded-[24px] border border-[#E8D9D6] bg-[#F7EEE9] p-6">
                 <h2 className="mb-3 text-lg font-black text-[#4A1821]">
@@ -172,7 +235,6 @@ export default function ShippingPolicy() {
                   التوصيل وتجنب التأخير.
                 </p>
               </div>
-
               {/* Footer */}
               <div className="border-t border-[#E8D9D6] pt-7 text-center">
                 <p className="text-sm leading-7 text-[#806D70]">

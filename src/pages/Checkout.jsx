@@ -1400,16 +1400,22 @@ function Checkout() {
                           >
                             <div className="flex min-w-0 items-center gap-3">
                               <div
-                                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
+                                className={`flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border ${
                                   methodIsSelected
-                                    ? "bg-[#641F2B] text-white"
-                                    : "bg-[#F2E4E1] text-[#641F2B]"
+                                    ? "border-[#641F2B] bg-white"
+                                    : "border-[#E8D9D6] bg-[#F2E4E1]"
                                 }`}
                               >
-                                {methodIsSelected ? (
-                                  <CheckCircle2 className="h-4 w-4" />
+                                {method.logo ? (
+                                  <img
+                                    src={method.logo}
+                                    alt={method.name || "شركة الشحن"}
+                                    className="h-full w-full object-contain p-1.5"
+                                  />
+                                ) : methodIsSelected ? (
+                                  <CheckCircle2 className="h-4 w-4 text-[#641F2B]" />
                                 ) : (
-                                  <Truck className="h-4 w-4" />
+                                  <Truck className="h-4 w-4 text-[#641F2B]" />
                                 )}
                               </div>
 

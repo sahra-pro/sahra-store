@@ -84,7 +84,7 @@ function Hero() {
               >
                 <img
                   src={activeBanner.image}
-                  alt={`سهرة ستور - بانر ${safeBannerIndex + 1}`}
+                  alt={`سهرة  - بانر ${safeBannerIndex + 1}`}
                   className="h-auto w-full object-cover transition-transform duration-700 group-hover:scale-[1.01]"
                   loading={safeBannerIndex === 0 ? "eager" : "lazy"}
                   fetchPriority={safeBannerIndex === 0 ? "high" : "auto"}

@@ -277,7 +277,7 @@ export default function Home() {
   const { settings } = useSettings();
 
   useEffect(() => {
-    document.title = settings.seo?.title || settings.storeName || "سهرة ستور";
+    document.title = settings.seo?.title || settings.storeName || "سهرة ";
 
     const meta = document.querySelector('meta[name="description"]');
 
@@ -285,7 +285,7 @@ export default function Home() {
       meta.setAttribute(
         "content",
         settings.seo?.description ||
-          "سهرة ستور - متجر يوفر لك منتجات مختارة بعناية وتجربة تسوق مميزة.",
+          "سهرة متجر متخصص في المنتجات الأصلية للعناية الزوجية والمقويات الطبيعية، نختارها بعناية من تركيا ودول مختلفة حسب نوع المنتج. وجهتنا الأولى: السعودية ودول الخليج",
       );
     }
   }, [settings]);

@@ -152,7 +152,7 @@ export default function OrderConfirmation() {
               </div>
 
               <p className="mb-2 text-xs font-bold tracking-[0.25em] text-[#E8C9CE]">
-                سهرة ستور
+                سهرة 
               </p>
 
               <h1 className="text-3xl font-black leading-tight sm:text-4xl">
@@ -476,11 +476,11 @@ export default function OrderConfirmation() {
             {/* Brand Footer */}
             <div className="mt-10 border-t border-[#F0E6E3] pt-6 text-center">
               <p className="text-xs font-bold tracking-[0.25em] text-[#A83F55]">
-                SAHRA STORE
+                SAHRA 
               </p>
 
               <p className="mt-2 text-xs text-[#A69A9C]">
-                شكرًا لاختيارك سهرة ستور
+                شكرًا لاختيارك سهرة 
               </p>
             </div>
           </div>

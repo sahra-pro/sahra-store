@@ -87,6 +87,7 @@ function normalizeShippingMethods(methods) {
         .toString(36)
         .slice(2, 8)}`,
     name: method?.name || "",
+    logo: method?.logo || "",
     isDefault: method?.isDefault === true || index === 0,
     active: method?.active !== false,
     extraFee: Number.isFinite(Number(method?.extraFee))
@@ -114,6 +115,7 @@ function createShippingMethod() {
   return {
     id: `shipping-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     name: "",
+    logo: "",
     isDefault: false,
     active: true,
     extraFee: 6,
@@ -308,7 +310,33 @@ function Settings() {
       event.target.value = "";
     }
   };
+  const handleShippingLogoUpload = async (event, shippingId) => {
+    const file = event.target.files?.[0];
 
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      window.alert("يرجى اختيار صورة صحيحة.");
+      event.target.value = "";
+      return;
+    }
+
+    try {
+      const imageUrl = await uploadToCloudinary(file);
+
+      updateShippingMethod(shippingId, "logo", imageUrl);
+    } catch (error) {
+      console.error("Shipping logo upload error:", error);
+
+      window.alert(
+        error?.message || "حدث خطأ أثناء رفع شعار شركة الشحن. حاول مرة أخرى.",
+      );
+    } finally {
+      event.target.value = "";
+    }
+  };
   const removeBanner = (id) => {
     if (!window.confirm("هل أنت متأكد من حذف هذا البنر؟")) {
       return;
@@ -874,7 +902,53 @@ function Settings() {
                                     )}
                                   </div>
                                 </div>
+                                <div className="rounded-2xl border border-[#E8D9D6] bg-[#FBF6F1] p-4">
+                                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                    <div>
+                                      <p className="text-xs font-bold text-[#4A1821]">
+                                        شعار شركة الشحن
+                                      </p>
 
+                                      <p className="mt-1 text-[11px] leading-5 text-[#806D70]">
+                                        ارفع صورة أو شعار الشركة ليظهر للعملاء
+                                        عند اختيار شركة الشحن.
+                                      </p>
+                                    </div>
+
+                                    <div className="flex items-center gap-3">
+                                      <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border border-[#E8D9D6] bg-white">
+                                        {method.logo ? (
+                                          <img
+                                            src={method.logo}
+                                            alt={method.name || "شركة الشحن"}
+                                            className="h-full w-full object-contain p-2"
+                                          />
+                                        ) : (
+                                          <FaTruck className="text-xl text-[#641F2B]" />
+                                        )}
+                                      </div>
+
+                                      <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#641F2B] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#4A1821]">
+                                        <FaUpload />
+                                        {method.logo
+                                          ? "تغيير الصورة"
+                                          : "رفع الصورة"}
+
+                                        <input
+                                          type="file"
+                                          accept="image/*"
+                                          onChange={(e) =>
+                                            handleShippingLogoUpload(
+                                              e,
+                                              method.id,
+                                            )
+                                          }
+                                          className="hidden"
+                                        />
+                                      </label>
+                                    </div>
+                                  </div>
+                                </div>
                                 <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_180px]">
                                   <div>
                                     <label className="mb-2 block text-xs font-bold text-[#4A1821]">

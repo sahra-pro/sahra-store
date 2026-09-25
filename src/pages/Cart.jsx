@@ -54,7 +54,7 @@ export default function Cart() {
             </div>
 
             <p className="mt-7 text-xs font-bold tracking-[0.18em] text-[#A83F55]">
-              سهرة ستور
+              سهرة 
             </p>
 
             <h1 className="mt-3 text-3xl font-black text-[#4A1821] sm:text-4xl">
@@ -88,7 +88,7 @@ export default function Cart() {
         <div className="mb-8 md:mb-10">
           <div className="flex flex-col gap-2">
             <p className="text-xs font-bold tracking-[0.16em] text-[#A83F55]">
-              سهرة ستور
+              سهرة 
             </p>
 
             <h1 className="text-3xl font-black tracking-tight text-[#4A1821] sm:text-4xl">
