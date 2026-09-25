@@ -172,6 +172,7 @@ export function OrderProvider({ children }) {
     subtotal,
     shipping,
     total,
+    shippingCompany,
   }) => {
     const orderNumber = await getNextOrderNumber();
 
@@ -195,6 +196,8 @@ export function OrderProvider({ children }) {
       subtotal,
       shipping,
       total,
+
+      shippingCompany: shippingCompany || null,
 
       createdAt: serverTimestamp(),
     };
