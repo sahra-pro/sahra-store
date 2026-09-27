@@ -70,6 +70,7 @@ function CustomerReviews() {
   const visibleReviews = reviews.slice(0, 6);
 
   return (
+    
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
       {/* Section Header */}{" "}
       <div className="mx-auto mb-10 max-w-3xl text-center">
