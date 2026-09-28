@@ -12,20 +12,18 @@ export default async function handler(req, res) {
       });
     }
 
-    // نرسل orderId في الرابط:
-    // /api/treek-create-order?orderId=12345
     const { orderId } = req.query;
 
     if (!orderId) {
       return res.status(400).json({
         success: false,
         message: "يجب إرسال orderId",
-        example: "/api/treek-create-order?orderId=12345",
+        example: "/api/treek-create-order?orderId=ORD-1013",
       });
     }
 
     // --------------------------------------------------
-    // 1. التأكد من بيانات تسجيل الدخول
+    // 1. بيانات الدخول
     // --------------------------------------------------
 
     const email = process.env.TREEK_EMAIL;
@@ -68,8 +66,6 @@ export default async function handler(req, res) {
         message: "الطلب لا يحتوي على منتجات",
       });
     }
-
-    const customer = order.customer;
 
     // --------------------------------------------------
     // 3. تسجيل الدخول إلى Treek
@@ -114,7 +110,7 @@ export default async function handler(req, res) {
     };
 
     // --------------------------------------------------
-    // 4. جلب الدول والبحث عن السعودية
+    // 4. السعودية
     // --------------------------------------------------
 
     const countriesResponse = await fetch(`${TREEK_API}/countries`, {
@@ -140,20 +136,23 @@ export default async function handler(req, res) {
         country.code === "SA" ||
         country.iso2 === "SA" ||
         country.name === "Saudi Arabia" ||
-        country.name_ar === "المملكة العربية السعودية",
+        country.name_ar === "المملكة العربية السعودية" ||
+        country.name_ar === "السعودية",
     );
 
     if (!saudiCountry) {
       return res.status(500).json({
         success: false,
         step: "country",
-        message: "لم يتم العثور على المملكة العربية السعودية في Treek",
+        message: "لم يتم العثور على السعودية في Treek",
       });
     }
 
     // --------------------------------------------------
-    // 5. البحث عن مدينة العميل
+    // 5. مدينة العميل
     // --------------------------------------------------
+
+    const customer = order.customer;
 
     const customerCity = String(customer.city || "").trim();
 
@@ -188,7 +187,6 @@ export default async function handler(req, res) {
 
     const cities = citySearchData?.data || [];
 
-    // نبحث أولًا عن تطابق عربي أو إنجليزي كامل
     const normalizedCustomerCity = customerCity.toLowerCase();
 
     let matchedCity = cities.find(
@@ -199,7 +197,6 @@ export default async function handler(req, res) {
           .toLowerCase() === normalizedCustomerCity,
     );
 
-    // إذا لم يوجد تطابق كامل نستخدم أول نتيجة
     if (!matchedCity && cities.length > 0) {
       matchedCity = cities[0];
     }
@@ -214,7 +211,7 @@ export default async function handler(req, res) {
     }
 
     // --------------------------------------------------
-    // 6. جلب نوع التغليف الافتراضي
+    // 6. نوع التغليف
     // --------------------------------------------------
 
     const packagingResponse = await fetch(`${TREEK_API}/packaging-types`, {
@@ -250,7 +247,7 @@ export default async function handler(req, res) {
     }
 
     // --------------------------------------------------
-    // 7. تجهيز اسم العميل
+    // 7. اسم العميل
     // --------------------------------------------------
 
     const fullName = String(customer.name || "").trim();
@@ -270,7 +267,7 @@ export default async function handler(req, res) {
     const receiverLastName = nameParts.slice(1).join(" ") || "Customer";
 
     // --------------------------------------------------
-    // 8. تجهيز رقم الجوال
+    // 8. رقم الجوال
     // --------------------------------------------------
 
     let receiverPhone = String(customer.phone || "").replace(/\s/g, "");
@@ -283,23 +280,20 @@ export default async function handler(req, res) {
       });
     }
 
-    // 05xxxxxxxx → +9665xxxxxxxx
     if (/^05\d{8}$/.test(receiverPhone)) {
       receiverPhone = `+966${receiverPhone.substring(1)}`;
     }
 
-    // 5xxxxxxxx → +9665xxxxxxxx
     if (/^5\d{8}$/.test(receiverPhone)) {
       receiverPhone = `+966${receiverPhone}`;
     }
 
-    // 9665xxxxxxxx → +9665xxxxxxxx
     if (/^9665\d{8}$/.test(receiverPhone)) {
       receiverPhone = `+${receiverPhone}`;
     }
 
     // --------------------------------------------------
-    // 9. تجهيز عنوان العميل
+    // 9. العنوان
     // --------------------------------------------------
 
     const receiverAddressLine = String(
@@ -325,10 +319,7 @@ export default async function handler(req, res) {
     }
 
     // --------------------------------------------------
-    // 10. تجهيز المنتجات
-    //
-    // حسب اتفاقنا:
-    // كل منتج = 100 جرام
+    // 10. المنتجات والأوزان
     // --------------------------------------------------
 
     let totalWeight = 0;
@@ -337,9 +328,7 @@ export default async function handler(req, res) {
       const quantity = Number(item.quantity || 0);
       const price = Number(item.price || 0);
 
-      const itemWeight = quantity * 100;
-
-      totalWeight += itemWeight;
+      totalWeight += quantity * 100;
 
       return {
         name: String(item.name || "Product"),
@@ -358,19 +347,17 @@ export default async function handler(req, res) {
     }
 
     // --------------------------------------------------
-    // 11. تجهيز بيانات Treek
+    // 11. تجهيز الطلب
     // --------------------------------------------------
 
     const treekPayload = {
       receiver_first_name: receiverFirstName,
       receiver_last_name: receiverLastName,
-
       receiver_phone: receiverPhone,
 
       receiver_address_line: receiverAddressLine,
 
       receiver_city_id: matchedCity.id,
-
       receiver_country_id: saudiCountry.id,
 
       receiver_short_address: receiverShortAddress,
@@ -379,7 +366,6 @@ export default async function handler(req, res) {
 
       order_grand_total: Math.round(Number(order.total || 0)),
 
-      // متجرنا حاليًا يستخدم الدفع عند الاستلام
       payment_method: "cod",
 
       items: treekItems,
@@ -396,61 +382,93 @@ export default async function handler(req, res) {
     };
 
     // --------------------------------------------------
-    // 12. المرحلة الأولى:
-    // لا يتم إرسال الطلب إلى Treek
+    // 12. منع إنشاء الشحنة مرتين
     // --------------------------------------------------
 
-    return res.status(200).json({
+    if (order.treek?.orderNumber || order.treek?.id) {
+      return res.status(409).json({
+        success: false,
+        step: "duplicate",
+        message: "هذا الطلب لديه طلب Treek مسجل مسبقًا",
+        treek: order.treek,
+      });
+    }
+
+    // --------------------------------------------------
+    // 13. إنشاء الطلب فعليًا في Treek
+    // --------------------------------------------------
+
+    const createResponse = await fetch(`${TREEK_API}/orders`, {
+      method: "POST",
+      headers: {
+        ...headers,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(treekPayload),
+    });
+
+    const createData = await createResponse.json();
+
+    if (!createResponse.ok) {
+      return res.status(createResponse.status).json({
+        success: false,
+        step: "create-order",
+        message: "فشل إنشاء الطلب في Treek",
+        status: createResponse.status,
+        details: createData,
+        payload: treekPayload,
+      });
+    }
+
+    const treekOrder = createData?.data;
+
+    if (!treekOrder) {
+      return res.status(500).json({
+        success: false,
+        step: "create-order",
+        message: "Treek لم يرجع بيانات الطلب بعد الإنشاء",
+        response: createData,
+      });
+    }
+
+    // --------------------------------------------------
+    // 14. حفظ بيانات Treek داخل Firestore
+    // --------------------------------------------------
+
+    await orderRef.update({
+      treek: {
+        id: treekOrder.id || null,
+        orderNumber: treekOrder.order_number || null,
+        status: treekOrder.status || null,
+        createdAt: treekOrder.created_at || new Date().toISOString(),
+      },
+    });
+
+    // --------------------------------------------------
+    // 15. النتيجة
+    // --------------------------------------------------
+
+    return res.status(201).json({
       success: true,
-
-      testMode: true,
-
-      message: "تم تجهيز بيانات الطلب بنجاح. لم يتم إنشاء الطلب في Treek.",
+      message: "تم إنشاء طلب Treek بنجاح",
 
       order: {
         id: String(orderId),
         orderNumber: order.orderNumber || String(orderId),
-        status: order.status || null,
-      },
-
-      customer: {
-        name: fullName,
-        phone: receiverPhone,
-        cityFromStore: customerCity,
       },
 
       treek: {
-        warehouse: {
-          id: TREEK_WAREHOUSE_ID,
-          name: "sahra",
-        },
-
-        country: {
-          id: saudiCountry.id,
-          name: saudiCountry.name,
-          name_ar: saudiCountry.name_ar,
-        },
-
-        city: {
-          id: matchedCity.id,
-          name: matchedCity.name,
-          name_ar: matchedCity.name_ar,
-        },
-
-        packaging: {
-          id: defaultPackaging.id,
-          name: defaultPackaging.name,
-        },
-
-        payload: treekPayload,
+        id: treekOrder.id || null,
+        orderNumber: treekOrder.order_number || null,
+        status: treekOrder.status || null,
       },
     });
   } catch (error) {
-    console.error("Treek create-order test error:", error);
+    console.error("Treek create-order error:", error);
 
     return res.status(500).json({
       success: false,
-      message: "حدث خطأ غير متوقع أثناء تجهيز طلب Treek",
+      message: "حدث خطأ غير متوقع أثناء إنشاء طلب Treek",
       error: error.message,
     });
   }
