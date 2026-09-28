@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   FaArrowRight,
@@ -62,12 +62,112 @@ export default function OrderDetails() {
   const { getOrderById, updateOrderStatus, deleteOrder } = useOrders();
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [statusUpdating, setStatusUpdating] = useState(false);
+  const [statusNotification, setStatusNotification] = useState(null);
 
   const order = getOrderById(id);
+  const handleStatusChange = async (newStatus) => {
+    if (newStatus === order.status || statusUpdating) return;
 
+    setStatusUpdating(true);
+    setStatusNotification(null);
+
+    try {
+      await updateOrderStatus(order.id, newStatus);
+
+      setStatusNotification({
+        type: "success",
+        message:
+          newStatus === "processing"
+            ? "تم تجهيز الطلب وإنشاء أو تأكيد الشحنة في Treek بنجاح."
+            : `تم تغيير حالة الطلب إلى ${
+                ORDER_STATUSES[newStatus] || newStatus
+              } بنجاح.`,
+      });
+    } catch (error) {
+      console.error("Status update error:", error);
+
+      setStatusNotification({
+        type: "error",
+        message:
+          error?.message || "تعذر تحديث حالة الطلب. يرجى المحاولة مرة أخرى.",
+      });
+    } finally {
+      setStatusUpdating(false);
+    }
+  };
+  useEffect(() => {
+    if (!statusNotification) return;
+
+    const timer = setTimeout(() => {
+      setStatusNotification(null);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [statusNotification]);
   if (!order) {
     return (
       <AdminLayout>
+        {statusNotification && (
+          <div
+            className={`fixed left-5 top-5 z-[100] w-[calc(100%-40px)] max-w-md overflow-hidden rounded-2xl border bg-white shadow-2xl ${
+              statusNotification.type === "success"
+                ? "border-emerald-200"
+                : "border-rose-200"
+            }`}
+          >
+            <div className="flex items-start gap-4 p-4">
+              <div
+                className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl text-lg ${
+                  statusNotification.type === "success"
+                    ? "bg-emerald-100 text-emerald-600"
+                    : "bg-rose-100 text-rose-600"
+                }`}
+              >
+                {statusNotification.type === "success" ? (
+                  <FaCheckCircle />
+                ) : (
+                  <FaExclamationTriangle />
+                )}
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <p
+                  className={`font-black ${
+                    statusNotification.type === "success"
+                      ? "text-emerald-700"
+                      : "text-rose-700"
+                  }`}
+                >
+                  {statusNotification.type === "success"
+                    ? "تم بنجاح"
+                    : "تعذر تحديث الحالة"}
+                </p>
+
+                <p className="mt-1 text-sm leading-6 text-[#806D70]">
+                  {statusNotification.message}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setStatusNotification(null)}
+                className="text-xl leading-none text-[#806D70] transition hover:text-[#4A1821]"
+                aria-label="إغلاق"
+              >
+                ×
+              </button>
+            </div>
+
+            <div
+              className={`h-1 ${
+                statusNotification.type === "success"
+                  ? "bg-emerald-500"
+                  : "bg-rose-500"
+              }`}
+            />
+          </div>
+        )}
         <div className="mx-auto mt-10 max-w-3xl rounded-[32px] border border-[#E8D9D6] bg-white p-10 text-center shadow-[0_15px_45px_rgba(74,24,33,0.07)]">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#F2E4E1] text-2xl text-[#641F2B]">
             <FaBox />
@@ -221,10 +321,13 @@ export default function OrderDetails() {
 
                   <select
                     value={order.status}
-                    onChange={(e) =>
-                      updateOrderStatus(order.id, e.target.value)
-                    }
-                    className="cursor-pointer bg-transparent font-black outline-none"
+                    disabled={statusUpdating}
+                    onChange={(e) => handleStatusChange(e.target.value)}
+                    className={`bg-transparent font-black outline-none ${
+                      statusUpdating
+                        ? "cursor-wait opacity-60"
+                        : "cursor-pointer"
+                    }`}
                   >
                     {Object.entries(ORDER_STATUSES).map(([key, label]) => (
                       <option key={key} value={key}>
