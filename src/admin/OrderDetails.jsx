@@ -108,66 +108,6 @@ export default function OrderDetails() {
   if (!order) {
     return (
       <AdminLayout>
-        {statusNotification && (
-          <div
-            className={`fixed left-5 top-5 z-[100] w-[calc(100%-40px)] max-w-md overflow-hidden rounded-2xl border bg-white shadow-2xl ${
-              statusNotification.type === "success"
-                ? "border-emerald-200"
-                : "border-rose-200"
-            }`}
-          >
-            <div className="flex items-start gap-4 p-4">
-              <div
-                className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl text-lg ${
-                  statusNotification.type === "success"
-                    ? "bg-emerald-100 text-emerald-600"
-                    : "bg-rose-100 text-rose-600"
-                }`}
-              >
-                {statusNotification.type === "success" ? (
-                  <FaCheckCircle />
-                ) : (
-                  <FaExclamationTriangle />
-                )}
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <p
-                  className={`font-black ${
-                    statusNotification.type === "success"
-                      ? "text-emerald-700"
-                      : "text-rose-700"
-                  }`}
-                >
-                  {statusNotification.type === "success"
-                    ? "تم بنجاح"
-                    : "تعذر تحديث الحالة"}
-                </p>
-
-                <p className="mt-1 text-sm leading-6 text-[#806D70]">
-                  {statusNotification.message}
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setStatusNotification(null)}
-                className="text-xl leading-none text-[#806D70] transition hover:text-[#4A1821]"
-                aria-label="إغلاق"
-              >
-                ×
-              </button>
-            </div>
-
-            <div
-              className={`h-1 ${
-                statusNotification.type === "success"
-                  ? "bg-emerald-500"
-                  : "bg-rose-500"
-              }`}
-            />
-          </div>
-        )}
         <div className="mx-auto mt-10 max-w-3xl rounded-[32px] border border-[#E8D9D6] bg-white p-10 text-center shadow-[0_15px_45px_rgba(74,24,33,0.07)]">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#F2E4E1] text-2xl text-[#641F2B]">
             <FaBox />
@@ -267,6 +207,54 @@ export default function OrderDetails() {
   return (
     <AdminLayout>
       <div className="mx-auto max-w-[1600px] pb-10">
+        {statusNotification && (
+          <div
+            className={`mb-5 flex items-start gap-4 rounded-2xl border p-4 shadow-lg ${
+              statusNotification.type === "success"
+                ? "border-emerald-200 bg-emerald-50"
+                : "border-rose-200 bg-rose-50"
+            }`}
+          >
+            <div
+              className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl ${
+                statusNotification.type === "success"
+                  ? "bg-emerald-100 text-emerald-600"
+                  : "bg-rose-100 text-rose-600"
+              }`}
+            >
+              {statusNotification.type === "success" ? (
+                <FaCheckCircle />
+              ) : (
+                <FaExclamationTriangle />
+              )}
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <h3
+                className={`font-black ${
+                  statusNotification.type === "success"
+                    ? "text-emerald-800"
+                    : "text-rose-800"
+                }`}
+              >
+                {statusNotification.title}
+              </h3>
+
+              <p className="mt-1 text-sm leading-6 text-[#806D70]">
+                {statusNotification.message}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setStatusNotification(null)}
+              className="text-xl font-bold text-[#806D70] hover:text-[#4A1821]"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         {/* Back */}
         <button
           type="button"
@@ -335,6 +323,11 @@ export default function OrderDetails() {
                       </option>
                     ))}
                   </select>
+                  {statusUpdating && (
+                    <span className="mr-1 text-xs font-bold">
+                      جاري التحديث...
+                    </span>
+                  )}
                 </div>
 
                 <OrderInvoice order={order} />
