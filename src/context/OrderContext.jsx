@@ -220,7 +220,52 @@ export function OrderProvider({ children }) {
 
     if (!order) return;
 
+    // ==================================================
+    // عند تحويل الطلب إلى "قيد التجهيز"
+    // ننشئ الشحنة في Treek أولًا
+    // ==================================================
+
+    if (status === "processing" && order.status !== "processing") {
+      try {
+        // إذا كانت الشحنة موجودة مسبقًا في Treek
+        // لا ننشئ شحنة جديدة
+        if (!order.treek?.id && !order.treek?.orderNumber) {
+          const response = await fetch(
+            `/api/treek-create-order?orderId=${encodeURIComponent(id)}`,
+            {
+              method: "GET",
+              headers: {
+                Accept: "application/json",
+              },
+            },
+          );
+
+          const data = await response.json();
+
+          if (!response.ok || !data.success) {
+            console.error("Treek create order error:", data);
+
+            throw new Error(data?.message || "فشل إنشاء الطلب في Treek");
+          }
+        }
+      } catch (error) {
+        console.error("Treek integration error:", error);
+
+        throw new Error(
+          error.message ||
+            "تعذر إنشاء الشحنة في Treek، لذلك لم يتم تغيير حالة الطلب.",
+          {
+            cause: error,
+          },
+        );
+      }
+    }
+
+    // ==================================================
     // خصم المخزون عند اكتمال الطلب
+    // هذا المنطق كما هو بدون تغيير
+    // ==================================================
+
     if (status === "completed" && order.status !== "completed") {
       for (const item of order.items) {
         const productRef = doc(db, "products", item.id);
@@ -242,6 +287,10 @@ export function OrderProvider({ children }) {
       }
     }
 
+    // ==================================================
+    // تحديث حالة الطلب والسجل
+    // ==================================================
+
     const newHistory = [
       ...(order.history || []),
       {
@@ -255,7 +304,6 @@ export function OrderProvider({ children }) {
       history: newHistory,
     });
   };
-
   // حذف طلب
   const deleteOrder = async (id) => {
     await deleteDoc(doc(db, "orders", id));
