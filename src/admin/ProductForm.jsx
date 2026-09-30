@@ -11,6 +11,7 @@ import {
   FaSearch,
   FaInfoCircle,
   FaCheckCircle,
+  FaThumbtack,
 } from "react-icons/fa";
 
 import AdminLayout from "../components/layout/AdminLayout";
@@ -32,6 +33,9 @@ const emptyProduct = {
 
   category: "",
   categories: [],
+
+  promoTitle: "",
+  isPinned: false,
 
   description: "",
   usage: "",
@@ -63,6 +67,9 @@ function ProductForm() {
         categories:
           existingProduct.categories ||
           (existingProduct.category ? [existingProduct.category] : []),
+
+        promoTitle: existingProduct.promoTitle || "",
+        isPinned: Boolean(existingProduct.isPinned),
       };
     }
 
@@ -196,6 +203,10 @@ function ProductForm() {
       categories: form.categories,
 
       category: form.categories[0] || "",
+
+      promoTitle: form.promoTitle?.trim() || "",
+
+      isPinned: Boolean(form.isPinned),
 
       price: Number(form.price),
 
@@ -360,6 +371,26 @@ function ProductForm() {
                     placeholder="0"
                     className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-[#A83F55] focus:ring-4 focus:ring-[#A83F55]/10"
                   />
+                </div>
+
+                {/* العنوان الترويجي */}
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    العنوان الترويجي
+                  </label>
+
+                  <input
+                    type="text"
+                    value={form.promoTitle}
+                    onChange={(e) => handleChange("promoTitle", e.target.value)}
+                    placeholder="مثال: أصلي 100%"
+                    maxLength={60}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#A83F55] focus:ring-4 focus:ring-[#A83F55]/10"
+                  />
+
+                  <p className="mt-1.5 text-[11px] text-slate-400">
+                    يظهر هذا العنوان أعلى بطاقة المنتج في المتجر.
+                  </p>
                 </div>
               </div>
             </section>
@@ -679,6 +710,80 @@ function ProductForm() {
               </div>
             </section>
 
+            {/* تثبيت المنتج */}
+            <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div className="border-b border-slate-100 px-5 py-4">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg transition ${
+                      form.isPinned
+                        ? "bg-[#641F2B] text-white"
+                        : "bg-[#F2E4E1] text-[#641F2B]"
+                    }`}
+                  >
+                    <FaThumbtack />
+                  </div>
+
+                  <div>
+                    <h2 className="text-sm font-bold text-slate-900">
+                      تثبيت المنتج
+                    </h2>
+
+                    <p className="mt-1 text-[11px] text-slate-400">
+                      اجعل المنتج يظهر أولًا
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setForm((prev) => ({
+                      ...prev,
+                      isPinned: !prev.isPinned,
+                    }))
+                  }
+                  className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-right transition ${
+                    form.isPinned
+                      ? "border-[#641F2B] bg-[#F2E4E1] text-[#641F2B]"
+                      : "border-slate-200 bg-white text-slate-600 hover:border-[#E8D9D6] hover:bg-slate-50"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <FaThumbtack
+                      className={form.isPinned ? "rotate-[-20deg]" : ""}
+                    />
+
+                    <div>
+                      <span className="block text-sm font-bold">
+                        {form.isPinned ? "المنتج مثبت" : "تثبيت هذا المنتج"}
+                      </span>
+
+                      <span className="mt-0.5 block text-[11px] text-slate-400">
+                        {form.isPinned
+                          ? "سيظهر قبل المنتجات غير المثبتة"
+                          : "سيظهر في مقدمة المنتجات"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <span
+                    className={`relative h-6 w-11 rounded-full transition ${
+                      form.isPinned ? "bg-[#641F2B]" : "bg-slate-200"
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow-sm transition ${
+                        form.isPinned ? "right-1" : "right-6"
+                      }`}
+                    />
+                  </span>
+                </button>
+              </div>
+            </section>
+
             {/* ملخص المنتج */}
             <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
               <div className="border-b border-slate-100 px-5 py-4">
@@ -719,6 +824,19 @@ function ProductForm() {
                   <span className="text-slate-500">التصنيفات</span>
                   <span className="font-bold text-slate-800">
                     {form.categories.length}
+                  </span>
+                </div>
+
+                <div className="h-px bg-slate-100" />
+
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-500">التثبيت</span>
+                  <span
+                    className={`font-bold ${
+                      form.isPinned ? "text-[#641F2B]" : "text-slate-400"
+                    }`}
+                  >
+                    {form.isPinned ? "مثبت" : "غير مثبت"}
                   </span>
                 </div>
               </div>

@@ -12,6 +12,7 @@ import {
   FaChevronDown,
   FaTags,
   FaArrowLeft,
+  FaThumbtack,
 } from "react-icons/fa";
 
 import { useStore } from "../hooks/useStore";
@@ -151,6 +152,18 @@ export default function Products() {
     });
 
     return [...filtered].sort((a, b) => {
+      /*
+       * المنتجات المثبتة لها أولوية دائمًا.
+       * لذلك تظهر قبل المنتجات غير المثبتة حتى عند استخدام
+       * ترتيب السعر أو الخصم أو الاسم أو الأحدث.
+       */
+      const pinnedA = Boolean(a.isPinned);
+      const pinnedB = Boolean(b.isPinned);
+
+      if (pinnedA !== pinnedB) {
+        return pinnedB ? 1 : -1;
+      }
+
       const priceA = Number(a.price || 0);
       const priceB = Number(b.price || 0);
 
@@ -541,9 +554,31 @@ export default function Products() {
                       key={product.id}
                       className="group relative overflow-hidden rounded-[18px] border border-[#E8D9D6] bg-white shadow-[0_5px_20px_rgba(74,24,33,0.045)] transition-all duration-500 hover:-translate-y-1 hover:border-[#D6A5AD] hover:shadow-[0_16px_40px_rgba(74,24,33,0.11)] md:rounded-[24px]"
                     >
-                      {discount > 0 && (
-                        <div className="absolute right-2 top-2 z-20 rounded-full bg-[#641F2B] px-2 py-1 text-[8px] font-black text-white shadow-sm md:right-3 md:top-3 md:px-3 md:py-1.5 md:text-xs">
-                          خصم {discount}%
+                      {/* العنوان الترويجي */}
+                      {product.promoTitle && (
+                        <div className="absolute right-2 top-2 z-20 max-w-[calc(100%-4rem)] rounded-full border border-white/30 bg-[#4A1821]/90 px-2.5 py-1 text-[8px] font-black text-white shadow-md backdrop-blur-sm md:right-3 md:top-3 md:px-3.5 md:py-1.5 md:text-xs">
+                          {product.promoTitle}
+                        </div>
+                      )}
+
+                      {/* تثبيت المنتج */}
+                      {product.isPinned && (
+                        <div
+                          className={`absolute z-20 flex h-7 w-7 items-center justify-center rounded-full bg-white text-[#641F2B] shadow-md md:h-9 md:w-9 ${
+                            product.promoTitle
+                              ? "right-2 top-10 md:right-3 md:top-12"
+                              : "right-2 top-2 md:right-3 md:top-3"
+                          } ${
+                            discount > 0
+                              ? product.promoTitle
+                                ? "translate-y-9 md:translate-y-11"
+                                : "translate-y-9 md:translate-y-11"
+                              : ""
+                          }`}
+                          title="منتج مثبت"
+                          aria-label="منتج مثبت"
+                        >
+                          <FaThumbtack className="rotate-[-20deg] text-[10px] md:text-xs" />
                         </div>
                       )}
 
@@ -602,17 +637,25 @@ export default function Products() {
                           </span>
                         </div>
 
-                        <div className="mt-2 flex flex-wrap items-center gap-1.5 md:mt-4 md:gap-3">
-                          <span className="text-[14px] font-black text-[#641F2B] md:text-2xl">
-                            {product.price}
-                            <span className="mr-0.5 text-[8px] font-bold md:mr-1 md:text-sm">
-                              ر.س
+                        <div className="mt-2 flex items-center justify-between gap-2 md:mt-4">
+                          <div className="flex min-w-0 items-center gap-1.5 md:gap-3">
+                            <span className="text-[14px] font-black text-[#641F2B] md:text-2xl">
+                              {product.price}
+                              <span className="mr-0.5 text-[8px] font-bold md:mr-1 md:text-sm">
+                                ر.س
+                              </span>
                             </span>
-                          </span>
+
+                            {discount > 0 && (
+                              <span className="text-[8px] text-[#B5A5A7] line-through md:text-sm">
+                                {product.oldPrice} ر.س
+                              </span>
+                            )}
+                          </div>
 
                           {discount > 0 && (
-                            <span className="text-[8px] text-[#B5A5A7] line-through md:text-sm">
-                              {product.oldPrice} ر.س
+                            <span className="flex-shrink-0 rounded-full bg-[#641F2B] px-2 py-1 text-[8px] font-black text-white md:px-3 md:py-1.5 md:text-xs">
+                              خصم {discount}%
                             </span>
                           )}
                         </div>
