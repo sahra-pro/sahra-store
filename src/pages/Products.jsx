@@ -419,14 +419,47 @@ export default function Products() {
 
             {/* CATEGORY BANNER */}
             {activeCategory && categoryBanner && (
-              <div className="mb-7 overflow-hidden rounded-[24px] border border-[#E8D9D6] bg-white shadow-[0_10px_35px_rgba(74,24,33,0.07)] md:mb-10 md:rounded-[30px]">
-                <img
-                  src={optimizeCloudinaryImage(categoryBanner, 1600)}
-                  alt={`بانر ${activeCategory}`}
-                  loading="eager"
-                  decoding="async"
-                  className="block h-auto max-h-[420px] w-full object-cover"
-                />
+              <div className="group relative mb-8 overflow-hidden rounded-[28px] border border-[#E8D9D6] bg-[#4A1821] shadow-[0_18px_55px_rgba(74,24,33,0.12)] md:mb-12 md:rounded-[36px]">
+                <div className="relative aspect-[16/7] min-h-[190px] w-full overflow-hidden sm:min-h-[230px] md:aspect-[16/6] md:min-h-[280px] lg:min-h-[320px]">
+                  <img
+                    src={optimizeCloudinaryImage(categoryBanner, 1800)}
+                    alt={`بانر ${activeCategory}`}
+                    loading="eager"
+                    decoding="async"
+                    className="h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.025]"
+                  />
+
+                  {/* Luxury overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-l from-[#2D1017]/85 via-[#4A1821]/35 to-transparent" />
+
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#2D1017]/45 via-transparent to-transparent" />
+
+                  {/* Decorative glow */}
+                  <div className="pointer-events-none absolute -left-20 -top-20 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
+
+                  {/* Content */}
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="max-w-2xl px-6 text-right sm:px-10 md:px-14 lg:px-16">
+                      <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[9px] font-bold text-white/90 backdrop-blur-md sm:text-[10px] md:px-4 md:py-2">
+                        <span className="h-1.5 w-1.5 rounded-full bg-[#F2E4E1] shadow-[0_0_10px_rgba(242,228,225,0.8)]" />
+                        قسم من سهرة
+                      </div>
+
+                      <h2 className="text-2xl font-black leading-tight text-white drop-shadow-sm sm:text-3xl md:text-4xl lg:text-5xl">
+                        {activeCategory}
+                      </h2>
+
+                      <p className="mt-2 max-w-md text-[10px] leading-6 text-white/70 sm:text-xs md:mt-3 md:text-sm md:leading-7">
+                        اكتشف مجموعتنا المختارة من منتجات هذا القسم
+                      </p>
+
+                      <div className="mt-4 h-px w-16 bg-white/40 md:mt-5 md:w-20" />
+                    </div>
+                  </div>
+
+                  {/* Bottom shine */}
+                  <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+                </div>
               </div>
             )}
 
@@ -648,4 +681,3 @@ export default function Products() {
     </>
   );
 }
-  
