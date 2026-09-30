@@ -82,14 +82,18 @@ function Checkout() {
     defaultShippingMethod;
 
   const baseShippingFee = Number(settings?.shipping?.shippingFee || 0);
+  const hasFreeShippingProduct = cartItems.some(
+    (item) => item?.freeShipping === true,
+  );
 
   const freeShippingThreshold = Number(
     settings?.shipping?.freeShippingThreshold || 0,
   );
 
   const isFreeShipping =
-    freeShippingThreshold > 0 &&
-    Number(cartTotal || 0) >= freeShippingThreshold;
+    hasFreeShippingProduct ||
+    (freeShippingThreshold > 0 &&
+      Number(cartTotal || 0) >= freeShippingThreshold);
 
   const baseShippingCost = isFreeShipping ? 0 : baseShippingFee;
 
@@ -1459,14 +1463,21 @@ function Checkout() {
                       </p>
                     )}
 
-                    {freeShippingThreshold > 0 && !isFreeShipping && (
-                      <div className="rounded-xl bg-[#F7EEE9] px-3.5 py-3 text-[10px] leading-5 text-[#806D70]">
-                        الشحن الأساسي يصبح مجانيًا عند وصول الطلب إلى{" "}
-                        <strong className="text-[#641F2B]">
-                          {freeShippingThreshold.toFixed(2)} ر.س
-                        </strong>
-                        .
+                    {hasFreeShippingProduct ? (
+                      <div className="rounded-xl bg-[#F1F6E8] px-3.5 py-3 text-[10px] leading-5 text-[#5F7132]">
+                        يوجد منتج في طلبك مؤهل للشحن المجاني.
                       </div>
+                    ) : (
+                      freeShippingThreshold > 0 &&
+                      !isFreeShipping && (
+                        <div className="rounded-xl bg-[#F7EEE9] px-3.5 py-3 text-[10px] leading-5 text-[#806D70]">
+                          الشحن الأساسي يصبح مجانيًا عند وصول الطلب إلى{" "}
+                          <strong className="text-[#641F2B]">
+                            {freeShippingThreshold.toFixed(2)} ر.س
+                          </strong>
+                          .
+                        </div>
+                      )
                     )}
                   </div>
 

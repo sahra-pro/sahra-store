@@ -20,10 +20,15 @@ export default function Cart() {
 
   const shippingFee = settings?.shipping?.shippingFee || 0;
 
+  const hasFreeShippingProduct = cartItems.some(
+    (item) => item?.freeShipping === true,
+  );
+
   const freeShippingThreshold = settings?.shipping?.freeShippingThreshold || 0;
 
   const shippingCost =
-    freeShippingThreshold > 0 && cartTotal >= freeShippingThreshold
+    hasFreeShippingProduct ||
+    (freeShippingThreshold > 0 && cartTotal >= freeShippingThreshold)
       ? 0
       : shippingFee;
 
@@ -54,7 +59,7 @@ export default function Cart() {
             </div>
 
             <p className="mt-7 text-xs font-bold tracking-[0.18em] text-[#A83F55]">
-              سهرة 
+              سهرة
             </p>
 
             <h1 className="mt-3 text-3xl font-black text-[#4A1821] sm:text-4xl">
@@ -88,7 +93,7 @@ export default function Cart() {
         <div className="mb-8 md:mb-10">
           <div className="flex flex-col gap-2">
             <p className="text-xs font-bold tracking-[0.16em] text-[#A83F55]">
-              سهرة 
+              سهرة
             </p>
 
             <h1 className="text-3xl font-black tracking-tight text-[#4A1821] sm:text-4xl">
@@ -104,7 +109,7 @@ export default function Cart() {
         {/* ========================================================
             FREE SHIPPING PROGRESS
         ========================================================= */}
-        {freeShippingThreshold > 0 && (
+        {(freeShippingThreshold > 0 || hasFreeShippingProduct) && (
           <div className="mb-7 rounded-[24px] border border-[#E8D9D6] bg-white p-5 shadow-[0_8px_30px_rgba(100,31,43,0.04)] sm:p-6">
             {shippingCost === 0 ? (
               <div className="flex items-center gap-4">
@@ -118,7 +123,9 @@ export default function Cart() {
                   </p>
 
                   <p className="mt-1 text-xs text-[#806D70]">
-                    طلبك تجاوز الحد المطلوب للشحن المجاني.
+                    {hasFreeShippingProduct
+                      ? "يوجد منتج في طلبك مؤهل للشحن المجاني."
+                      : "طلبك تجاوز الحد المطلوب للشحن المجاني."}
                   </p>
                 </div>
               </div>

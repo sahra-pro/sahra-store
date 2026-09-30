@@ -12,6 +12,7 @@ import {
   FaInfoCircle,
   FaCheckCircle,
   FaThumbtack,
+  FaTruck,
 } from "react-icons/fa";
 
 import AdminLayout from "../components/layout/AdminLayout";
@@ -36,6 +37,7 @@ const emptyProduct = {
 
   promoTitle: "",
   isPinned: false,
+  freeShipping: false,
 
   description: "",
   usage: "",
@@ -70,6 +72,7 @@ function ProductForm() {
 
         promoTitle: existingProduct.promoTitle || "",
         isPinned: Boolean(existingProduct.isPinned),
+        freeShipping: Boolean(existingProduct.freeShipping),
       };
     }
 
@@ -207,6 +210,8 @@ function ProductForm() {
       promoTitle: form.promoTitle?.trim() || "",
 
       isPinned: Boolean(form.isPinned),
+
+      freeShipping: Boolean(form.freeShipping),
 
       price: Number(form.price),
 
@@ -606,7 +611,7 @@ function ProductForm() {
                       handleChange("seoDescription", e.target.value)
                     }
                     placeholder="وصف مختصر للمنتج يظهر في نتائج البحث..."
-                    className="w-full resize-y rounded-xl border border-slate-200 px-4 py-3 text-sm leading-7 text-slate-800 outline-none transition focus:border-[#A83F55] focus:ring-4 focus:ring-[#A83F55]/10"
+                    className="w-full resize-y rounded-xl border border-slate-200 px-4 py-3 text-sm leading-7 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#A83F55] focus:ring-4 focus:ring-[#A83F55]/10"
                   />
                 </div>
 
@@ -784,6 +789,80 @@ function ProductForm() {
               </div>
             </section>
 
+            {/* الشحن المجاني */}
+            <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div className="border-b border-slate-100 px-5 py-4">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg transition ${
+                      form.freeShipping
+                        ? "bg-[#641F2B] text-white"
+                        : "bg-[#F2E4E1] text-[#641F2B]"
+                    }`}
+                  >
+                    <FaTruck />
+                  </div>
+
+                  <div>
+                    <h2 className="text-sm font-bold text-slate-900">
+                      شحن مجاني
+                    </h2>
+
+                    <p className="mt-1 text-[11px] text-slate-400">
+                      إعفاء المنتج من رسوم الشحن
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setForm((prev) => ({
+                      ...prev,
+                      freeShipping: !prev.freeShipping,
+                    }))
+                  }
+                  className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-right transition ${
+                    form.freeShipping
+                      ? "border-[#641F2B] bg-[#F2E4E1] text-[#641F2B]"
+                      : "border-slate-200 bg-white text-slate-600 hover:border-[#E8D9D6] hover:bg-slate-50"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <FaTruck />
+
+                    <div>
+                      <span className="block text-sm font-bold">
+                        {form.freeShipping
+                          ? "الشحن مجاني"
+                          : "تفعيل الشحن المجاني"}
+                      </span>
+
+                      <span className="mt-0.5 block text-[11px] text-slate-400">
+                        {form.freeShipping
+                          ? "هذا المنتج مؤهل للشحن المجاني"
+                          : "حتى لو لم تصل السلة للحد المجاني"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <span
+                    className={`relative h-6 w-11 rounded-full transition ${
+                      form.freeShipping ? "bg-[#641F2B]" : "bg-slate-200"
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow-sm transition ${
+                        form.freeShipping ? "right-1" : "right-6"
+                      }`}
+                    />
+                  </span>
+                </button>
+              </div>
+            </section>
+
             {/* ملخص المنتج */}
             <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
               <div className="border-b border-slate-100 px-5 py-4">
@@ -837,6 +916,19 @@ function ProductForm() {
                     }`}
                   >
                     {form.isPinned ? "مثبت" : "غير مثبت"}
+                  </span>
+                </div>
+
+                <div className="h-px bg-slate-100" />
+
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-500">الشحن</span>
+                  <span
+                    className={`font-bold ${
+                      form.freeShipping ? "text-[#641F2B]" : "text-slate-400"
+                    }`}
+                  >
+                    {form.freeShipping ? "مجاني" : "حسب إعدادات الشحن"}
                   </span>
                 </div>
               </div>
