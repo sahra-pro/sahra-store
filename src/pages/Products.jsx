@@ -43,6 +43,7 @@ export default function Products() {
   const activeCategory = searchParams.get("category") || "";
   const search = searchParams.get("search") || "";
   const sort = searchParams.get("sort") || "default";
+
   const sortedCategories = useMemo(() => {
     return [...categories].sort((a, b) => {
       const orderA =
@@ -58,6 +59,19 @@ export default function Products() {
       return (a.name || "").localeCompare(b.name || "", "ar");
     });
   }, [categories]);
+
+  const activeCategoryData = useMemo(() => {
+    if (!activeCategory) {
+      return null;
+    }
+
+    return (
+      categories.find((category) => category.name === activeCategory) || null
+    );
+  }, [categories, activeCategory]);
+
+  const categoryBanner = activeCategoryData?.banner || "";
+
   const handleSearchChange = (value) => {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
@@ -203,6 +217,7 @@ export default function Products() {
           content="تصفح منتجات سهرة واكتشف مجموعتنا المختارة من المنتجات."
         />
       </Helmet>
+
       <main dir="rtl" className="min-h-screen bg-[#FBF6F1] text-[#4A1821]">
         <section className="relative overflow-hidden py-6 md:py-10">
           <div className="pointer-events-none absolute -right-32 top-0 h-72 w-72 rounded-full bg-[#A83F55]/5 blur-3xl" />
@@ -402,11 +417,24 @@ export default function Products() {
               </div>
             )}
 
+            {/* CATEGORY BANNER */}
+            {activeCategory && categoryBanner && (
+              <div className="mb-7 overflow-hidden rounded-[24px] border border-[#E8D9D6] bg-white shadow-[0_10px_35px_rgba(74,24,33,0.07)] md:mb-10 md:rounded-[30px]">
+                <img
+                  src={optimizeCloudinaryImage(categoryBanner, 1600)}
+                  alt={`بانر ${activeCategory}`}
+                  loading="eager"
+                  decoding="async"
+                  className="block h-auto max-h-[420px] w-full object-cover"
+                />
+              </div>
+            )}
+
             {/* RESULTS HEADER */}
             <div className="mb-4 flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-black text-[#4A1821] md:text-2xl">
-                  المنتجات
+                  {activeCategory || "المنتجات"}
                 </h2>
 
                 <p className="mt-0.5 text-[10px] text-[#806D70] md:text-xs">
@@ -620,3 +648,4 @@ export default function Products() {
     </>
   );
 }
+  

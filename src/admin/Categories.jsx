@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   FaEdit,
@@ -20,6 +19,7 @@ import { uploadToCloudinary } from "../services/cloudinary";
 const emptyForm = {
   name: "",
   image: "",
+  banner: "",
 };
 
 function Categories() {
@@ -31,6 +31,7 @@ function Categories() {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
   const [reordering, setReordering] = useState(false);
 
   const sortedCategories = [...categories].sort((a, b) => {
@@ -61,6 +62,7 @@ function Categories() {
     setForm({
       name: category.name,
       image: category.image || "",
+      banner: category.banner || "",
     });
 
     setEditingId(category.id);
@@ -74,6 +76,7 @@ function Categories() {
     setEditingId(null);
     setError("");
     setUploadingImage(false);
+    setUploadingBanner(false);
   };
 
   const handleImageUpload = async (e) => {
@@ -83,11 +86,13 @@ function Categories() {
 
     if (!file.type.startsWith("image/")) {
       setError("يرجى اختيار ملف صورة صالح.");
+      e.target.value = "";
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
       setError("حجم الصورة يجب ألا يتجاوز 5 ميجابايت.");
+      e.target.value = "";
       return;
     }
 
@@ -110,6 +115,42 @@ function Categories() {
     }
   };
 
+  const handleBannerUpload = async (e) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setError("يرجى اختيار ملف صورة صالح للبانر.");
+      e.target.value = "";
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setError("حجم البانر يجب ألا يتجاوز 10 ميجابايت.");
+      e.target.value = "";
+      return;
+    }
+
+    try {
+      setUploadingBanner(true);
+      setError("");
+
+      const bannerUrl = await uploadToCloudinary(file);
+
+      setForm((current) => ({
+        ...current,
+        banner: bannerUrl,
+      }));
+    } catch (error) {
+      console.error("Category banner upload error:", error);
+      setError("حدث خطأ أثناء رفع بانر التصنيف.");
+    } finally {
+      setUploadingBanner(false);
+      e.target.value = "";
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -128,8 +169,8 @@ function Categories() {
       return;
     }
 
-    if (uploadingImage) {
-      setError("انتظر حتى يكتمل رفع الصورة.");
+    if (uploadingImage || uploadingBanner) {
+      setError("انتظر حتى يكتمل رفع الصور.");
       return;
     }
 
@@ -142,6 +183,7 @@ function Categories() {
         await updateCategory(editingId, {
           name: form.name.trim(),
           image: form.image,
+          banner: form.banner,
           sortOrder: currentCategory?.sortOrder ?? 0,
         });
       } else {
@@ -159,6 +201,7 @@ function Categories() {
         await addCategory({
           name: form.name.trim(),
           image: form.image,
+          banner: form.banner,
           sortOrder: nextSortOrder,
         });
       }
@@ -248,8 +291,8 @@ function Categories() {
               </h1>
 
               <p className="mt-2 max-w-xl text-sm leading-7 text-white/70">
-                أنشئ تصنيفات متناسقة مع هوية سهرة، أضف صورها ونظّم منتجات المتجر
-                بسهولة.
+                أنشئ تصنيفات متناسقة مع هوية سهرة، أضف صورها وبنراتها ونظّم
+                منتجات المتجر بسهولة.
               </p>
             </div>
 
@@ -272,6 +315,7 @@ function Categories() {
                 <p className="text-sm font-medium text-[#806D70]">
                   إجمالي التصنيفات
                 </p>
+
                 <p className="mt-2 text-3xl font-black text-[#4A1821]">
                   {categories.length}
                 </p>
@@ -289,6 +333,7 @@ function Categories() {
                 <p className="text-sm font-medium text-[#806D70]">
                   إجمالي المنتجات
                 </p>
+
                 <p className="mt-2 text-3xl font-black text-[#4A1821]">
                   {totalProducts}
                 </p>
@@ -314,7 +359,7 @@ function Categories() {
                 </h2>
 
                 <p className="mt-1 text-sm text-[#806D70]">
-                  أضف اسم التصنيف وصورته ليظهر بشكل أنيق في المتجر.
+                  أضف اسم التصنيف وصورته وبانره ليظهر بشكل أنيق في المتجر.
                 </p>
               </div>
 
@@ -334,6 +379,7 @@ function Categories() {
                   <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-red-100">
                     !
                   </span>
+
                   {error}
                 </div>
               )}
@@ -407,13 +453,63 @@ function Categories() {
                     </div>
                   )}
                 </div>
+
+                {/* Category banner */}
+                <div className="lg:col-span-2">
+                  <label className="mb-2.5 block text-sm font-bold text-[#4A1821]">
+                    بانر التصنيف
+                  </label>
+
+                  <div className="rounded-2xl border border-dashed border-[#D8B8B9] bg-[#FBF6F1] p-5">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      disabled={uploadingBanner}
+                      onChange={handleBannerUpload}
+                      className="w-full cursor-pointer rounded-2xl border border-dashed border-[#D8B8B9] bg-white p-3.5 text-sm text-[#806D70] outline-none transition hover:border-[#A83F55] disabled:cursor-not-allowed disabled:opacity-60"
+                    />
+
+                    <p className="mt-2 text-xs leading-6 text-[#806D70]">
+                      يفضل استخدام صورة أفقية مناسبة للبانر — PNG أو JPG أو WEBP
+                      — الحد الأقصى 10 ميجابايت
+                    </p>
+
+                    {uploadingBanner && (
+                      <div className="mt-4 flex items-center gap-3 rounded-2xl border border-[#E8D9D6] bg-[#F2E4E1] p-4 text-sm font-medium text-[#641F2B]">
+                        <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#641F2B] border-t-transparent" />
+                        جاري رفع البانر إلى Cloudinary...
+                      </div>
+                    )}
+
+                    {form.banner && !uploadingBanner && (
+                      <div className="mt-5">
+                        <p className="mb-3 flex items-center gap-2 text-sm font-bold text-[#4A1821]">
+                          <FaImage className="text-[#A83F55]" />
+                          معاينة بانر التصنيف
+                        </p>
+
+                        <div className="relative w-full overflow-hidden rounded-2xl border border-[#E8D9D6] bg-white shadow-sm">
+                          <img
+                            src={form.banner}
+                            alt="معاينة بانر التصنيف"
+                            className="block h-auto max-h-72 w-full object-cover"
+                          />
+
+                          <div className="absolute bottom-3 left-3 flex h-8 w-8 items-center justify-center rounded-full bg-[#641F2B] text-white shadow-md">
+                            <FaCheckCircle className="text-xs" />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* Form buttons */}
               <div className="mt-8 flex flex-wrap gap-3 border-t border-[#E8D9D6] pt-6">
                 <button
                   type="submit"
-                  disabled={uploadingImage}
+                  disabled={uploadingImage || uploadingBanner}
                   className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#641F2B] px-7 py-3.5 font-bold text-white shadow-[0_10px_25px_rgba(100,31,43,0.16)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#4A1821] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <FaCheckCircle className="text-sm" />
@@ -503,6 +599,13 @@ function Categories() {
                             <FaBoxOpen />
                             {count} منتج
                           </span>
+
+                          {category.banner && (
+                            <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-[#F9EEF0] px-3 py-1 text-xs font-bold text-[#A83F55]">
+                              <FaImage />
+                              بانر مضاف
+                            </span>
+                          )}
                         </div>
                       </div>
 
@@ -521,8 +624,7 @@ function Categories() {
                           type="button"
                           onClick={() => moveCategory(index, 1)}
                           disabled={
-                            index === sortedCategories.length - 1 ||
-                            reordering
+                            index === sortedCategories.length - 1 || reordering
                           }
                           className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#E8D9D6] bg-white text-[#641F2B] transition hover:bg-[#F2E4E1] disabled:cursor-not-allowed disabled:opacity-30"
                           title="نقل للأسفل"
@@ -555,7 +657,7 @@ function Categories() {
 
               {/* Desktop table */}
               <div className="hidden overflow-x-auto md:block">
-                <table className="w-full min-w-[820px]">
+                <table className="w-full min-w-[900px]">
                   <thead>
                     <tr className="border-b border-[#E8D9D6] bg-[#FBF6F1]">
                       <th className="w-20 px-6 py-4 text-center text-xs font-bold text-[#806D70]">
@@ -572,6 +674,10 @@ function Categories() {
 
                       <th className="px-6 py-4 text-center text-xs font-bold text-[#806D70]">
                         عدد المنتجات
+                      </th>
+
+                      <th className="px-6 py-4 text-center text-xs font-bold text-[#806D70]">
+                        البانر
                       </th>
 
                       <th className="px-6 py-4 text-center text-xs font-bold text-[#806D70]">
@@ -650,6 +756,31 @@ function Categories() {
                             </span>
                           </td>
 
+                          <td className="px-6 py-5 text-center">
+                            {category.banner ? (
+                              <div className="flex flex-col items-center gap-2">
+                                <div className="h-14 w-24 overflow-hidden rounded-xl border border-[#E8D9D6] bg-[#FBF6F1]">
+                                  <img
+                                    src={category.banner}
+                                    alt={`بانر ${category.name}`}
+                                    loading="lazy"
+                                    className="h-full w-full object-cover"
+                                  />
+                                </div>
+
+                                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#A83F55]">
+                                  <FaCheckCircle />
+                                  مضاف
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FBF6F1] px-3 py-2 text-xs font-medium text-[#806D70]">
+                                <FaImage />
+                                بدون بانر
+                              </span>
+                            )}
+                          </td>
+
                           <td className="px-6 py-5">
                             <div className="flex justify-center gap-2">
                               <button
@@ -709,4 +840,3 @@ function Categories() {
 }
 
 export default Categories;
-
