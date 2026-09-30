@@ -13,6 +13,7 @@ import {
   FaTags,
   FaArrowLeft,
   FaThumbtack,
+  FaTruck,
 } from "react-icons/fa";
 
 import { useStore } from "../hooks/useStore";
@@ -548,15 +549,34 @@ export default function Products() {
 
                   const wished = isInWishlist(product.id);
                   const isAdded = addedId === product.id;
+                  const isFreeShipping = product.freeShipping === true;
 
                   return (
                     <article
                       key={product.id}
-                      className="group relative overflow-hidden rounded-[18px] border border-[#E8D9D6] bg-white shadow-[0_5px_20px_rgba(74,24,33,0.045)] transition-all duration-500 hover:-translate-y-1 hover:border-[#D6A5AD] hover:shadow-[0_16px_40px_rgba(74,24,33,0.11)] md:rounded-[24px]"
+                      className={`group relative overflow-hidden rounded-[18px] bg-white transition-all duration-500 md:rounded-[24px] ${
+                        isFreeShipping
+                          ? "border-2 border-[#7A8B43] shadow-[0_8px_28px_rgba(122,139,67,0.16)] hover:-translate-y-1 hover:border-[#6F7D45] hover:shadow-[0_18px_42px_rgba(122,139,67,0.22)]"
+                          : "border border-[#E8D9D6] shadow-[0_5px_20px_rgba(74,24,33,0.045)] hover:-translate-y-1 hover:border-[#D6A5AD] hover:shadow-[0_16px_40px_rgba(74,24,33,0.11)]"
+                      }`}
                     >
+                      {/* شحن مجاني */}
+                      {isFreeShipping && (
+                        <div className="absolute right-2 top-2 z-30 inline-flex items-center gap-1 rounded-full bg-[#7A8B43] px-2.5 py-1 text-[8px] font-black text-white shadow-md md:right-3 md:top-3 md:gap-1.5 md:px-3.5 md:py-1.5 md:text-xs">
+                          <FaTruck className="text-[8px] md:text-[10px]" />
+                          شحن مجاني
+                        </div>
+                      )}
+
                       {/* العنوان الترويجي */}
                       {product.promoTitle && (
-                        <div className="absolute right-2 top-2 z-20 max-w-[calc(100%-4rem)] rounded-full border border-white/30 bg-[#4A1821]/90 px-2.5 py-1 text-[8px] font-black text-white shadow-md backdrop-blur-sm md:right-3 md:top-3 md:px-3.5 md:py-1.5 md:text-xs">
+                        <div
+                          className={`absolute z-20 max-w-[calc(100%-4rem)] rounded-full border border-white/30 bg-[#4A1821]/90 px-2.5 py-1 text-[8px] font-black text-white shadow-md backdrop-blur-sm md:px-3.5 md:py-1.5 md:text-xs ${
+                            isFreeShipping
+                              ? "right-2 top-10 md:right-3 md:top-12"
+                              : "right-2 top-2 md:right-3 md:top-3"
+                          }`}
+                        >
                           {product.promoTitle}
                         </div>
                       )}
@@ -565,15 +585,9 @@ export default function Products() {
                       {product.isPinned && (
                         <div
                           className={`absolute z-20 flex h-7 w-7 items-center justify-center rounded-full bg-white text-[#641F2B] shadow-md md:h-9 md:w-9 ${
-                            product.promoTitle
-                              ? "right-2 top-10 md:right-3 md:top-12"
+                            product.promoTitle || isFreeShipping
+                              ? "right-2 top-20 md:right-3 md:top-24"
                               : "right-2 top-2 md:right-3 md:top-3"
-                          } ${
-                            discount > 0
-                              ? product.promoTitle
-                                ? "translate-y-9 md:translate-y-11"
-                                : "translate-y-9 md:translate-y-11"
-                              : ""
                           }`}
                           title="منتج مثبت"
                           aria-label="منتج مثبت"
@@ -702,7 +716,13 @@ export default function Products() {
                         </button>
                       </div>
 
-                      <div className="absolute bottom-0 left-1/2 h-1 w-0 -translate-x-1/2 rounded-t-full bg-gradient-to-r from-[#641F2B] to-[#A83F55] transition-all duration-500 group-hover:w-1/2" />
+                      <div
+                        className={`absolute bottom-0 left-1/2 h-1 w-0 -translate-x-1/2 rounded-t-full transition-all duration-500 group-hover:w-1/2 ${
+                          isFreeShipping
+                            ? "bg-gradient-to-r from-[#6F7D45] to-[#A3B66A]"
+                            : "bg-gradient-to-r from-[#641F2B] to-[#A83F55]"
+                        }`}
+                      />
                     </article>
                   );
                 })}
