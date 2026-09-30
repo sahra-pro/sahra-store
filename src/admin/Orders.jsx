@@ -390,17 +390,28 @@ function Orders() {
                 واحد.
               </p>
             </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <button
+                type="button"
+                onClick={() => navigate("/admin/orders/new")}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-black text-[#641F2B] shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#F9EFEC] hover:shadow-xl"
+              >
+                <FaShoppingBag className="text-sm" />
+                إنشاء طلب جديد
+              </button>
 
-            <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/10 px-5 py-3 backdrop-blur-sm">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10">
-                <FaShoppingBag className="text-sm text-[#F2E4E1]" />
-              </div>
+              <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/10 px-5 py-3 backdrop-blur-sm">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10">
+                  <FaShoppingBag className="text-sm text-[#F2E4E1]" />
+                </div>
 
-              <div>
-                <p className="text-xs text-white/60">الطلبات المعروضة</p>
-                <p className="font-black">
-                  {filteredOrders.length} من {orders.length}
-                </p>
+                <div>
+                  <p className="text-xs text-white/60">الطلبات المعروضة</p>
+
+                  <p className="font-black">
+                    {filteredOrders.length} من {orders.length}
+                  </p>
+                </div>
               </div>
             </div>
           </div>

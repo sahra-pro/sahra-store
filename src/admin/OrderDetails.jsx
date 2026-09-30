@@ -16,6 +16,9 @@ import {
   FaTruck,
   FaMapMarkedAlt,
   FaStickyNote,
+  FaEdit,
+  FaSave,
+  FaTimes,
 } from "react-icons/fa";
 
 import AdminLayout from "../components/layout/AdminLayout";
@@ -59,13 +62,28 @@ export default function OrderDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const { getOrderById, updateOrderStatus, deleteOrder } = useOrders();
+  const { getOrderById, updateOrderStatus, updateOrder, deleteOrder } =
+    useOrders();
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [statusNotification, setStatusNotification] = useState(null);
 
+  const [editingCustomer, setEditingCustomer] = useState(false);
+  const [customerSaving, setCustomerSaving] = useState(false);
+  const [customerForm, setCustomerForm] = useState({
+    name: "",
+    phone: "",
+    city: "",
+    neighborhood: "",
+    shortAddress: "",
+    deliveryNotes: "",
+    latitude: "",
+    longitude: "",
+  });
+
   const order = getOrderById(id);
+
   const handleStatusChange = async (newStatus) => {
     if (newStatus === order.status || statusUpdating) return;
 
@@ -96,6 +114,7 @@ export default function OrderDetails() {
       setStatusUpdating(false);
     }
   };
+
   useEffect(() => {
     if (!statusNotification) return;
 
@@ -105,6 +124,7 @@ export default function OrderDetails() {
 
     return () => clearTimeout(timer);
   }, [statusNotification]);
+
   if (!order) {
     return (
       <AdminLayout>
@@ -199,6 +219,99 @@ export default function OrderDetails() {
       )}`
     : "";
 
+  const startCustomerEditing = () => {
+    setCustomerForm({
+      name: customer.name || "",
+      phone: customer.phone || "",
+      city,
+      neighborhood,
+      shortAddress,
+      deliveryNotes,
+      latitude:
+        latitude !== null && latitude !== undefined ? String(latitude) : "",
+      longitude:
+        longitude !== null && longitude !== undefined ? String(longitude) : "",
+    });
+
+    setEditingCustomer(true);
+    setStatusNotification(null);
+  };
+
+  const cancelCustomerEditing = () => {
+    setEditingCustomer(false);
+    setCustomerForm({
+      name: "",
+      phone: "",
+      city: "",
+      neighborhood: "",
+      shortAddress: "",
+      deliveryNotes: "",
+      latitude: "",
+      longitude: "",
+    });
+  };
+
+  const handleCustomerFieldChange = (field, value) => {
+    setCustomerForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleCustomerSave = async () => {
+    if (customerSaving) return;
+
+    setCustomerSaving(true);
+    setStatusNotification(null);
+
+    try {
+      const updatedCustomer = {
+        ...customer,
+        name: customerForm.name.trim(),
+        phone: customerForm.phone.trim(),
+        city: customerForm.city.trim(),
+        neighborhood: customerForm.neighborhood.trim(),
+        shortAddress: customerForm.shortAddress.trim(),
+        address: customerForm.shortAddress.trim(),
+        deliveryNotes: customerForm.deliveryNotes.trim(),
+        notes: customerForm.deliveryNotes.trim(),
+      };
+
+      if (customerForm.latitude.trim() !== "") {
+        updatedCustomer.latitude = Number(customerForm.latitude);
+      } else {
+        updatedCustomer.latitude = null;
+      }
+
+      if (customerForm.longitude.trim() !== "") {
+        updatedCustomer.longitude = Number(customerForm.longitude);
+      } else {
+        updatedCustomer.longitude = null;
+      }
+
+      await updateOrder(order.id, {
+        customer: updatedCustomer,
+      });
+
+      setEditingCustomer(false);
+
+      setStatusNotification({
+        type: "success",
+        message: "تم حفظ بيانات العميل والتوصيل بنجاح.",
+      });
+    } catch (error) {
+      console.error("Customer update error:", error);
+
+      setStatusNotification({
+        type: "error",
+        message:
+          error?.message || "تعذر حفظ بيانات العميل. يرجى المحاولة مرة أخرى.",
+      });
+    } finally {
+      setCustomerSaving(false);
+    }
+  };
+
   const handleDelete = async () => {
     await deleteOrder(order.id);
     navigate("/admin/orders");
@@ -237,7 +350,7 @@ export default function OrderDetails() {
                     : "text-rose-800"
                 }`}
               >
-                {statusNotification.title}
+                {statusNotification.type === "success" ? "تم بنجاح" : "حدث خطأ"}
               </h3>
 
               <p className="mt-1 text-sm leading-6 text-[#806D70]">
@@ -323,6 +436,7 @@ export default function OrderDetails() {
                       </option>
                     ))}
                   </select>
+
                   {statusUpdating && (
                     <span className="mr-1 text-xs font-bold">
                       جاري التحديث...
@@ -436,18 +550,53 @@ export default function OrderDetails() {
         <div className="mt-6 grid gap-6 lg:grid-cols-3">
           {/* Customer */}
           <div className="rounded-[30px] border border-[#E8D9D6] bg-white p-5 shadow-[0_15px_45px_rgba(74,24,33,0.05)] md:p-6">
-            <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F2E4E1] text-[#641F2B]">
-                <FaUser />
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F2E4E1] text-[#641F2B]">
+                  <FaUser />
+                </div>
+
+                <div>
+                  <h2 className="font-black text-[#4A1821]">بيانات العميل</h2>
+
+                  <p className="mt-0.5 text-xs text-[#806D70]">
+                    معلومات التواصل والتوصيل
+                  </p>
+                </div>
               </div>
 
-              <div>
-                <h2 className="font-black text-[#4A1821]">بيانات العميل</h2>
+              {!editingCustomer ? (
+                <button
+                  type="button"
+                  onClick={startCustomerEditing}
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#F2E4E1] px-3.5 py-2 text-xs font-black text-[#641F2B] transition hover:bg-[#E8D9D6]"
+                >
+                  <FaEdit />
+                  تعديل البيانات
+                </button>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={cancelCustomerEditing}
+                    disabled={customerSaving}
+                    className="inline-flex items-center gap-2 rounded-xl border border-[#E8D9D6] bg-white px-3.5 py-2 text-xs font-bold text-[#806D70] transition hover:bg-[#FBF6F1]"
+                  >
+                    <FaTimes />
+                    إلغاء
+                  </button>
 
-                <p className="mt-0.5 text-xs text-[#806D70]">
-                  معلومات التواصل والتوصيل
-                </p>
-              </div>
+                  <button
+                    type="button"
+                    onClick={handleCustomerSave}
+                    disabled={customerSaving}
+                    className="inline-flex items-center gap-2 rounded-xl bg-[#641F2B] px-3.5 py-2 text-xs font-black text-white transition hover:bg-[#4A1821] disabled:cursor-wait disabled:opacity-60"
+                  >
+                    <FaSave />
+                    {customerSaving ? "جاري الحفظ..." : "حفظ التعديلات"}
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="space-y-3">
@@ -456,14 +605,26 @@ export default function OrderDetails() {
                 <div className="flex items-start gap-3">
                   <FaUser className="mt-1 text-[#A83F55]" />
 
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs font-semibold text-[#806D70]">
                       اسم العميل
                     </p>
 
-                    <p className="mt-1 break-words font-bold text-[#4A1821]">
-                      {customer.name || "-"}
-                    </p>
+                    {editingCustomer ? (
+                      <input
+                        type="text"
+                        value={customerForm.name}
+                        onChange={(e) =>
+                          handleCustomerFieldChange("name", e.target.value)
+                        }
+                        className="mt-2 w-full rounded-xl border border-[#DCC9C5] bg-white px-3 py-2.5 text-sm font-bold text-[#4A1821] outline-none transition focus:border-[#A83F55] focus:ring-2 focus:ring-[#A83F55]/10"
+                        placeholder="اسم العميل"
+                      />
+                    ) : (
+                      <p className="mt-1 break-words font-bold text-[#4A1821]">
+                        {customer.name || "-"}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -473,14 +634,26 @@ export default function OrderDetails() {
                 <div className="flex items-start gap-3">
                   <FaPhone className="mt-1 text-[#A83F55]" />
 
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs font-semibold text-[#806D70]">
                       رقم الهاتف
                     </p>
 
-                    <p className="mt-1 break-words font-bold text-[#4A1821]">
-                      {customer.phone || "-"}
-                    </p>
+                    {editingCustomer ? (
+                      <input
+                        type="tel"
+                        value={customerForm.phone}
+                        onChange={(e) =>
+                          handleCustomerFieldChange("phone", e.target.value)
+                        }
+                        className="mt-2 w-full rounded-xl border border-[#DCC9C5] bg-white px-3 py-2.5 text-sm font-bold text-[#4A1821] outline-none transition focus:border-[#A83F55] focus:ring-2 focus:ring-[#A83F55]/10"
+                        placeholder="رقم الهاتف"
+                      />
+                    ) : (
+                      <p className="mt-1 break-words font-bold text-[#4A1821]">
+                        {customer.phone || "-"}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -490,14 +663,26 @@ export default function OrderDetails() {
                 <div className="flex items-start gap-3">
                   <FaMapMarkerAlt className="mt-1 text-[#A83F55]" />
 
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs font-semibold text-[#806D70]">
                       المدينة
                     </p>
 
-                    <p className="mt-1 break-words font-bold text-[#4A1821]">
-                      {city || "-"}
-                    </p>
+                    {editingCustomer ? (
+                      <input
+                        type="text"
+                        value={customerForm.city}
+                        onChange={(e) =>
+                          handleCustomerFieldChange("city", e.target.value)
+                        }
+                        className="mt-2 w-full rounded-xl border border-[#DCC9C5] bg-white px-3 py-2.5 text-sm font-bold text-[#4A1821] outline-none transition focus:border-[#A83F55] focus:ring-2 focus:ring-[#A83F55]/10"
+                        placeholder="المدينة"
+                      />
+                    ) : (
+                      <p className="mt-1 break-words font-bold text-[#4A1821]">
+                        {city || "-"}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -507,12 +692,27 @@ export default function OrderDetails() {
                 <div className="flex items-start gap-3">
                   <FaMapMarkerAlt className="mt-1 text-[#A83F55]" />
 
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs font-semibold text-[#806D70]">الحي</p>
 
-                    <p className="mt-1 break-words font-bold text-[#4A1821]">
-                      {neighborhood || "-"}
-                    </p>
+                    {editingCustomer ? (
+                      <input
+                        type="text"
+                        value={customerForm.neighborhood}
+                        onChange={(e) =>
+                          handleCustomerFieldChange(
+                            "neighborhood",
+                            e.target.value,
+                          )
+                        }
+                        className="mt-2 w-full rounded-xl border border-[#DCC9C5] bg-white px-3 py-2.5 text-sm font-bold text-[#4A1821] outline-none transition focus:border-[#A83F55] focus:ring-2 focus:ring-[#A83F55]/10"
+                        placeholder="الحي"
+                      />
+                    ) : (
+                      <p className="mt-1 break-words font-bold text-[#4A1821]">
+                        {neighborhood || "-"}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -522,14 +722,29 @@ export default function OrderDetails() {
                 <div className="flex items-start gap-3">
                   <FaMapMarkerAlt className="mt-1 text-[#A83F55]" />
 
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs font-semibold text-[#806D70]">
                       العنوان المختصر
                     </p>
 
-                    <p className="mt-1 break-words leading-7 text-[#4A1821]">
-                      {shortAddress || "-"}
-                    </p>
+                    {editingCustomer ? (
+                      <input
+                        type="text"
+                        value={customerForm.shortAddress}
+                        onChange={(e) =>
+                          handleCustomerFieldChange(
+                            "shortAddress",
+                            e.target.value,
+                          )
+                        }
+                        className="mt-2 w-full rounded-xl border border-[#DCC9C5] bg-white px-3 py-2.5 text-sm font-bold text-[#4A1821] outline-none transition focus:border-[#A83F55] focus:ring-2 focus:ring-[#A83F55]/10"
+                        placeholder="العنوان المختصر"
+                      />
+                    ) : (
+                      <p className="mt-1 break-words leading-7 text-[#4A1821]">
+                        {shortAddress || "-"}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -539,14 +754,29 @@ export default function OrderDetails() {
                 <div className="flex items-start gap-3">
                   <FaStickyNote className="mt-1 text-[#A83F55]" />
 
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs font-semibold text-[#806D70]">
                       ملاحظات التوصيل
                     </p>
 
-                    <p className="mt-1 break-words leading-7 text-[#4A1821]">
-                      {deliveryNotes || "-"}
-                    </p>
+                    {editingCustomer ? (
+                      <textarea
+                        value={customerForm.deliveryNotes}
+                        onChange={(e) =>
+                          handleCustomerFieldChange(
+                            "deliveryNotes",
+                            e.target.value,
+                          )
+                        }
+                        rows={3}
+                        className="mt-2 w-full resize-y rounded-xl border border-[#DCC9C5] bg-white px-3 py-2.5 text-sm font-bold leading-6 text-[#4A1821] outline-none transition focus:border-[#A83F55] focus:ring-2 focus:ring-[#A83F55]/10"
+                        placeholder="ملاحظات التوصيل"
+                      />
+                    ) : (
+                      <p className="mt-1 break-words leading-7 text-[#4A1821]">
+                        {deliveryNotes || "-"}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -561,7 +791,56 @@ export default function OrderDetails() {
                       موقع العميل على الخريطة
                     </p>
 
-                    {hasCoordinates ? (
+                    {editingCustomer ? (
+                      <div className="mt-3 space-y-3">
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <div>
+                            <label className="mb-1.5 block text-[11px] font-semibold text-[#806D70]">
+                              خط العرض
+                            </label>
+
+                            <input
+                              type="number"
+                              step="any"
+                              value={customerForm.latitude}
+                              onChange={(e) =>
+                                handleCustomerFieldChange(
+                                  "latitude",
+                                  e.target.value,
+                                )
+                              }
+                              className="w-full rounded-xl border border-[#DCC9C5] bg-white px-3 py-2.5 text-xs font-bold text-[#4A1821] outline-none transition focus:border-[#A83F55] focus:ring-2 focus:ring-[#A83F55]/10"
+                              placeholder="مثال: 24.7136"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="mb-1.5 block text-[11px] font-semibold text-[#806D70]">
+                              خط الطول
+                            </label>
+
+                            <input
+                              type="number"
+                              step="any"
+                              value={customerForm.longitude}
+                              onChange={(e) =>
+                                handleCustomerFieldChange(
+                                  "longitude",
+                                  e.target.value,
+                                )
+                              }
+                              className="w-full rounded-xl border border-[#DCC9C5] bg-white px-3 py-2.5 text-xs font-bold text-[#4A1821] outline-none transition focus:border-[#A83F55] focus:ring-2 focus:ring-[#A83F55]/10"
+                              placeholder="مثال: 46.6753"
+                            />
+                          </div>
+                        </div>
+
+                        <p className="text-[11px] leading-5 text-[#806D70]">
+                          يمكنك ترك الإحداثيات فارغة إذا لم يكن هناك موقع محفوظ
+                          للعميل.
+                        </p>
+                      </div>
+                    ) : hasCoordinates ? (
                       <>
                         <div className="mt-2 rounded-xl border border-[#E8D9D6] bg-white p-3">
                           <div className="grid grid-cols-2 gap-3 text-xs">

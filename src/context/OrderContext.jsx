@@ -165,7 +165,10 @@ export function OrderProvider({ children }) {
     };
   }, [myOrderNumbers]);
 
-  // إنشاء طلب
+  // ==================================================
+  // إنشاء طلب العميل من المتجر
+  // ==================================================
+
   const createOrder = async ({
     customer,
     items,
@@ -173,6 +176,7 @@ export function OrderProvider({ children }) {
     shipping,
     total,
     shippingCompany,
+    hasFreeShippingProduct,
   }) => {
     const orderNumber = await getNextOrderNumber();
 
@@ -199,6 +203,10 @@ export function OrderProvider({ children }) {
 
       shippingCompany: shippingCompany || null,
 
+      hasFreeShippingProduct: Boolean(hasFreeShippingProduct),
+
+      paymentMethod: "cod",
+
       createdAt: serverTimestamp(),
     };
 
@@ -214,7 +222,73 @@ export function OrderProvider({ children }) {
     return savedOrder;
   };
 
+  // ==================================================
+  // إنشاء طلب من لوحة التحكم
+  // ==================================================
+  // نفس بنية طلب المتجر، لكن لا نضيفه إلى "طلبات هذا الجهاز"
+  // لأن الطلب تم إنشاؤه بواسطة الأدمن.
+
+  const createAdminOrder = async ({
+    customer,
+    items,
+    subtotal,
+    shipping,
+    total,
+    shippingCompany,
+    hasFreeShippingProduct,
+    paymentMethod = "cod",
+    notes = "",
+  }) => {
+    const orderNumber = await getNextOrderNumber();
+
+    const now = new Date().toISOString();
+
+    const newOrder = {
+      orderNumber,
+
+      date: now,
+
+      status: "pending",
+
+      history: [
+        {
+          status: "pending",
+          date: now,
+        },
+      ],
+
+      customer,
+      items,
+
+      subtotal: Number(subtotal || 0),
+      shipping: Number(shipping || 0),
+      total: Number(total || 0),
+
+      shippingCompany: shippingCompany || null,
+
+      hasFreeShippingProduct: Boolean(hasFreeShippingProduct),
+
+      paymentMethod,
+
+      notes: notes?.trim() || "",
+
+      source: "admin",
+
+      createdAt: serverTimestamp(),
+    };
+
+    await setDoc(doc(db, "orders", orderNumber), newOrder);
+
+    return {
+      id: orderNumber,
+      ...newOrder,
+    };
+  };
+
+  // ==================================================
   // تحديث حالة الطلب
+  // ==================================================
+
   const updateOrderStatus = async (id, status) => {
     const order = orders.find((o) => o.id === id);
 
@@ -263,7 +337,6 @@ export function OrderProvider({ children }) {
 
     // ==================================================
     // خصم المخزون عند اكتمال الطلب
-    // هذا المنطق كما هو بدون تغيير
     // ==================================================
 
     if (status === "completed" && order.status !== "completed") {
@@ -304,7 +377,23 @@ export function OrderProvider({ children }) {
       history: newHistory,
     });
   };
+
+  // ==================================================
+  // تحديث بيانات الطلب
+  // ==================================================
+
+  const updateOrder = async (id, updates) => {
+    await updateDoc(doc(db, "orders", id), updates);
+
+    setOrders((prev) =>
+      prev.map((order) => (order.id === id ? { ...order, ...updates } : order)),
+    );
+  };
+
+  // ==================================================
   // حذف طلب
+  // ==================================================
+
   const deleteOrder = async (id) => {
     await deleteDoc(doc(db, "orders", id));
 
@@ -319,13 +408,19 @@ export function OrderProvider({ children }) {
     );
   };
 
+  // ==================================================
   // بحث الأدمن
+  // ==================================================
+
   const getOrderByNumber = (orderNumber) =>
     orders.find((order) => order.orderNumber === orderNumber);
 
   const getOrderById = (id) => orders.find((order) => order.id === id);
 
+  // ==================================================
   // بحث الزبون
+  // ==================================================
+
   const findOrder = async (orderNumber, phone) => {
     const order = await fetchOrderByNumber(orderNumber);
 
@@ -354,7 +449,11 @@ export function OrderProvider({ children }) {
     myOrdersLoading,
 
     createOrder,
+    createAdminOrder,
+
     updateOrderStatus,
+    updateOrder,
+
     deleteOrder,
 
     getOrderByNumber,

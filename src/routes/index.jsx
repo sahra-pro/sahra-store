@@ -31,6 +31,7 @@ import ProductForm from "../admin/ProductForm";
 import OrderDetails from "../admin/OrderDetails";
 import Reviews from "../admin/Reviews";
 import CustomerTestimonials from "../admin/CustomerTestimonials";
+import CreateOrder from "../admin/CreateOrder";
 
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -160,6 +161,11 @@ const router = createBrowserRouter([
           {
             path: "orders",
             element: <AdminOrders />,
+          },
+
+          {
+            path: "orders/new",
+            element: <CreateOrder />,
           },
 
           {
