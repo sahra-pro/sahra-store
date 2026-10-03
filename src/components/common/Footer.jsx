@@ -134,7 +134,9 @@ export default function Footer() {
 
           <div className="flex gap-4 text-2xl">
             <a
-              href="#"
+              href="https://www.instagram.com/shrtsahra/"
+              target="_blank"
+              rel="noopener noreferrer"
               aria-label="Instagram"
               className="text-[#E8D9D6] transition duration-300 hover:text-[#F2C8C8]"
             >
@@ -142,7 +144,9 @@ export default function Footer() {
             </a>
 
             <a
-              href="#"
+              href="https://wa.me/905555507388"
+              target="_blank"
+              rel="noopener noreferrer"
               aria-label="WhatsApp"
               className="text-[#E8D9D6] transition duration-300 hover:text-[#F2C8C8]"
             >
