@@ -185,7 +185,20 @@ export default function CreateOrder() {
       ),
     );
   };
+  const updatePrice = (id, price) => {
+    const nextPrice = Math.max(0, Number(price) || 0);
 
+    setCartItems((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              price: nextPrice,
+            }
+          : item,
+      ),
+    );
+  };
   const increaseQuantity = (id) => {
     const item = cartItems.find((cartItem) => cartItem.id === id);
 
@@ -557,10 +570,29 @@ export default function CreateOrder() {
                                 {item.name}
                               </p>
 
-                              <p className="mt-1 text-xs font-bold text-[#806D70]">
-                                {formatPrice(item.price)} للقطعة
-                              </p>
+                              <div className="mt-2">
+                                <label className="mb-1 block text-[10px] font-black text-[#806D70]">
+                                  سعر الوحدة
+                                </label>
 
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    value={item.price}
+                                    onChange={(event) =>
+                                      updatePrice(item.id, event.target.value)
+                                    }
+                                    className="w-28 rounded-xl border border-[#E8D9D6] bg-white px-3 py-2 text-xs font-black text-[#641F2B] outline-none transition focus:border-[#A83F55] focus:ring-2 focus:ring-[#A83F55]/10"
+                                    dir="ltr"
+                                  />
+
+                                  <span className="text-[11px] font-bold text-[#806D70]">
+                                    ر.س
+                                  </span>
+                                </div>
+                              </div>
                               {item.freeShipping && (
                                 <span className="mt-1 inline-flex items-center gap-1 text-[10px] font-black text-emerald-600">
                                   <FaTruck />

@@ -81,7 +81,14 @@ export default function OrderDetails() {
     latitude: "",
     longitude: "",
   });
+  const [editingOrderValues, setEditingOrderValues] = useState(false);
+  const [orderValuesSaving, setOrderValuesSaving] = useState(false);
 
+  const [orderValuesForm, setOrderValuesForm] = useState({
+    items: [],
+    shipping: "",
+    total: "",
+  });
   const order = getOrderById(id);
 
   const handleStatusChange = async (newStatus) => {
@@ -311,7 +318,112 @@ export default function OrderDetails() {
       setCustomerSaving(false);
     }
   };
+  const startOrderValuesEditing = () => {
+    setOrderValuesForm({
+      items: (order.items || []).map((item) => ({
+        ...item,
+        price: Number(item.price || 0),
+      })),
+      shipping: Number(
+        order.shippingCost ?? order.shippingFee ?? order.shipping ?? 0,
+      ),
+      total: Number(order.total || 0),
+    });
 
+    setEditingOrderValues(true);
+    setStatusNotification(null);
+  };
+
+  const cancelOrderValuesEditing = () => {
+    setEditingOrderValues(false);
+
+    setOrderValuesForm({
+      items: [],
+      shipping: "",
+      total: "",
+    });
+  };
+
+  const handleOrderItemPriceChange = (index, value) => {
+    setOrderValuesForm((prev) => {
+      const updatedItems = prev.items.map((item, itemIndex) =>
+        itemIndex === index
+          ? {
+              ...item,
+              price: value,
+            }
+          : item,
+      );
+
+      const updatedSubtotal = updatedItems.reduce(
+        (sum, item) =>
+          sum + Number(item.price || 0) * Number(item.quantity || 0),
+        0,
+      );
+
+      const shipping = Math.max(0, Number(prev.shipping) || 0);
+
+      return {
+        ...prev,
+        items: updatedItems,
+        total: (updatedSubtotal + shipping).toFixed(2),
+      };
+    });
+  };
+
+  const handleOrderValuesSave = async () => {
+    if (orderValuesSaving) return;
+
+    setOrderValuesSaving(true);
+    setStatusNotification(null);
+
+    try {
+      const updatedItems = orderValuesForm.items.map((item) => ({
+        ...item,
+        price: Math.max(0, Number(item.price) || 0),
+      }));
+
+      const updatedSubtotal = updatedItems.reduce(
+        (sum, item) =>
+          sum + Number(item.price || 0) * Number(item.quantity || 0),
+        0,
+      );
+
+      const updatedShipping = Math.max(
+        0,
+        Number(orderValuesForm.shipping) || 0,
+      );
+
+      const updatedTotal =
+        orderValuesForm.total === ""
+          ? updatedSubtotal + updatedShipping
+          : Math.max(0, Number(orderValuesForm.total) || 0);
+
+      await updateOrder(order.id, {
+        items: updatedItems,
+        subtotal: updatedSubtotal,
+        shipping: updatedShipping,
+        total: updatedTotal,
+      });
+
+      setEditingOrderValues(false);
+
+      setStatusNotification({
+        type: "success",
+        message: "تم حفظ أسعار المنتجات والشحن والإجمالي بنجاح.",
+      });
+    } catch (error) {
+      console.error("Order values update error:", error);
+
+      setStatusNotification({
+        type: "error",
+        message:
+          error?.message || "تعذر حفظ تعديلات الطلب. يرجى المحاولة مرة أخرى.",
+      });
+    } finally {
+      setOrderValuesSaving(false);
+    }
+  };
   const handleDelete = async () => {
     await deleteOrder(order.id);
     navigate("/admin/orders");
@@ -915,7 +1027,7 @@ export default function OrderDetails() {
 
           {/* Products */}
           <div className="rounded-[30px] border border-[#E8D9D6] bg-white p-5 shadow-[0_15px_45px_rgba(74,24,33,0.05)] md:p-6 lg:col-span-2">
-            <div className="mb-6 flex items-center justify-between gap-4">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F2E4E1] text-[#641F2B]">
                   <FaShoppingBag />
@@ -956,11 +1068,27 @@ export default function OrderDetails() {
                       </h3>
 
                       <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm text-[#806D70]">
-                        <span>
-                          السعر:{" "}
-                          <strong className="text-[#4A1821]">
-                            {Number(item.price || 0).toFixed(2)} ر.س
-                          </strong>
+                        <span className="flex items-center gap-2">
+                          السعر:
+                          {editingOrderValues ? (
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={orderValuesForm.items[index]?.price ?? ""}
+                              onChange={(e) =>
+                                handleOrderItemPriceChange(
+                                  index,
+                                  e.target.value,
+                                )
+                              }
+                              className="w-28 rounded-lg border border-[#DCC9C5] bg-white px-2.5 py-1.5 text-sm font-black text-[#4A1821] outline-none transition focus:border-[#A83F55] focus:ring-2 focus:ring-[#A83F55]/10"
+                            />
+                          ) : (
+                            <strong className="text-[#4A1821]">
+                              {Number(item.price || 0).toFixed(2)} ر.س
+                            </strong>
+                          )}
                         </span>
 
                         <span>
@@ -978,7 +1106,11 @@ export default function OrderDetails() {
 
                         <span className="font-black text-[#641F2B]">
                           {(
-                            Number(item.price || 0) * Number(item.quantity || 0)
+                            Number(
+                              editingOrderValues
+                                ? orderValuesForm.items[index]?.price || 0
+                                : item.price || 0,
+                            ) * Number(item.quantity || 0)
                           ).toFixed(2)}{" "}
                           ر.س
                         </span>
@@ -988,6 +1120,38 @@ export default function OrderDetails() {
                 </div>
               ))}
             </div>
+            {!editingOrderValues ? (
+              <button
+                type="button"
+                onClick={startOrderValuesEditing}
+                className="inline-flex items-center gap-2 rounded-xl bg-[#F2E4E1] px-3.5 py-2 text-xs font-black text-[#641F2B] transition hover:bg-[#E8D9D6]"
+              >
+                <FaEdit />
+                تعديل المبلغ
+              </button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={cancelOrderValuesEditing}
+                  disabled={orderValuesSaving}
+                  className="inline-flex items-center gap-2 rounded-xl border border-[#E8D9D6] bg-white px-3.5 py-2 text-xs font-bold text-[#806D70] transition hover:bg-[#FBF6F1]"
+                >
+                  <FaTimes />
+                  إلغاء
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleOrderValuesSave}
+                  disabled={orderValuesSaving}
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#641F2B] px-3.5 py-2 text-xs font-black text-white transition hover:bg-[#4A1821] disabled:cursor-wait disabled:opacity-60"
+                >
+                  <FaSave />
+                  {orderValuesSaving ? "جاري الحفظ..." : "حفظ المبلغ"}
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -1015,7 +1179,16 @@ export default function OrderDetails() {
                 <span className="text-sm text-[#806D70]">إجمالي المنتجات</span>
 
                 <span className="font-bold text-[#4A1821]">
-                  {Number(order.subtotal ?? order.total ?? 0).toFixed(2)} ر.س
+                  {(editingOrderValues
+                    ? orderValuesForm.items.reduce(
+                        (sum, item) =>
+                          sum +
+                          Number(item.price || 0) * Number(item.quantity || 0),
+                        0,
+                      )
+                    : Number(order.subtotal ?? order.total ?? 0)
+                  ).toFixed(2)}{" "}
+                  ر.س
                 </span>
               </div>
 
@@ -1030,17 +1203,33 @@ export default function OrderDetails() {
               <div className="flex items-center justify-between gap-4">
                 <span className="text-sm text-[#806D70]">الشحن</span>
 
-                <span
-                  className={
-                    shippingAmount === 0
-                      ? "font-bold text-emerald-600"
-                      : "font-bold text-[#4A1821]"
-                  }
-                >
-                  {shippingAmount > 0
-                    ? `${shippingAmount.toFixed(2)} ر.س`
-                    : "مجاني 🎉"}
-                </span>
+                {editingOrderValues ? (
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={orderValuesForm.shipping}
+                    onChange={(e) =>
+                      setOrderValuesForm((prev) => ({
+                        ...prev,
+                        shipping: e.target.value,
+                      }))
+                    }
+                    className="w-32 rounded-xl border border-[#DCC9C5] bg-white px-3 py-2 text-left text-sm font-black text-[#4A1821] outline-none transition focus:border-[#A83F55] focus:ring-2 focus:ring-[#A83F55]/10"
+                  />
+                ) : (
+                  <span
+                    className={
+                      shippingAmount === 0
+                        ? "font-bold text-emerald-600"
+                        : "font-bold text-[#4A1821]"
+                    }
+                  >
+                    {shippingAmount > 0
+                      ? `${shippingAmount.toFixed(2)} ر.س`
+                      : "مجاني 🎉"}
+                  </span>
+                )}
               </div>
 
               <div className="flex items-center justify-between gap-4">
@@ -1061,9 +1250,25 @@ export default function OrderDetails() {
                     الإجمالي النهائي
                   </span>
 
-                  <span className="text-2xl font-black text-[#641F2B] md:text-3xl">
-                    {Number(order.total || 0).toFixed(2)} ر.س
-                  </span>
+                  {editingOrderValues ? (
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={orderValuesForm.total}
+                      onChange={(e) =>
+                        setOrderValuesForm((prev) => ({
+                          ...prev,
+                          total: e.target.value,
+                        }))
+                      }
+                      className="w-40 rounded-xl border border-[#DCC9C5] bg-white px-3 py-2 text-left text-xl font-black text-[#641F2B] outline-none transition focus:border-[#A83F55] focus:ring-2 focus:ring-[#A83F55]/10 md:text-2xl"
+                    />
+                  ) : (
+                    <span className="text-2xl font-black text-[#641F2B] md:text-3xl">
+                      {Number(order.total || 0).toFixed(2)} ر.س
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
