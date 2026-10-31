@@ -109,7 +109,11 @@ export default async function handler(req, res) {
 
             const now = new Date().toISOString();
 
-            if (newStoreStatus && order.status !== newStoreStatus) {
+            if (
+              newStoreStatus &&
+              ["processing", "shipped", "completed"].includes(order.status) &&
+              order.status !== newStoreStatus
+            ) {
               const history = Array.isArray(order.history)
                 ? [...order.history]
                 : [];
