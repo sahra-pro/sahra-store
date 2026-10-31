@@ -4,7 +4,6 @@ const TREEK_API = "https://api.gotreek.com/api";
 
 export default async function handler(req, res) {
   try {
-    // السماح لخدمة الجدولة باستدعاء الملف
     if (req.method !== "GET") {
       return res.status(405).json({
         success: false,
@@ -12,7 +11,6 @@ export default async function handler(req, res) {
       });
     }
 
-    // حماية الملف بمفتاح سري
     const cronSecret = process.env.CRON_SECRET;
 
     if (!cronSecret || req.headers.authorization !== `Bearer ${cronSecret}`) {
@@ -22,18 +20,17 @@ export default async function handler(req, res) {
       });
     }
 
-    // بيانات تسجيل الدخول إلى Treek
     const email = process.env.TREEK_EMAIL;
     const password = process.env.TREEK_PASSWORD;
 
     if (!email || !password) {
       return res.status(500).json({
         success: false,
-        message: "TREEK_EMAIL أو TREEK_PASSWORD غير موجودة",
+        message: "بيانات تسجيل الدخول إلى Treek غير موجودة",
       });
     }
 
-    // 1. تسجيل الدخول إلى Treek
+    // تسجيل الدخول إلى Treek
     const loginResponse = await fetch(`${TREEK_API}/auth/login`, {
       method: "POST",
       headers: {
@@ -57,103 +54,105 @@ export default async function handler(req, res) {
       Accept: "application/json",
     };
 
-    // 2. قراءة الطلبات من Firestore
-    const ordersSnapshot = await adminDb.collection("orders").get();
+    // جلب الطلبات التي ما زالت بحاجة للمزامنة فقط
+    const ordersSnapshot = await adminDb
+      .collection("orders")
+      .where("status", "in", ["processing", "shipped"])
+      .get();
 
     const orders = ordersSnapshot.docs.filter((doc) => {
-      const order = doc.data();
-
-      return (
-        order.treek?.id &&
-        ["processing", "shipped", "completed"].includes(order.status)
-      );
+      return doc.data().treek?.id;
     });
 
     let checked = 0;
     let updated = 0;
-    const errors = [];
+    let failed = 0;
 
-    // 3. فحص حالة كل طلب في Treek
-    for (const orderDoc of orders) {
-      const order = orderDoc.data();
-      const treekOrderId = order.treek.id;
+    // فحص الطلبات بالتوازي، 5 طلبات في كل مجموعة
+    const batchSize = 5;
 
-      try {
-        const response = await fetch(`${TREEK_API}/orders/${treekOrderId}`, {
-          method: "GET",
-          headers,
-        });
+    for (let i = 0; i < orders.length; i += batchSize) {
+      const batch = orders.slice(i, i + batchSize);
 
-        const result = await response.json();
+      await Promise.all(
+        batch.map(async (orderDoc) => {
+          const order = orderDoc.data();
+          const treekOrderId = order.treek.id;
 
-        if (!response.ok || !result?.data?.status) {
-          errors.push({
-            orderNumber: order.orderNumber,
-            message: "تعذر جلب حالة الطلب من Treek",
-          });
-          continue;
-        }
+          try {
+            const response = await fetch(
+              `${TREEK_API}/orders/${treekOrderId}`,
+              {
+                method: "GET",
+                headers,
+                signal: AbortSignal.timeout(15000),
+              },
+            );
 
-        checked++;
+            const result = await response.json();
 
-        const treekStatus = result.data.status;
+            if (!response.ok || !result?.data?.status) {
+              failed++;
+              return;
+            }
 
-        // 4. تحويل حالات Treek إلى حالات المتجر
-        let newStoreStatus = null;
+            checked++;
 
-        if (treekStatus === "currently_shipping") {
-          newStoreStatus = "shipped";
-        } else if (treekStatus === "delivered") {
-          newStoreStatus = "completed";
-        }
+            const treekStatus = result.data.status;
 
-        // 5. تحديث Firebase عند وجود تغيير فعلي
-        if (newStoreStatus && order.status !== newStoreStatus) {
-          const now = new Date().toISOString();
+            let newStoreStatus = null;
 
-          const history = Array.isArray(order.history)
-            ? [...order.history]
-            : [];
+            if (treekStatus === "currently_shipping") {
+              newStoreStatus = "shipped";
+            } else if (treekStatus === "delivered") {
+              newStoreStatus = "completed";
+            }
 
-          history.push({
-            status: newStoreStatus,
-            date: now,
-          });
+            const now = new Date().toISOString();
 
-          await orderDoc.ref.update({
-            status: newStoreStatus,
-            history,
-            "treek.status": treekStatus,
-            "treek.lastSyncAt": now,
-          });
+            if (newStoreStatus && order.status !== newStoreStatus) {
+              const history = Array.isArray(order.history)
+                ? [...order.history]
+                : [];
 
-          updated++;
-        } else {
-          // تحديث آخر حالة Treek حتى لو لم تتغير حالة المتجر
-          await orderDoc.ref.update({
-            "treek.status": treekStatus,
-            "treek.lastSyncAt": new Date().toISOString(),
-          });
-        }
-      } catch (error) {
-        console.error(
-          `Treek sync error for ${order.orderNumber}:`,
-          error.message,
-        );
+              history.push({
+                status: newStoreStatus,
+                date: now,
+              });
 
-        errors.push({
-          orderNumber: order.orderNumber,
-          message: error.message,
-        });
-      }
+              await orderDoc.ref.update({
+                status: newStoreStatus,
+                history,
+                "treek.status": treekStatus,
+                "treek.lastSyncAt": now,
+              });
+
+              updated++;
+            } else {
+              await orderDoc.ref.update({
+                "treek.status": treekStatus,
+                "treek.lastSyncAt": now,
+              });
+            }
+          } catch (error) {
+            failed++;
+
+            console.error(
+              `Treek sync error for ${order.orderNumber}:`,
+              error.message,
+            );
+          }
+        }),
+      );
     }
 
     return res.status(200).json({
       success: true,
       message: "تمت مزامنة حالات الطلبات",
+      total: orders.length,
       checked,
       updated,
-      errors,
+      failed,
     });
   } catch (error) {
     console.error("Treek sync error:", error);
