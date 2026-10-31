@@ -57,9 +57,8 @@ export default async function handler(req, res) {
     // جلب الطلبات التي ما زالت بحاجة للمزامنة فقط
     const ordersSnapshot = await adminDb
       .collection("orders")
-      .where("status", "in", ["processing", "shipped"])
+      .where("status", "in", ["processing", "shipped", "completed"])
       .get();
-
     const orders = ordersSnapshot.docs.filter((doc) => {
       return doc.data().treek?.id;
     });
