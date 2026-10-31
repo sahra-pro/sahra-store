@@ -365,6 +365,7 @@ export default async function handler(req, res) {
       warehouse_id: TREEK_WAREHOUSE_ID,
 
       order_grand_total: Math.round(Number(order.total || 0)),
+      declared_value: Math.round(Number(order.total || 0)),
 
       payment_method: "cod",
 
