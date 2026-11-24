@@ -23,7 +23,7 @@ import { useOrders } from "../hooks/useOrders";
 import { useSettings } from "../hooks/useSettings";
 
 import { trackEvent } from "../lib/metaPixel";
-
+import { trackTikTok } from "../lib/tiktokPixel";
 
 const DEFAULT_MAP_CENTER = [24.7136, 46.6753];
 
@@ -116,6 +116,17 @@ function Checkout() {
       value: Number(finalTotal),
       currency: "SAR",
     });
+    trackTikTok("InitiateCheckout", {
+  contents: cartItems.map((item) => ({
+    content_id: String(item.id),
+    content_name: item.name,
+    quantity: Number(item.quantity || 0),
+    price: Number(item.price || 0),
+  })),
+  content_type: "product",
+  value: Number(finalTotal),
+  currency: "SAR",
+});
   }, [cartItems, finalTotal, orderCompleted]);
 
   const updateMapMarker = useCallback((lat, lng) => {
@@ -705,7 +716,27 @@ function Checkout() {
         console.error("EMAIL REQUEST ERROR:", emailError);
       }
 
-      
+      trackEvent("Purchase", {
+        content_ids: order.items.map((item) => item.id),
+        content_type: "product",
+        num_items: order.items.reduce(
+          (total, item) => total + Number(item.quantity || 0),
+          0,
+        ),
+        value: Number(order.total),
+        currency: "SAR",
+      });
+
+      trackTikTok("CompletePayment", {
+        contents: order.items.map((item) => ({
+          content_id: item.id,
+          content_name: item.name,
+          quantity: Number(item.quantity || 0),
+          price: Number(item.price || 0),
+        })),
+        value: Number(order.total),
+        currency: "SAR",
+      });
 
       setOrderCompleted(true);
 
