@@ -727,16 +727,16 @@ function Checkout() {
         currency: "SAR",
       });
 
-      trackTikTok("CompletePayment", {
-        contents: order.items.map((item) => ({
-          content_id: item.id,
-          content_name: item.name,
-          quantity: Number(item.quantity || 0),
-          price: Number(item.price || 0),
-        })),
-        value: Number(order.total),
-        currency: "SAR",
-      });
+      trackTikTok("Purchase", {
+  contents: order.items.map((item) => ({
+    content_id: String(item.id),
+    content_name: item.name,
+    quantity: Number(item.quantity || 0),
+    price: Number(item.price || 0),
+  })),
+  value: Number(order.total),
+  currency: "SAR",
+});
 
       setOrderCompleted(true);
 
