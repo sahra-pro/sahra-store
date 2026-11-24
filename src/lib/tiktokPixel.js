@@ -12,7 +12,9 @@ export const initTikTokPixel = () => {
     return;
   }
 
-  if (isInitialized || window.ttq) {
+  if (isInitialized) return;
+
+  if (window.ttq) {
     isInitialized = true;
     return;
   }
@@ -43,7 +45,9 @@ export const initTikTokPixel = () => {
 
     ttq.setAndDefer = function (target, method) {
       target[method] = function () {
-        target.push([method].concat(Array.prototype.slice.call(arguments)));
+        target.push(
+          [method].concat(Array.prototype.slice.call(arguments)),
+        );
       };
     };
 
@@ -53,14 +57,21 @@ export const initTikTokPixel = () => {
 
     ttq.load = function (pixelId) {
       const script = d.createElement("script");
+
+      script.type = "text/javascript";
       script.async = true;
-      script.src = "https://analytics.tiktok.com/i18n/pixel/events.js";
-      script.onload = function () {
-        ttq._i = ttq._i || {};
-      };
+
+      script.src =
+        "https://analytics.tiktok.com/i18n/pixel/events.js" +
+        `?sdkid=${encodeURIComponent(pixelId)}&lib=${t}`;
 
       const firstScript = d.getElementsByTagName("script")[0];
-      firstScript.parentNode.insertBefore(script, firstScript);
+
+      if (firstScript && firstScript.parentNode) {
+        firstScript.parentNode.insertBefore(script, firstScript);
+      } else {
+        d.head.appendChild(script);
+      }
 
       ttq._i = ttq._i || {};
       ttq._i[pixelId] = [];
@@ -79,7 +90,6 @@ export const initTikTokPixel = () => {
 
 export const trackTikTok = (event, data = {}) => {
   if (typeof window === "undefined") return;
-
   if (!window.ttq || !TIKTOK_PIXEL_ID) return;
 
   window.ttq.track(event, data);
@@ -87,7 +97,6 @@ export const trackTikTok = (event, data = {}) => {
 
 export const trackTikTokPageView = () => {
   if (typeof window === "undefined") return;
-
   if (!window.ttq || !TIKTOK_PIXEL_ID) return;
 
   window.ttq.page();
