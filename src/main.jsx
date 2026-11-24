@@ -20,9 +20,9 @@ import { HelmetProvider } from "react-helmet-async";
 import VisitTracker from "./components/common/VisitTracker.jsx";
 
 import { initFacebookPixel } from "./lib/metaPixel";
-
+import { initTikTokPixel } from "./lib/tiktokPixel";
 initFacebookPixel();
-
+initTikTokPixel();
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <AuthProvider>
