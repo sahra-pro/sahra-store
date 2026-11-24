@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -12,6 +13,7 @@ import {
 import { useCart } from "../../hooks/useCart";
 import { useWishlist } from "../../hooks/useWishlist";
 import { trackEvent } from "../../lib/metaPixel";
+import { trackTikTok } from "../../lib/tiktokPixel";
 
 function ProductActions({ product }) {
   const { addToCart } = useCart();
@@ -46,6 +48,24 @@ function ProductActions({ product }) {
       content_type: "product",
       value: totalPrice,
       currency: "SAR",
+    });
+
+    trackTikTok("AddToCart", {
+      content_id: String(product.id),
+      content_name: product.name,
+      content_type: "product",
+      quantity,
+      price,
+      value: totalPrice,
+      currency: "SAR",
+      contents: [
+        {
+          content_id: String(product.id),
+          content_name: product.name,
+          quantity,
+          price,
+        },
+      ],
     });
   };
 
@@ -86,7 +106,6 @@ function ProductActions({ product }) {
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-sm font-bold text-[#4A1821]">الكمية</p>
-
             <p className="mt-1 text-xs text-[#806D70]">اختر الكمية المطلوبة</p>
           </div>
 
@@ -96,16 +115,8 @@ function ProductActions({ product }) {
               type="button"
               onClick={() => toggleWishlist(product.id)}
               className={`
-                flex
-                h-12
-                w-12
-                items-center
-                justify-center
-                rounded-xl
-                border
-                transition-all
-                duration-200
-                active:scale-95
+                flex h-12 w-12 items-center justify-center rounded-xl
+                border transition-all duration-200 active:scale-95
                 ${
                   inWishlist
                     ? "border-[#641F2B] bg-[#641F2B] text-white"
@@ -124,16 +135,9 @@ function ProductActions({ product }) {
                 onClick={decrease}
                 disabled={outOfStock || quantity <= 1}
                 className="
-                  flex
-                  h-12
-                  w-10
-                  items-center
-                  justify-center
-                  text-[#641F2B]
-                  transition
-                  hover:bg-[#F2E4E1]
-                  disabled:cursor-not-allowed
-                  disabled:opacity-30
+                  flex h-12 w-10 items-center justify-center text-[#641F2B]
+                  transition hover:bg-[#F2E4E1]
+                  disabled:cursor-not-allowed disabled:opacity-30
                 "
                 aria-label="تقليل الكمية"
               >
@@ -149,16 +153,9 @@ function ProductActions({ product }) {
                 onClick={increase}
                 disabled={outOfStock || quantity >= stock}
                 className="
-                  flex
-                  h-12
-                  w-10
-                  items-center
-                  justify-center
-                  text-[#641F2B]
-                  transition
-                  hover:bg-[#F2E4E1]
-                  disabled:cursor-not-allowed
-                  disabled:opacity-30
+                  flex h-12 w-10 items-center justify-center text-[#641F2B]
+                  transition hover:bg-[#F2E4E1]
+                  disabled:cursor-not-allowed disabled:opacity-30
                 "
                 aria-label="زيادة الكمية"
               >
@@ -186,24 +183,12 @@ function ProductActions({ product }) {
             onClick={handleBuyNow}
             disabled={outOfStock}
             className="
-              flex
-              h-14
-              items-center
-              justify-center
-              gap-2
-              rounded-2xl
-              bg-[#641F2B]
-              text-sm
-              font-bold
-              text-white
+              flex h-14 items-center justify-center gap-2 rounded-2xl
+              bg-[#641F2B] text-sm font-bold text-white
               shadow-[0_8px_20px_rgba(100,31,43,0.16)]
-              transition-all
-              duration-200
-              hover:-translate-y-0.5
-              hover:bg-[#4A1821]
-              active:scale-[0.98]
-              disabled:cursor-not-allowed
-              disabled:opacity-50
+              transition-all duration-200 hover:-translate-y-0.5
+              hover:bg-[#4A1821] active:scale-[0.98]
+              disabled:cursor-not-allowed disabled:opacity-50
             "
           >
             اشترِ الآن
@@ -214,21 +199,10 @@ function ProductActions({ product }) {
             onClick={handleAddToCart}
             disabled={outOfStock}
             className={`
-              flex
-              h-14
-              items-center
-              justify-center
-              gap-2
-              rounded-2xl
-              border
-              text-sm
-              font-bold
-              transition-all
-              duration-200
-              active:scale-[0.98]
-              disabled:cursor-not-allowed
+              flex h-14 items-center justify-center gap-2 rounded-2xl
+              border text-sm font-bold transition-all duration-200
+              active:scale-[0.98] disabled:cursor-not-allowed
               disabled:opacity-50
-
               ${
                 added
                   ? "border-[#641F2B] bg-[#641F2B] text-white"
